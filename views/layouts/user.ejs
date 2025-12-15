@@ -246,6 +246,71 @@
             color: white;
             cursor: pointer;
             text-decoration: none;
+            overflow: hidden;
+        }
+
+        .user-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        /* User Dropdown */
+        .user-dropdown {
+            position: relative;
+        }
+
+        .dropdown-menu {
+            position: absolute;
+            top: calc(100% + 8px);
+            right: 0;
+            min-width: 200px;
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            box-shadow: var(--shadow-lg);
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-10px);
+            transition: all 0.2s;
+            z-index: 1001;
+            overflow: hidden;
+        }
+
+        .user-dropdown:hover .dropdown-menu {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+        .dropdown-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 16px;
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+
+        .dropdown-item:hover {
+            background: var(--bg-card-hover);
+            color: var(--text-primary);
+        }
+
+        .dropdown-item.danger {
+            color: var(--accent-danger);
+        }
+
+        .dropdown-item.danger:hover {
+            background: rgba(239, 68, 68, 0.1);
+        }
+
+        .dropdown-divider {
+            height: 1px;
+            background: var(--border-color);
+            margin: 4px 0;
         }
 
         /* Main Content */
@@ -360,13 +425,13 @@
                 <a href="/tahminler" class="nav-link <%= typeof activeMenu !== 'undefined' && activeMenu === 'tahminler' ? 'active' : '' %>">Tahminler</a>
                 <a href="/siralama" class="nav-link <%= typeof activeMenu !== 'undefined' && activeMenu === 'siralama' ? 'active' : '' %>">Sıralama</a>
                 <a href="/magaza" class="nav-link <%= typeof activeMenu !== 'undefined' && activeMenu === 'magaza' ? 'active' : '' %>">Mağaza</a>
-                <a href="/profilim" class="nav-link <%= typeof activeMenu !== 'undefined' && activeMenu === 'profil' ? 'active' : '' %>">Profilim</a>
+                <a href="/gorevler" class="nav-link <%= typeof activeMenu !== 'undefined' && activeMenu === 'gorevler' ? 'active' : '' %>">Görevler</a>
             </div>
 
             <div class="nav-right">
-                <a href="/magaza" class="bi-badge">
+                <a href="/bi-gecmisi" class="bi-badge">
                     <div class="bi-icon">bi!</div>
-                    <span><%= typeof user !== 'undefined' && user ? user.bi_coin.toLocaleString('tr-TR') : '0' %></span>
+                    <span id="biCoinDisplay"><%= typeof user !== 'undefined' && user ? user.bi_coin.toLocaleString('tr-TR') : '0' %></span>
                 </a>
 
                 <div class="theme-toggle">
@@ -383,16 +448,34 @@
                     </button>
                 </div>
 
-                <button class="notification-btn">
+                <a href="/bildirimler" class="notification-btn">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
                     <% if (typeof unreadNotifications !== 'undefined' && unreadNotifications > 0) { %>
                     <span class="notification-dot"></span>
                     <% } %>
-                </button>
-
-                <a href="/profilim" class="user-avatar">
-                    <%= typeof user !== 'undefined' && user ? user.ad.charAt(0) + user.soyad.charAt(0) : 'U' %>
                 </a>
+
+                <div class="user-dropdown">
+                    <div class="user-avatar">
+                        <% if (typeof user !== 'undefined' && user && user.avatar) { %>
+                            <img src="<%= user.avatar %>" alt="<%= user.ad_soyad %>">
+                        <% } else if (typeof user !== 'undefined' && user && user.ad_soyad) { %>
+                            <%= user.ad_soyad.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase() %>
+                        <% } else { %>
+                            U
+                        <% } %>
+                    </div>
+                    <div class="dropdown-menu">
+                        <a href="/dashboard" class="dropdown-item">Dashboard</a>
+                        <a href="/profil" class="dropdown-item">Profil Ayarları</a>
+                        <a href="/ayarlar" class="dropdown-item">Hesap Ayarları</a>
+                        <% if (typeof user !== 'undefined' && user && (user.rol === 'admin' || user.rol === 'superadmin' || user.rol === 'moderator')) { %>
+                            <a href="/admin" class="dropdown-item">Admin Panel</a>
+                        <% } %>
+                        <div class="dropdown-divider"></div>
+                        <a href="/auth/cikis" class="dropdown-item danger">Çıkış Yap</a>
+                    </div>
+                </div>
             </div>
         </div>
     </nav>
@@ -461,6 +544,55 @@
             theme = 'dark';
             localStorage.setItem('userTheme', theme);
             applyTheme();
+        });
+    </script>
+
+    <!-- Socket.io for live updates -->
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        // Socket.io bağlantısı
+        const socket = io();
+
+        // Kullanıcı odasına katıl
+        <% if (typeof user !== 'undefined' && user && user.id) { %>
+        socket.emit('join', <%= user.id %>);
+        <% } %>
+
+        // Leaderboard odasına katıl
+        socket.emit('joinLeaderboard');
+
+        // bi! coin güncellemelerini dinle
+        socket.on('biCoinUpdate', function(data) {
+            const biCoinDisplay = document.getElementById('biCoinDisplay');
+            if (biCoinDisplay && data.bi_coin !== undefined) {
+                // Animasyonlu güncelleme
+                biCoinDisplay.style.transform = 'scale(1.2)';
+                biCoinDisplay.style.transition = 'transform 0.2s';
+                biCoinDisplay.textContent = Number(data.bi_coin).toLocaleString('tr-TR');
+
+                setTimeout(() => {
+                    biCoinDisplay.style.transform = 'scale(1)';
+                }, 200);
+            }
+        });
+
+        // Sıralama güncellemelerini dinle
+        socket.on('leaderboardUpdate', function(topUsers) {
+            // Sıralama tablosu güncellenebilir
+            console.log('Sıralama güncellendi');
+        });
+
+        // Bildirim güncellemelerini dinle
+        socket.on('newNotification', function(data) {
+            const notificationDot = document.querySelector('.notification-dot');
+            if (!notificationDot) {
+                const notificationBtn = document.querySelector('.notification-btn');
+                if (notificationBtn) {
+                    const dot = document.createElement('span');
+                    dot.className = 'notification-dot';
+                    notificationBtn.appendChild(dot);
+                }
+            }
         });
     </script>
 </body>

@@ -56,19 +56,28 @@ const generalLimiter = rateLimit({
     legacyHeaders: false
 });
 
-// Rate Limiting - Auth (Daha sıkı)
+// Rate Limiting - Auth (Daha sıkı - sadece POST için)
 const authLimiter = rateLimit({
     windowMs: 15 * 60 * 1000, // 15 dakika
-    max: 10, // IP başına maksimum giriş denemesi
-    message: { success: false, message: 'Çok fazla giriş denemesi. Lütfen 15 dakika sonra tekrar deneyin.' },
+    max: 50, // IP başına maksimum giriş denemesi (artırıldı)
     standardHeaders: true,
-    legacyHeaders: false
+    legacyHeaders: false,
+    skip: (req) => req.method === 'GET', // GET istekleri atla
+    handler: (req, res) => {
+        // HTML response için flash message ile yönlendir
+        if (req.accepts('html')) {
+            req.flash('error_msg', 'Çok fazla giriş denemesi. Lütfen 15 dakika sonra tekrar deneyin.');
+            return res.redirect('back');
+        }
+        // JSON response için
+        res.status(429).json({ success: false, message: 'Çok fazla giriş denemesi. Lütfen 15 dakika sonra tekrar deneyin.' });
+    }
 });
 
 // Rate Limiting - API
 const apiLimiter = rateLimit({
     windowMs: 1 * 60 * 1000, // 1 dakika
-    max: 60, // IP başına maksimum API isteği
+    max: 100, // IP başına maksimum API isteği (artırıldı)
     message: { success: false, message: 'API istek limiti aşıldı. Lütfen biraz bekleyin.' },
     standardHeaders: true,
     legacyHeaders: false
@@ -77,7 +86,7 @@ const apiLimiter = rateLimit({
 // Genel rate limiter
 app.use(generalLimiter);
 
-// Auth route'larına sıkı limit
+// Auth route'larına limit (sadece POST istekleri için uygulanır)
 app.use('/auth/giris', authLimiter);
 app.use('/auth/kayit', authLimiter);
 
