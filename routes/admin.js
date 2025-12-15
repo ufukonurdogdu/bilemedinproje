@@ -326,6 +326,74 @@ router.get('/kategoriler', ensureAdmin, async (req, res) => {
     }
 });
 
+// Kategori Ekle
+router.post('/kategoriler/ekle', ensureAdmin, async (req, res) => {
+    try {
+        const { ad, slug, ikon, renk, sira } = req.body;
+
+        // Slug oluştur (yoksa)
+        const finalSlug = slug || ad.toLowerCase()
+            .replace(/ğ/g, 'g').replace(/ü/g, 'u').replace(/ş/g, 's')
+            .replace(/ı/g, 'i').replace(/ö/g, 'o').replace(/ç/g, 'c')
+            .replace(/[^a-z0-9]/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '');
+
+        await db.insert(`
+            INSERT INTO kategoriler (ad, slug, ikon, renk, sira, aktif_mi)
+            VALUES (?, ?, ?, ?, ?, 1)
+        `, [ad, finalSlug, ikon || '📁', renk || '#6366f1', sira || 0]);
+
+        req.flash('success_msg', 'Kategori eklendi');
+        res.redirect('/admin/kategoriler');
+    } catch (err) {
+        console.error('Kategori ekleme hatası:', err);
+        req.flash('error_msg', 'Bir hata oluştu');
+        res.redirect('/admin/kategoriler');
+    }
+});
+
+// Kategori Düzenle
+router.post('/kategoriler/:id/duzenle', ensureAdmin, async (req, res) => {
+    try {
+        const { ad, slug, ikon, renk, sira, aktif_mi } = req.body;
+
+        await db.execute(`
+            UPDATE kategoriler SET ad = ?, slug = ?, ikon = ?, renk = ?, sira = ?, aktif_mi = ?
+            WHERE id = ?
+        `, [ad, slug, ikon, renk, sira || 0, aktif_mi ? 1 : 0, req.params.id]);
+
+        req.flash('success_msg', 'Kategori güncellendi');
+        res.redirect('/admin/kategoriler');
+    } catch (err) {
+        console.error('Kategori güncelleme hatası:', err);
+        req.flash('error_msg', 'Bir hata oluştu');
+        res.redirect('/admin/kategoriler');
+    }
+});
+
+// Kategori Sil
+router.post('/kategoriler/:id/sil', ensureAdmin, async (req, res) => {
+    try {
+        // Kategoriye ait tahmin var mı kontrol et
+        const tahminSayisi = await db.getOne(
+            'SELECT COUNT(*) as count FROM tahminler WHERE kategori_id = ?',
+            [req.params.id]
+        );
+
+        if (tahminSayisi.count > 0) {
+            req.flash('error_msg', 'Bu kategoriye ait tahminler var. Önce tahminleri silin veya başka kategoriye taşıyın.');
+            return res.redirect('/admin/kategoriler');
+        }
+
+        await db.execute('DELETE FROM kategoriler WHERE id = ?', [req.params.id]);
+        req.flash('success_msg', 'Kategori silindi');
+        res.redirect('/admin/kategoriler');
+    } catch (err) {
+        console.error('Kategori silme hatası:', err);
+        req.flash('error_msg', 'Bir hata oluştu');
+        res.redirect('/admin/kategoriler');
+    }
+});
+
 // Reklamlar
 router.get('/reklamlar', ensureAdmin, async (req, res) => {
     try {
@@ -340,6 +408,83 @@ router.get('/reklamlar', ensureAdmin, async (req, res) => {
         console.error('Reklamlar hatası:', err);
         req.flash('error_msg', 'Bir hata oluştu');
         res.redirect('/admin');
+    }
+});
+
+// Reklam Ekle
+router.post('/reklamlar/ekle', ensureAdmin, async (req, res) => {
+    try {
+        const { baslik, gorsel, link, konum, baslangic_tarihi, bitis_tarihi } = req.body;
+
+        await db.insert(`
+            INSERT INTO reklamlar (baslik, gorsel, link, konum, baslangic_tarihi, bitis_tarihi, aktif_mi)
+            VALUES (?, ?, ?, ?, ?, ?, 1)
+        `, [baslik, gorsel, link, konum || 'banner', baslangic_tarihi || null, bitis_tarihi || null]);
+
+        req.flash('success_msg', 'Reklam eklendi');
+        res.redirect('/admin/reklamlar');
+    } catch (err) {
+        console.error('Reklam ekleme hatası:', err);
+        req.flash('error_msg', 'Bir hata oluştu');
+        res.redirect('/admin/reklamlar');
+    }
+});
+
+// Reklam Düzenle
+router.post('/reklamlar/:id/duzenle', ensureAdmin, async (req, res) => {
+    try {
+        const { baslik, gorsel, link, konum, baslangic_tarihi, bitis_tarihi, aktif_mi } = req.body;
+
+        await db.execute(`
+            UPDATE reklamlar SET baslik = ?, gorsel = ?, link = ?, konum = ?,
+                   baslangic_tarihi = ?, bitis_tarihi = ?, aktif_mi = ?
+            WHERE id = ?
+        `, [baslik, gorsel, link, konum, baslangic_tarihi || null, bitis_tarihi || null, aktif_mi ? 1 : 0, req.params.id]);
+
+        req.flash('success_msg', 'Reklam güncellendi');
+        res.redirect('/admin/reklamlar');
+    } catch (err) {
+        console.error('Reklam güncelleme hatası:', err);
+        req.flash('error_msg', 'Bir hata oluştu');
+        res.redirect('/admin/reklamlar');
+    }
+});
+
+// Reklam Sil
+router.post('/reklamlar/:id/sil', ensureAdmin, async (req, res) => {
+    try {
+        await db.execute('DELETE FROM reklamlar WHERE id = ?', [req.params.id]);
+        req.flash('success_msg', 'Reklam silindi');
+        res.redirect('/admin/reklamlar');
+    } catch (err) {
+        console.error('Reklam silme hatası:', err);
+        req.flash('error_msg', 'Bir hata oluştu');
+        res.redirect('/admin/reklamlar');
+    }
+});
+
+// Reklam İstatistikleri
+router.get('/reklamlar/:id/istatistik', ensureAdmin, async (req, res) => {
+    try {
+        const reklam = await db.getOne('SELECT * FROM reklamlar WHERE id = ?', [req.params.id]);
+
+        if (!reklam) {
+            req.flash('error_msg', 'Reklam bulunamadı');
+            return res.redirect('/admin/reklamlar');
+        }
+
+        res.json({
+            success: true,
+            data: {
+                baslik: reklam.baslik,
+                goruntulenme: reklam.goruntulenme,
+                tiklanma: reklam.tiklanma,
+                ctr: reklam.goruntulenme > 0 ? ((reklam.tiklanma / reklam.goruntulenme) * 100).toFixed(2) : 0
+            }
+        });
+    } catch (err) {
+        console.error('Reklam istatistik hatası:', err);
+        res.json({ success: false, message: 'Bir hata oluştu' });
     }
 });
 

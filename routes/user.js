@@ -662,4 +662,271 @@ router.get('/bildirimler', ensureAuthenticated, async (req, res) => {
     }
 });
 
+// Ayarlar Sayfası
+router.get('/ayarlar', ensureAuthenticated, async (req, res) => {
+    try {
+        const kullanici = await db.getOne(`
+            SELECT id, ad_soyad, kullanici_adi, email, avatar, bio, ayarlar,
+                   google_id, facebook_id, giris_yontemi, olusturma_tarihi
+            FROM kullanicilar WHERE id = ?
+        `, [req.user.id]);
+
+        res.render('user/ayarlar', {
+            title: 'Ayarlar - Bilemezsin',
+            layout: false,
+            kullanici
+        });
+    } catch (err) {
+        console.error('Ayarlar hatası:', err);
+        res.redirect('/dashboard');
+    }
+});
+
+// Ayarlar Güncelle
+router.post('/ayarlar/guncelle', ensureAuthenticated, async (req, res) => {
+    try {
+        const { tema, bildirimler, email_bildirimleri } = req.body;
+        const ayarlar = JSON.stringify({
+            tema: tema || 'auto',
+            bildirimler: bildirimler === 'true',
+            email_bildirimleri: email_bildirimleri === 'true',
+            dil: 'tr'
+        });
+
+        await db.execute(
+            'UPDATE kullanicilar SET ayarlar = ? WHERE id = ?',
+            [ayarlar, req.user.id]
+        );
+
+        res.json({ success: true, message: 'Ayarlar güncellendi' });
+    } catch (err) {
+        console.error('Ayarlar güncelleme hatası:', err);
+        res.json({ success: false, message: 'Bir hata oluştu' });
+    }
+});
+
+// Şifre Değiştir
+router.post('/ayarlar/sifre-degistir', ensureAuthenticated, async (req, res) => {
+    try {
+        const { mevcut_sifre, yeni_sifre, yeni_sifre_tekrar } = req.body;
+        const bcrypt = require('bcryptjs');
+
+        // Validasyon
+        if (!mevcut_sifre || !yeni_sifre || !yeni_sifre_tekrar) {
+            return res.json({ success: false, message: 'Tüm alanları doldurun' });
+        }
+
+        if (yeni_sifre.length < 6) {
+            return res.json({ success: false, message: 'Yeni şifre en az 6 karakter olmalı' });
+        }
+
+        if (yeni_sifre !== yeni_sifre_tekrar) {
+            return res.json({ success: false, message: 'Yeni şifreler eşleşmiyor' });
+        }
+
+        // Mevcut şifreyi kontrol et
+        const kullanici = await db.getOne('SELECT sifre FROM kullanicilar WHERE id = ?', [req.user.id]);
+
+        if (!kullanici.sifre) {
+            return res.json({ success: false, message: 'Sosyal medya ile giriş yaptınız, şifre değiştirilemez' });
+        }
+
+        const isMatch = await bcrypt.compare(mevcut_sifre, kullanici.sifre);
+        if (!isMatch) {
+            return res.json({ success: false, message: 'Mevcut şifre yanlış' });
+        }
+
+        // Yeni şifreyi hashle ve kaydet
+        const salt = await bcrypt.genSalt(10);
+        const hashedPassword = await bcrypt.hash(yeni_sifre, salt);
+
+        await db.execute(
+            'UPDATE kullanicilar SET sifre = ? WHERE id = ?',
+            [hashedPassword, req.user.id]
+        );
+
+        res.json({ success: true, message: 'Şifreniz başarıyla değiştirildi' });
+    } catch (err) {
+        console.error('Şifre değiştirme hatası:', err);
+        res.json({ success: false, message: 'Bir hata oluştu' });
+    }
+});
+
+// Bi! Coin Geçmişi
+router.get('/bi-gecmisi', ensureAuthenticated, async (req, res) => {
+    try {
+        const sayfa = parseInt(req.query.sayfa) || 1;
+        const limit = 20;
+        const offset = (sayfa - 1) * limit;
+
+        const islemler = await db.getAll(`
+            SELECT * FROM bi_islemleri
+            WHERE kullanici_id = ?
+            ORDER BY olusturma_tarihi DESC
+            LIMIT ${limit} OFFSET ${offset}
+        `, [req.user.id]);
+
+        const toplamCount = await db.getOne(
+            'SELECT COUNT(*) as total FROM bi_islemleri WHERE kullanici_id = ?',
+            [req.user.id]
+        );
+
+        const toplamSayfa = Math.ceil((toplamCount?.total || 0) / limit);
+
+        // İstatistikler
+        const istatistikler = await db.getOne(`
+            SELECT
+                SUM(CASE WHEN miktar > 0 THEN miktar ELSE 0 END) as toplam_kazanc,
+                SUM(CASE WHEN miktar < 0 THEN ABS(miktar) ELSE 0 END) as toplam_harcama,
+                COUNT(*) as toplam_islem
+            FROM bi_islemleri WHERE kullanici_id = ?
+        `, [req.user.id]);
+
+        res.render('user/bi-gecmisi', {
+            title: 'Bi! Geçmişi - Bilemezsin',
+            layout: false,
+            islemler,
+            istatistikler,
+            sayfa,
+            toplamSayfa
+        });
+    } catch (err) {
+        console.error('Bi! geçmişi hatası:', err);
+        res.redirect('/dashboard');
+    }
+});
+
+// Görevlerim (Tamamlanan Görevler)
+router.get('/gorevlerim', ensureAuthenticated, async (req, res) => {
+    try {
+        const tamamlananGorevler = await db.getAll(`
+            SELECT g.*, kg.tamamlanma_tarihi
+            FROM kullanici_gorevleri kg
+            JOIN gorevler g ON kg.gorev_id = g.id
+            WHERE kg.kullanici_id = ? AND kg.tamamlandi_mi = 1
+            ORDER BY kg.tamamlanma_tarihi DESC
+        `, [req.user.id]);
+
+        // İstatistikler
+        const istatistikler = await db.getOne(`
+            SELECT
+                COUNT(*) as tamamlanan_gorev,
+                SUM(g.bi_odul) as toplam_bi_kazanilan,
+                SUM(g.xp_odul) as toplam_xp_kazanilan
+            FROM kullanici_gorevleri kg
+            JOIN gorevler g ON kg.gorev_id = g.id
+            WHERE kg.kullanici_id = ? AND kg.tamamlandi_mi = 1
+        `, [req.user.id]);
+
+        res.render('user/gorevlerim', {
+            title: 'Görevlerim - Bilemezsin',
+            layout: false,
+            gorevler: tamamlananGorevler,
+            istatistikler
+        });
+    } catch (err) {
+        console.error('Görevlerim hatası:', err);
+        res.redirect('/dashboard');
+    }
+});
+
+// Rozetlerim
+router.get('/rozetlerim', ensureAuthenticated, async (req, res) => {
+    try {
+        // Kazanılan rozetler
+        const kazanilanRozetler = await db.getAll(`
+            SELECT r.*, kr.kazanilma_tarihi, 1 as kazanildi
+            FROM kullanici_rozetleri kr
+            JOIN rozetler r ON kr.rozet_id = r.id
+            WHERE kr.kullanici_id = ?
+            ORDER BY kr.kazanilma_tarihi DESC
+        `, [req.user.id]);
+
+        // Tüm rozetler (kazanılmamış olanlar için)
+        const tumRozetler = await db.getAll('SELECT * FROM rozetler ORDER BY id');
+
+        // Kazanılan rozet ID'leri
+        const kazanilanIds = kazanilanRozetler.map(r => r.id);
+
+        // Kazanılmamış rozetler
+        const kazanilmamisRozetler = tumRozetler.filter(r => !kazanilanIds.includes(r.id));
+
+        // İstatistikler
+        const istatistikler = {
+            kazanilan: kazanilanRozetler.length,
+            toplam: tumRozetler.length,
+            toplam_bi_kazanilan: kazanilanRozetler.reduce((sum, r) => sum + (r.bi_odul || 0), 0)
+        };
+
+        res.render('user/rozetlerim', {
+            title: 'Rozetlerim - Bilemezsin',
+            layout: false,
+            kazanilanRozetler,
+            kazanilmamisRozetler,
+            istatistikler
+        });
+    } catch (err) {
+        console.error('Rozetlerim hatası:', err);
+        res.redirect('/dashboard');
+    }
+});
+
+// Tahminlerim
+router.get('/tahminlerim', ensureAuthenticated, async (req, res) => {
+    try {
+        const durum = req.query.durum || 'tumu'; // tumu, bekleyen, kazanan, kaybeden
+        const sayfa = parseInt(req.query.sayfa) || 1;
+        const limit = 15;
+        const offset = (sayfa - 1) * limit;
+
+        let whereClause = 'WHERE kt.kullanici_id = ?';
+        const params = [req.user.id];
+
+        if (durum === 'bekleyen') {
+            whereClause += " AND t.durum = 'aktif'";
+        } else if (durum === 'kazanan') {
+            whereClause += " AND kt.dogru_mu = 1";
+        } else if (durum === 'kaybeden') {
+            whereClause += " AND kt.dogru_mu = 0 AND t.durum = 'sonuclandi'";
+        }
+
+        const tahminler = await db.getAll(`
+            SELECT kt.*, t.baslik, t.durum as tahmin_durum, t.dogru_cevap, t.bi_odul,
+                   t.evet_orani, t.hayir_orani, t.bitis_tarihi,
+                   k.ad as kategori_adi, k.ikon as kategori_ikon, k.renk as kategori_renk
+            FROM kullanici_tahminleri kt
+            JOIN tahminler t ON kt.tahmin_id = t.id
+            LEFT JOIN kategoriler k ON t.kategori_id = k.id
+            ${whereClause}
+            ORDER BY kt.olusturma_tarihi DESC
+            LIMIT ${limit} OFFSET ${offset}
+        `, params);
+
+        // İstatistikler
+        const istatistikler = await db.getOne(`
+            SELECT
+                COUNT(*) as toplam_tahmin,
+                SUM(CASE WHEN kt.dogru_mu = 1 THEN 1 ELSE 0 END) as dogru_tahmin,
+                SUM(CASE WHEN kt.dogru_mu = 0 AND t.durum = 'sonuclandi' THEN 1 ELSE 0 END) as yanlis_tahmin,
+                SUM(CASE WHEN t.durum = 'aktif' THEN 1 ELSE 0 END) as bekleyen_tahmin,
+                SUM(kt.kazanilan_bi) as toplam_kazanilan_bi
+            FROM kullanici_tahminleri kt
+            JOIN tahminler t ON kt.tahmin_id = t.id
+            WHERE kt.kullanici_id = ?
+        `, [req.user.id]);
+
+        res.render('user/tahminlerim', {
+            title: 'Tahminlerim - Bilemezsin',
+            layout: false,
+            tahminler,
+            istatistikler,
+            durum,
+            sayfa
+        });
+    } catch (err) {
+        console.error('Tahminlerim hatası:', err);
+        res.redirect('/dashboard');
+    }
+});
+
 module.exports = router;

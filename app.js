@@ -7,6 +7,9 @@ const passport = require('passport');
 const flash = require('connect-flash');
 const expressLayouts = require('express-ejs-layouts');
 const path = require('path');
+const helmet = require('helmet');
+const rateLimit = require('express-rate-limit');
+const cookieParser = require('cookie-parser');
 
 // Database
 const db = require('./config/database');
@@ -28,6 +31,61 @@ app.set('io', io);
 
 // Trust proxy (Apache/Nginx arkasında çalışıyorsa gerekli)
 app.set('trust proxy', 1);
+
+// Helmet - HTTP Güvenlik Başlıkları
+app.use(helmet({
+    contentSecurityPolicy: {
+        directives: {
+            defaultSrc: ["'self'"],
+            styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com", "https://cdnjs.cloudflare.com"],
+            fontSrc: ["'self'", "https://fonts.gstatic.com", "https://cdnjs.cloudflare.com"],
+            scriptSrc: ["'self'", "'unsafe-inline'", "https://cdnjs.cloudflare.com"],
+            imgSrc: ["'self'", "data:", "https:", "http:"],
+            connectSrc: ["'self'", "wss:", "ws:"]
+        }
+    },
+    crossOriginEmbedderPolicy: false
+}));
+
+// Rate Limiting - Genel
+const generalLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 dakika
+    max: 500, // IP başına maksimum istek
+    message: { success: false, message: 'Çok fazla istek gönderdiniz. Lütfen 15 dakika sonra tekrar deneyin.' },
+    standardHeaders: true,
+    legacyHeaders: false
+});
+
+// Rate Limiting - Auth (Daha sıkı)
+const authLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 dakika
+    max: 10, // IP başına maksimum giriş denemesi
+    message: { success: false, message: 'Çok fazla giriş denemesi. Lütfen 15 dakika sonra tekrar deneyin.' },
+    standardHeaders: true,
+    legacyHeaders: false
+});
+
+// Rate Limiting - API
+const apiLimiter = rateLimit({
+    windowMs: 1 * 60 * 1000, // 1 dakika
+    max: 60, // IP başına maksimum API isteği
+    message: { success: false, message: 'API istek limiti aşıldı. Lütfen biraz bekleyin.' },
+    standardHeaders: true,
+    legacyHeaders: false
+});
+
+// Genel rate limiter
+app.use(generalLimiter);
+
+// Auth route'larına sıkı limit
+app.use('/auth/giris', authLimiter);
+app.use('/auth/kayit', authLimiter);
+
+// API route'larına limit
+app.use('/api', apiLimiter);
+
+// Cookie Parser
+app.use(cookieParser());
 
 // EJS Setup
 app.use(expressLayouts);

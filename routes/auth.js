@@ -282,6 +282,179 @@ router.get('/sifremi-unuttum', ensureGuest, (req, res) => {
     });
 });
 
+// Şifre Sıfırlama İsteği (Email Gönder)
+router.post('/sifremi-unuttum', ensureGuest, [
+    body('email')
+        .isEmail()
+        .normalizeEmail()
+        .withMessage('Geçerli bir e-posta adresi giriniz')
+], async (req, res) => {
+    const errors = validationResult(req);
+
+    if (!errors.isEmpty()) {
+        return res.render('auth/sifremi-unuttum', {
+            title: 'Şifremi Unuttum - Bilemezsin',
+            layout: 'layouts/auth',
+            errors: errors.array(),
+            email: req.body.email
+        });
+    }
+
+    const { email } = req.body;
+
+    try {
+        // Kullanıcıyı bul
+        const kullanici = await db.getOne('SELECT id, ad_soyad, email FROM kullanicilar WHERE email = ?', [email.toLowerCase()]);
+
+        // Güvenlik için her durumda aynı mesajı göster
+        if (!kullanici) {
+            req.flash('success_msg', 'Eğer bu e-posta adresi sistemimizde kayıtlıysa, şifre sıfırlama bağlantısı gönderildi.');
+            return res.redirect('/auth/sifremi-unuttum');
+        }
+
+        // Token oluştur
+        const { v4: uuidv4 } = require('uuid');
+        const token = uuidv4();
+        const tokenExpiry = new Date(Date.now() + 60 * 60 * 1000); // 1 saat geçerli
+
+        // Token'ı veritabanına kaydet
+        await db.execute(
+            'UPDATE kullanicilar SET sifre_sifirlama_token = ?, sifre_sifirlama_son = ? WHERE id = ?',
+            [token, tokenExpiry, kullanici.id]
+        );
+
+        // Email gönder (nodemailer yapılandırması .env'de tanımlıysa)
+        if (process.env.SMTP_HOST && process.env.SMTP_USER) {
+            const nodemailer = require('nodemailer');
+
+            const transporter = nodemailer.createTransport({
+                host: process.env.SMTP_HOST,
+                port: process.env.SMTP_PORT || 587,
+                secure: process.env.SMTP_SECURE === 'true',
+                auth: {
+                    user: process.env.SMTP_USER,
+                    pass: process.env.SMTP_PASS
+                }
+            });
+
+            const resetUrl = `${process.env.BASE_URL}/auth/sifre-sifirla/${token}`;
+
+            await transporter.sendMail({
+                from: `"Bilemezsin" <${process.env.SMTP_FROM || process.env.SMTP_USER}>`,
+                to: kullanici.email,
+                subject: 'Şifre Sıfırlama - Bilemezsin',
+                html: `
+                    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+                        <h2 style="color: #6366f1;">Şifre Sıfırlama</h2>
+                        <p>Merhaba ${kullanici.ad_soyad},</p>
+                        <p>Bilemezsin hesabınız için şifre sıfırlama talebinde bulundunuz.</p>
+                        <p>Şifrenizi sıfırlamak için aşağıdaki butona tıklayın:</p>
+                        <a href="${resetUrl}" style="display: inline-block; background-color: #6366f1; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; margin: 16px 0;">Şifremi Sıfırla</a>
+                        <p style="color: #666; font-size: 14px;">Bu bağlantı 1 saat geçerlidir.</p>
+                        <p style="color: #666; font-size: 14px;">Eğer bu talebi siz yapmadıysanız, bu e-postayı görmezden gelebilirsiniz.</p>
+                        <hr style="border: none; border-top: 1px solid #eee; margin: 24px 0;">
+                        <p style="color: #999; font-size: 12px;">Bilemezsin - Tahmin Platformu</p>
+                    </div>
+                `
+            });
+        }
+
+        req.flash('success_msg', 'Eğer bu e-posta adresi sistemimizde kayıtlıysa, şifre sıfırlama bağlantısı gönderildi.');
+        res.redirect('/auth/sifremi-unuttum');
+
+    } catch (err) {
+        console.error('Şifre sıfırlama hatası:', err);
+        req.flash('error_msg', 'Bir hata oluştu, lütfen tekrar deneyin');
+        res.redirect('/auth/sifremi-unuttum');
+    }
+});
+
+// Şifre Sıfırlama Sayfası (Token ile)
+router.get('/sifre-sifirla/:token', ensureGuest, async (req, res) => {
+    try {
+        const { token } = req.params;
+
+        // Token'ı kontrol et
+        const kullanici = await db.getOne(
+            'SELECT id FROM kullanicilar WHERE sifre_sifirlama_token = ? AND sifre_sifirlama_son > NOW()',
+            [token]
+        );
+
+        if (!kullanici) {
+            req.flash('error_msg', 'Geçersiz veya süresi dolmuş bağlantı');
+            return res.redirect('/auth/sifremi-unuttum');
+        }
+
+        res.render('auth/sifre-sifirla', {
+            title: 'Yeni Şifre Belirle - Bilemezsin',
+            layout: 'layouts/auth',
+            token
+        });
+
+    } catch (err) {
+        console.error('Şifre sıfırlama sayfası hatası:', err);
+        req.flash('error_msg', 'Bir hata oluştu');
+        res.redirect('/auth/sifremi-unuttum');
+    }
+});
+
+// Yeni Şifre Kaydet
+router.post('/sifre-sifirla/:token', ensureGuest, [
+    body('sifre')
+        .isLength({ min: 6 })
+        .withMessage('Şifre en az 6 karakter olmalıdır'),
+    body('sifre_tekrar')
+        .custom((value, { req }) => {
+            if (value !== req.body.sifre) {
+                throw new Error('Şifreler eşleşmiyor');
+            }
+            return true;
+        })
+], async (req, res) => {
+    const errors = validationResult(req);
+    const { token } = req.params;
+
+    if (!errors.isEmpty()) {
+        return res.render('auth/sifre-sifirla', {
+            title: 'Yeni Şifre Belirle - Bilemezsin',
+            layout: 'layouts/auth',
+            errors: errors.array(),
+            token
+        });
+    }
+
+    try {
+        // Token'ı kontrol et
+        const kullanici = await db.getOne(
+            'SELECT id FROM kullanicilar WHERE sifre_sifirlama_token = ? AND sifre_sifirlama_son > NOW()',
+            [token]
+        );
+
+        if (!kullanici) {
+            req.flash('error_msg', 'Geçersiz veya süresi dolmuş bağlantı');
+            return res.redirect('/auth/sifremi-unuttum');
+        }
+
+        // Yeni şifreyi hashle
+        const salt = await bcrypt.genSalt(10);
+        const hashedPassword = await bcrypt.hash(req.body.sifre, salt);
+
+        // Şifreyi güncelle ve token'ı temizle
+        await db.execute(
+            'UPDATE kullanicilar SET sifre = ?, sifre_sifirlama_token = NULL, sifre_sifirlama_son = NULL WHERE id = ?',
+            [hashedPassword, kullanici.id]
+        );
+
+        req.flash('success_msg', 'Şifreniz başarıyla değiştirildi! Şimdi giriş yapabilirsiniz.');
+        res.redirect('/auth/giris');
+
+    } catch (err) {
+        console.error('Şifre kaydetme hatası:', err);
+        req.flash('error_msg', 'Bir hata oluştu, lütfen tekrar deneyin');
+        res.redirect('/auth/sifremi-unuttum');
+    }
+});
+
 // Kullanıcı Adı Belirleme Sayfası
 router.get('/kullanici-adi-belirle', ensureLoggedIn, (req, res) => {
     // Zaten onaylanmışsa dashboard'a yönlendir

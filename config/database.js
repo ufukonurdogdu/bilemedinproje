@@ -62,16 +62,28 @@ const createTables = async () => {
                 giris_yontemi ENUM('local', 'google', 'facebook') DEFAULT 'local',
                 son_giris DATETIME,
                 giris_serisi INT DEFAULT 0,
+                sifre_sifirlama_token VARCHAR(255),
+                sifre_sifirlama_son DATETIME,
                 ayarlar JSON DEFAULT '{"tema": "auto", "bildirimler": true, "email_bildirimleri": true, "dil": "tr"}',
                 olusturma_tarihi DATETIME DEFAULT CURRENT_TIMESTAMP,
                 guncelleme_tarihi DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
                 INDEX idx_email (email),
                 INDEX idx_kullanici_adi (kullanici_adi),
                 INDEX idx_google_id (google_id),
-                INDEX idx_facebook_id (facebook_id)
+                INDEX idx_facebook_id (facebook_id),
+                INDEX idx_sifre_token (sifre_sifirlama_token)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
         `);
         console.log('✅ kullanicilar tablosu hazır');
+
+        // Şifre sıfırlama alanları için migration (mevcut tablolar için)
+        try {
+            await connection.query(`ALTER TABLE kullanicilar ADD COLUMN sifre_sifirlama_token VARCHAR(255)`);
+            await connection.query(`ALTER TABLE kullanicilar ADD COLUMN sifre_sifirlama_son DATETIME`);
+            await connection.query(`ALTER TABLE kullanicilar ADD INDEX idx_sifre_token (sifre_sifirlama_token)`);
+        } catch (e) {
+            // Alanlar zaten varsa hata göz ardı edilir
+        }
 
         // Kategoriler tablosu
         await connection.query(`
@@ -379,14 +391,19 @@ const createTables = async () => {
         console.log('✅ Varsayılan mağaza ürünleri eklendi');
 
         // Varsayılan admin kullanıcısı oluştur
-        const adminExists = await connection.query('SELECT id FROM kullanicilar WHERE email = ?', ['admin@bilemezsin.com']);
+        const adminEmail = process.env.DEFAULT_ADMIN_EMAIL || 'admin@bilemezsin.com';
+        const adminPassword = process.env.DEFAULT_ADMIN_PASSWORD || 'Admin123!';
+        const adminExists = await connection.query('SELECT id FROM kullanicilar WHERE email = ?', [adminEmail]);
         if (adminExists[0].length === 0) {
-            const hashedPassword = await bcrypt.hash('Admin123!', 10);
+            const hashedPassword = await bcrypt.hash(adminPassword, 10);
             await connection.query(`
-                INSERT INTO kullanicilar (email, sifre, ad_soyad, kullanici_adi, rol, bi_coin, dogrulanmis_mi, giris_yontemi)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-            `, ['admin@bilemezsin.com', hashedPassword, 'Admin', 'admin', 'superadmin', 100000, 1, 'local']);
-            console.log('✅ Varsayılan admin kullanıcısı oluşturuldu (admin@bilemezsin.com / Admin123!)');
+                INSERT INTO kullanicilar (email, sifre, ad_soyad, kullanici_adi, rol, bi_coin, dogrulanmis_mi, kullanici_adi_onaylandi, giris_yontemi)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+            `, [adminEmail, hashedPassword, 'Admin', 'admin', 'superadmin', 100000, 1, 1, 'local']);
+            console.log(`✅ Varsayılan admin kullanıcısı oluşturuldu (${adminEmail})`);
+            if (adminPassword === 'Admin123!') {
+                console.warn('⚠️  UYARI: Varsayılan admin şifresi kullanılıyor! .env dosyasında DEFAULT_ADMIN_PASSWORD değişkenini ayarlayın.');
+            }
         }
 
         // Örnek tahminler ekle
