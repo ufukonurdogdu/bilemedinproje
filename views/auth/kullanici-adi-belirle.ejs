@@ -1,0 +1,449 @@
+<style>
+    .username-card {
+        background: var(--bg-secondary);
+        border: 1px solid var(--border-color);
+        border-radius: 20px;
+        padding: 40px;
+    }
+
+    .username-header {
+        text-align: center;
+        margin-bottom: 32px;
+    }
+
+    .username-icon {
+        width: 80px;
+        height: 80px;
+        background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 20px;
+        font-size: 36px;
+    }
+
+    .username-header h1 {
+        font-size: 24px;
+        font-weight: 700;
+        margin-bottom: 8px;
+    }
+
+    .username-header p {
+        color: var(--text-secondary);
+        font-size: 15px;
+    }
+
+    .welcome-text {
+        background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(139, 92, 246, 0.1));
+        border: 1px solid rgba(99, 102, 241, 0.2);
+        border-radius: 12px;
+        padding: 16px;
+        margin-bottom: 24px;
+        text-align: center;
+    }
+
+    .welcome-text span {
+        color: var(--accent-primary);
+        font-weight: 600;
+    }
+
+    .form-group {
+        margin-bottom: 24px;
+    }
+
+    .form-group label {
+        display: block;
+        font-size: 14px;
+        font-weight: 600;
+        margin-bottom: 8px;
+        color: var(--text-primary);
+    }
+
+    .input-wrapper {
+        position: relative;
+    }
+
+    .input-prefix {
+        position: absolute;
+        left: 16px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--text-muted);
+        font-size: 15px;
+        font-weight: 500;
+    }
+
+    .form-input {
+        width: 100%;
+        padding: 14px 16px 14px 32px;
+        background: var(--bg-tertiary);
+        border: 2px solid var(--border-color);
+        border-radius: 12px;
+        font-size: 16px;
+        color: var(--text-primary);
+        font-family: inherit;
+        transition: all 0.2s;
+    }
+
+    .form-input:focus {
+        outline: none;
+        border-color: var(--accent-primary);
+        box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
+    }
+
+    .form-input.is-valid {
+        border-color: var(--success);
+    }
+
+    .form-input.is-invalid {
+        border-color: var(--error);
+    }
+
+    .input-status {
+        position: absolute;
+        right: 16px;
+        top: 50%;
+        transform: translateY(-50%);
+        font-size: 18px;
+    }
+
+    .input-status.checking {
+        animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+        from { transform: translateY(-50%) rotate(0deg); }
+        to { transform: translateY(-50%) rotate(360deg); }
+    }
+
+    .form-hint {
+        font-size: 13px;
+        color: var(--text-muted);
+        margin-top: 8px;
+    }
+
+    .availability-message {
+        font-size: 13px;
+        margin-top: 8px;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .availability-message.available {
+        color: var(--success);
+    }
+
+    .availability-message.taken {
+        color: var(--error);
+    }
+
+    .btn-primary {
+        width: 100%;
+        padding: 16px 24px;
+        background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+        color: white;
+        border: none;
+        border-radius: 12px;
+        font-size: 16px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+    }
+
+    .btn-primary:hover:not(:disabled) {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 24px rgba(99, 102, 241, 0.4);
+    }
+
+    .btn-primary:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+    }
+
+    .error-list {
+        background: rgba(239, 68, 68, 0.1);
+        border: 1px solid rgba(239, 68, 68, 0.3);
+        border-radius: 12px;
+        padding: 16px;
+        margin-bottom: 24px;
+    }
+
+    .error-item {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        color: var(--error);
+        font-size: 14px;
+    }
+
+    .error-item + .error-item {
+        margin-top: 8px;
+    }
+
+    .rules-list {
+        background: var(--bg-tertiary);
+        border-radius: 12px;
+        padding: 16px;
+        margin-top: 24px;
+    }
+
+    .rules-title {
+        font-size: 13px;
+        font-weight: 600;
+        color: var(--text-secondary);
+        margin-bottom: 12px;
+    }
+
+    .rule-item {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 13px;
+        color: var(--text-muted);
+    }
+
+    .rule-item + .rule-item {
+        margin-top: 8px;
+    }
+
+    .rule-item.valid {
+        color: var(--success);
+    }
+
+    .rule-item.invalid {
+        color: var(--error);
+    }
+
+    .rule-icon {
+        width: 16px;
+        height: 16px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 10px;
+        background: var(--bg-secondary);
+    }
+
+    .rule-item.valid .rule-icon {
+        background: var(--success);
+        color: white;
+    }
+
+    .rule-item.invalid .rule-icon {
+        background: var(--error);
+        color: white;
+    }
+</style>
+
+<div class="username-card">
+    <div class="username-header">
+        <div class="username-icon">👤</div>
+        <h1>Kullanıcı Adı Belirle</h1>
+        <p>Platformda seni tanıyacağımız bir kullanıcı adı seç</p>
+    </div>
+
+    <% if (typeof user !== 'undefined' && user && user.ad_soyad) { %>
+    <div class="welcome-text">
+        Hoş geldin, <span><%= user.ad_soyad %></span>! 🎉
+    </div>
+    <% } %>
+
+    <% if (typeof errors !== 'undefined' && errors && errors.length > 0) { %>
+    <div class="error-list">
+        <% errors.forEach(error => { %>
+        <div class="error-item">
+            <span>✕</span>
+            <span><%= error.msg %></span>
+        </div>
+        <% }); %>
+    </div>
+    <% } %>
+
+    <form action="/auth/kullanici-adi-belirle" method="POST" id="usernameForm">
+        <div class="form-group">
+            <label for="kullanici_adi">Kullanıcı Adı</label>
+            <div class="input-wrapper">
+                <span class="input-prefix">@</span>
+                <input 
+                    type="text" 
+                    id="kullanici_adi" 
+                    name="kullanici_adi" 
+                    class="form-input"
+                    placeholder="kullanici_adi"
+                    value="<%= typeof kullanici_adi !== 'undefined' ? kullanici_adi : (typeof suggestedUsername !== 'undefined' ? suggestedUsername : '') %>"
+                    autocomplete="off"
+                    autocapitalize="off"
+                    spellcheck="false"
+                    maxlength="20"
+                    required
+                >
+                <span class="input-status" id="inputStatus"></span>
+            </div>
+            <div class="form-hint" id="suggestionHint">
+                <% if (typeof suggestedUsername !== 'undefined' && suggestedUsername) { %>
+                💡 Sizin için önerilen: <strong>@<%= suggestedUsername %></strong> - beğenirseniz onaylayın veya değiştirin
+                <% } %>
+            </div>
+            <div class="availability-message" id="availabilityMessage"></div>
+        </div>
+
+        <button type="submit" class="btn-primary" id="submitBtn" disabled>
+            <span>✓ Kullanıcı Adını Onayla</span>
+        </button>
+
+        <div class="rules-list">
+            <div class="rules-title">Kullanıcı adı kuralları:</div>
+            <div class="rule-item" id="rule-length">
+                <span class="rule-icon">•</span>
+                <span>3-20 karakter uzunluğunda</span>
+            </div>
+            <div class="rule-item" id="rule-chars">
+                <span class="rule-icon">•</span>
+                <span>Sadece harf, rakam ve alt çizgi (_)</span>
+            </div>
+            <div class="rule-item" id="rule-available">
+                <span class="rule-icon">•</span>
+                <span>Müsait olmalı</span>
+            </div>
+        </div>
+    </form>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const input = document.getElementById('kullanici_adi');
+    const submitBtn = document.getElementById('submitBtn');
+    const inputStatus = document.getElementById('inputStatus');
+    const availabilityMessage = document.getElementById('availabilityMessage');
+    const ruleLength = document.getElementById('rule-length');
+    const ruleChars = document.getElementById('rule-chars');
+    const ruleAvailable = document.getElementById('rule-available');
+
+    let checkTimeout;
+    let isAvailable = false;
+
+    function updateRule(element, isValid) {
+        element.classList.remove('valid', 'invalid');
+        if (isValid === true) {
+            element.classList.add('valid');
+            element.querySelector('.rule-icon').textContent = '✓';
+        } else if (isValid === false) {
+            element.classList.add('invalid');
+            element.querySelector('.rule-icon').textContent = '✕';
+        } else {
+            element.querySelector('.rule-icon').textContent = '•';
+        }
+    }
+
+    function validateInput(value) {
+        const lengthValid = value.length >= 3 && value.length <= 20;
+        const charsValid = /^[a-zA-Z0-9_]+$/.test(value);
+
+        updateRule(ruleLength, value.length > 0 ? lengthValid : null);
+        updateRule(ruleChars, value.length > 0 ? charsValid : null);
+
+        return lengthValid && charsValid;
+    }
+
+    function checkAvailability(username) {
+        if (!validateInput(username)) {
+            inputStatus.textContent = '';
+            inputStatus.classList.remove('checking');
+            availabilityMessage.textContent = '';
+            availabilityMessage.className = 'availability-message';
+            updateRule(ruleAvailable, null);
+            input.classList.remove('is-valid', 'is-invalid');
+            submitBtn.disabled = true;
+            isAvailable = false;
+            return;
+        }
+
+        inputStatus.textContent = '⟳';
+        inputStatus.classList.add('checking');
+        availabilityMessage.textContent = 'Kontrol ediliyor...';
+        availabilityMessage.className = 'availability-message';
+
+        fetch('/api/kullanici-adi-kontrol?kullanici_adi=' + encodeURIComponent(username))
+            .then(response => response.json())
+            .then(data => {
+                inputStatus.classList.remove('checking');
+                
+                if (data.available) {
+                    inputStatus.textContent = '✓';
+                    availabilityMessage.textContent = '✓ Bu kullanıcı adı müsait';
+                    availabilityMessage.className = 'availability-message available';
+                    input.classList.remove('is-invalid');
+                    input.classList.add('is-valid');
+                    updateRule(ruleAvailable, true);
+                    submitBtn.disabled = false;
+                    isAvailable = true;
+                } else {
+                    inputStatus.textContent = '✕';
+                    availabilityMessage.textContent = '✕ Bu kullanıcı adı kullanılıyor';
+                    availabilityMessage.className = 'availability-message taken';
+                    input.classList.remove('is-valid');
+                    input.classList.add('is-invalid');
+                    updateRule(ruleAvailable, false);
+                    submitBtn.disabled = true;
+                    isAvailable = false;
+                }
+            })
+            .catch(err => {
+                inputStatus.classList.remove('checking');
+                inputStatus.textContent = '!';
+                availabilityMessage.textContent = 'Kontrol edilemedi, tekrar deneyin';
+                availabilityMessage.className = 'availability-message taken';
+                submitBtn.disabled = true;
+                isAvailable = false;
+            });
+    }
+
+    input.addEventListener('input', function(e) {
+        // Sadece izin verilen karakterleri kabul et
+        let value = e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, '');
+        e.target.value = value;
+
+        clearTimeout(checkTimeout);
+        
+        if (value.length === 0) {
+            inputStatus.textContent = '';
+            availabilityMessage.textContent = '';
+            availabilityMessage.className = 'availability-message';
+            input.classList.remove('is-valid', 'is-invalid');
+            updateRule(ruleLength, null);
+            updateRule(ruleChars, null);
+            updateRule(ruleAvailable, null);
+            submitBtn.disabled = true;
+            isAvailable = false;
+            return;
+        }
+
+        validateInput(value);
+
+        // 500ms bekle sonra kontrol et (debounce)
+        checkTimeout = setTimeout(() => {
+            checkAvailability(value);
+        }, 500);
+    });
+
+    // Form submit kontrolü
+    document.getElementById('usernameForm').addEventListener('submit', function(e) {
+        if (!isAvailable) {
+            e.preventDefault();
+            return false;
+        }
+    });
+
+    // Sayfa yüklendiğinde mevcut değer varsa kontrol et
+    if (input.value) {
+        checkAvailability(input.value);
+    }
+});
+</script>

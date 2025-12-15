@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title %></title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="/socket.io/socket.io.js"></script>
+    <style>
+        :root, [data-theme="dark"] {
+            --bg-dark: #0a0a0b;
+            --bg-card: #141416;
+            --bg-card-hover: #1a1a1d;
+            --bg-input: #1a1a1d;
+            --border-color: #2a2a2d;
+            --text-primary: #ffffff;
+            --text-secondary: #a0a0a0;
+            --text-muted: #6b6b6b;
+            --accent-primary: #6366f1;
+            --accent-secondary: #8b5cf6;
+            --bi-color: #f59e0b;
+            --accent-success: #10b981;
+        }
+        [data-theme="light"] {
+            --bg-dark: #f5f5f5;
+            --bg-card: #ffffff;
+            --bg-card-hover: #f9f9f9;
+            --bg-input: #f0f0f0;
+            --border-color: #e5e5e5;
+            --text-primary: #1a1a1a;
+            --text-secondary: #5f6368;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg-dark); color: var(--text-primary); min-height: 100vh; }
+
+        .main-content { padding: 24px; max-width: 1400px; margin: 0 auto; }
+        .page-header { margin-bottom: 24px; }
+        .page-title { font-size: 28px; font-weight: 700; display: flex; align-items: center; gap: 12px; margin-bottom: 8px; }
+        .page-subtitle { color: var(--text-muted); font-size: 14px; }
+
+        .period-tabs { display: flex; gap: 8px; margin-bottom: 24px; background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 12px; padding: 8px; }
+        .period-tab { flex: 1; padding: 12px 16px; background: transparent; border: none; border-radius: 8px; font-size: 14px; font-weight: 600; color: var(--text-secondary); cursor: pointer; transition: all 0.2s; }
+        .period-tab:hover { color: var(--text-primary); background: var(--bg-input); }
+        .period-tab.active { background: var(--accent-primary); color: white; }
+
+        .leaderboard-layout { display: grid; grid-template-columns: 1fr 320px; gap: 24px; }
+
+        /* Top 3 Podium */
+        .podium-section { display: flex; justify-content: center; align-items: flex-end; gap: 16px; margin-bottom: 24px; padding: 32px 16px; background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(139, 92, 246, 0.1)); border-radius: 16px; border: 1px solid var(--border-color); }
+        .podium-item { text-align: center; transition: transform 0.3s; }
+        .podium-item:hover { transform: translateY(-5px); }
+        .podium-item.first { order: 2; }
+        .podium-item.second { order: 1; }
+        .podium-item.third { order: 3; }
+        .podium-avatar { width: 80px; height: 80px; border-radius: 50%; background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary)); display: flex; align-items: center; justify-content: center; font-size: 24px; font-weight: 800; color: white; margin: 0 auto 12px; position: relative; border: 4px solid var(--bg-card); overflow: hidden; }
+        .podium-avatar img { width: 100%; height: 100%; object-fit: cover; }
+        .podium-item.first .podium-avatar { width: 100px; height: 100px; font-size: 28px; border-color: #fbbf24; }
+        .podium-item.second .podium-avatar { border-color: #9ca3af; }
+        .podium-item.third .podium-avatar { border-color: #d97706; }
+        .podium-crown { position: absolute; top: -20px; left: 50%; transform: translateX(-50%); font-size: 24px; }
+        .podium-item.first .podium-crown { font-size: 32px; top: -25px; }
+        .podium-rank { position: absolute; bottom: -5px; right: -5px; width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 800; color: white; }
+        .podium-item.first .podium-rank { background: linear-gradient(135deg, #fbbf24, #f59e0b); width: 32px; height: 32px; }
+        .podium-item.second .podium-rank { background: linear-gradient(135deg, #9ca3af, #6b7280); }
+        .podium-item.third .podium-rank { background: linear-gradient(135deg, #d97706, #b45309); }
+        .podium-name { font-size: 16px; font-weight: 700; margin-bottom: 4px; }
+        .podium-item.first .podium-name { font-size: 18px; }
+        .podium-stats { font-size: 12px; color: var(--text-muted); margin-bottom: 8px; }
+        .podium-points { font-size: 18px; font-weight: 800; color: var(--bi-color); }
+        .podium-item.first .podium-points { font-size: 22px; }
+        .podium-stand { width: 100%; height: 60px; border-radius: 8px 8px 0 0; margin-top: 12px; display: flex; align-items: center; justify-content: center; font-size: 24px; font-weight: 800; color: rgba(255,255,255,0.5); }
+        .podium-item.first .podium-stand { background: linear-gradient(135deg, #fbbf24, #f59e0b); height: 80px; }
+        .podium-item.second .podium-stand { background: linear-gradient(135deg, #9ca3af, #6b7280); }
+        .podium-item.third .podium-stand { background: linear-gradient(135deg, #d97706, #b45309); }
+
+        /* Leaderboard List */
+        .leaderboard-list { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 12px; overflow: hidden; }
+        .leaderboard-header { display: grid; grid-template-columns: 60px 1fr 100px 100px; gap: 16px; padding: 14px 20px; background: var(--bg-input); font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-muted); }
+        .leaderboard-item { display: grid; grid-template-columns: 60px 1fr 100px 100px; gap: 16px; padding: 16px 20px; align-items: center; border-bottom: 1px solid var(--border-color); transition: all 0.2s; }
+        .leaderboard-item:last-child { border-bottom: none; }
+        .leaderboard-item:hover { background: var(--bg-card-hover); }
+        .leaderboard-item.current-user { background: rgba(99, 102, 241, 0.1); border-left: 4px solid var(--accent-primary); }
+        .leaderboard-item.highlight { animation: highlight 1s ease; }
+        @keyframes highlight { 0%, 100% { background: var(--bg-card); } 50% { background: rgba(99, 102, 241, 0.2); } }
+
+        .lb-rank { width: 36px; height: 36px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 800; background: var(--bg-input); color: var(--text-secondary); }
+        .lb-rank.gold { background: linear-gradient(135deg, #fbbf24, #f59e0b); color: #000; }
+        .lb-rank.silver { background: linear-gradient(135deg, #9ca3af, #6b7280); color: #000; }
+        .lb-rank.bronze { background: linear-gradient(135deg, #d97706, #b45309); color: #fff; }
+
+        .lb-user { display: flex; align-items: center; gap: 12px; }
+        .lb-avatar { width: 44px; height: 44px; border-radius: 50%; background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary)); display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 700; color: white; overflow: hidden; }
+        .lb-avatar img { width: 100%; height: 100%; object-fit: cover; }
+        .lb-user-info { flex: 1; }
+        .lb-name { font-size: 15px; font-weight: 600; margin-bottom: 2px; }
+        .lb-username { font-size: 13px; color: var(--text-muted); }
+
+        .lb-predictions { text-align: center; }
+        .lb-predictions-value { font-size: 16px; font-weight: 700; }
+        .lb-predictions-label { font-size: 11px; color: var(--text-muted); }
+
+        .lb-points { text-align: right; }
+        .lb-points-value { font-size: 18px; font-weight: 800; color: var(--bi-color); }
+        .lb-points-label { font-size: 11px; color: var(--text-muted); }
+
+        /* Sidebar */
+        .sidebar { display: flex; flex-direction: column; gap: 16px; }
+        .card { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 12px; overflow: hidden; }
+        .card-header { padding: 16px 20px; border-bottom: 1px solid var(--border-color); }
+        .card-title { font-size: 16px; font-weight: 700; display: flex; align-items: center; gap: 8px; }
+        .card-body { padding: 20px; }
+
+        /* My Rank Card */
+        .my-rank-card { background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary)); border: none; color: white; }
+        .my-rank-card .card-header { border-bottom-color: rgba(255,255,255,0.2); }
+        .my-rank-card .card-title { color: white; }
+        .my-rank-content { text-align: center; padding: 20px; }
+        .my-rank-avatar { width: 80px; height: 80px; border-radius: 50%; background: rgba(255,255,255,0.2); display: flex; align-items: center; justify-content: center; font-size: 24px; font-weight: 800; margin: 0 auto 16px; border: 3px solid rgba(255,255,255,0.3); overflow: hidden; }
+        .my-rank-avatar img { width: 100%; height: 100%; object-fit: cover; }
+        .my-rank-position { font-size: 48px; font-weight: 800; margin-bottom: 4px; }
+        .my-rank-label { opacity: 0.9; font-size: 14px; margin-bottom: 16px; }
+        .my-rank-stats { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; padding-top: 16px; border-top: 1px solid rgba(255,255,255,0.2); }
+        .my-rank-stat { text-align: center; }
+        .my-rank-stat-value { font-size: 20px; font-weight: 800; }
+        .my-rank-stat-label { font-size: 11px; opacity: 0.8; }
+
+        /* Rewards Info */
+        .reward-item { display: flex; align-items: center; gap: 12px; padding: 12px; background: var(--bg-input); border-radius: 8px; margin-bottom: 8px; }
+        .reward-item:last-child { margin-bottom: 0; }
+        .reward-item.gold { background: linear-gradient(135deg, rgba(251, 191, 36, 0.2), rgba(245, 158, 11, 0.2)); }
+        .reward-icon { font-size: 24px; }
+        .reward-info { flex: 1; }
+        .reward-rank { font-weight: 700; font-size: 14px; }
+        .reward-desc { font-size: 12px; color: var(--text-muted); }
+        .reward-amount { font-weight: 800; color: var(--bi-color); }
+
+        /* Live indicator */
+        .live-indicator { display: flex; align-items: center; gap: 8px; padding: 6px 12px; background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: 20px; font-size: 12px; font-weight: 600; color: var(--accent-success); }
+        .live-dot { width: 8px; height: 8px; background: var(--accent-success); border-radius: 50%; animation: pulse 2s infinite; }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+
+        .empty-state { text-align: center; padding: 48px 20px; color: var(--text-secondary); }
+
+        @media (max-width: 1024px) {
+            .leaderboard-layout { grid-template-columns: 1fr; }
+            .sidebar { display: grid; grid-template-columns: repeat(2, 1fr); }
+        }
+        @media (max-width: 768px) {
+            .podium-section { flex-direction: column; align-items: center; }
+            .podium-item.first, .podium-item.second, .podium-item.third { order: unset; }
+            .podium-stand { display: none; }
+            .leaderboard-header, .leaderboard-item { grid-template-columns: 50px 1fr 80px; }
+            .lb-predictions { display: none; }
+            .sidebar { grid-template-columns: 1fr; }
+            .period-tabs { flex-wrap: wrap; }
+        }
+    </style>
+</head>
+<body>
+    <%- include('../partials/user-navbar') %>
+
+    <div class="main-content">
+        <div class="page-header">
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;">
+                <div>
+                    <h1 class="page-title">Siralama</h1>
+                    <p class="page-subtitle">En iyi tahminciler arasinda yerini al!</p>
+                </div>
+                <div class="live-indicator">
+                    <span class="live-dot"></span>
+                    Canli Guncelleniyor
+                </div>
+            </div>
+        </div>
+
+        <div class="period-tabs">
+            <button class="period-tab active" data-period="all">Tum Zamanlar</button>
+            <button class="period-tab" data-period="monthly">Aylik</button>
+            <button class="period-tab" data-period="weekly">Haftalik</button>
+        </div>
+
+        <div class="leaderboard-layout">
+            <div>
+                <!-- Top 3 Podium -->
+                <div class="podium-section" id="podiumSection">
+                    <% if (leaderboard && leaderboard.length >= 2) { %>
+                    <div class="podium-item second">
+                        <div class="podium-avatar">
+                            <span class="podium-crown">🥈</span>
+                            <% if (leaderboard[1].avatar) { %>
+                                <img src="<%= leaderboard[1].avatar %>" alt="">
+                            <% } else { %>
+                                <%= leaderboard[1].ad_soyad ? leaderboard[1].ad_soyad.split(' ').map(n => n[0]).join('').substring(0,2).toUpperCase() : 'U' %>
+                            <% } %>
+                            <span class="podium-rank">2</span>
+                        </div>
+                        <div class="podium-name"><%= leaderboard[1].ad_soyad || leaderboard[1].kullanici_adi %></div>
+                        <div class="podium-stats"><%= leaderboard[1].dogru_tahmin || 0 %>/<%= leaderboard[1].toplam_tahmin || 0 %> tahmin</div>
+                        <div class="podium-points"><%= (leaderboard[1].bi_coin || 0).toLocaleString('tr-TR') %> bi!</div>
+                        <div class="podium-stand">2</div>
+                    </div>
+                    <% } %>
+
+                    <% if (leaderboard && leaderboard.length >= 1) { %>
+                    <div class="podium-item first">
+                        <div class="podium-avatar">
+                            <span class="podium-crown">👑</span>
+                            <% if (leaderboard[0].avatar) { %>
+                                <img src="<%= leaderboard[0].avatar %>" alt="">
+                            <% } else { %>
+                                <%= leaderboard[0].ad_soyad ? leaderboard[0].ad_soyad.split(' ').map(n => n[0]).join('').substring(0,2).toUpperCase() : 'U' %>
+                            <% } %>
+                            <span class="podium-rank">1</span>
+                        </div>
+                        <div class="podium-name"><%= leaderboard[0].ad_soyad || leaderboard[0].kullanici_adi %></div>
+                        <div class="podium-stats"><%= leaderboard[0].dogru_tahmin || 0 %>/<%= leaderboard[0].toplam_tahmin || 0 %> tahmin</div>
+                        <div class="podium-points"><%= (leaderboard[0].bi_coin || 0).toLocaleString('tr-TR') %> bi!</div>
+                        <div class="podium-stand">1</div>
+                    </div>
+                    <% } %>
+
+                    <% if (leaderboard && leaderboard.length >= 3) { %>
+                    <div class="podium-item third">
+                        <div class="podium-avatar">
+                            <span class="podium-crown">🥉</span>
+                            <% if (leaderboard[2].avatar) { %>
+                                <img src="<%= leaderboard[2].avatar %>" alt="">
+                            <% } else { %>
+                                <%= leaderboard[2].ad_soyad ? leaderboard[2].ad_soyad.split(' ').map(n => n[0]).join('').substring(0,2).toUpperCase() : 'U' %>
+                            <% } %>
+                            <span class="podium-rank">3</span>
+                        </div>
+                        <div class="podium-name"><%= leaderboard[2].ad_soyad || leaderboard[2].kullanici_adi %></div>
+                        <div class="podium-stats"><%= leaderboard[2].dogru_tahmin || 0 %>/<%= leaderboard[2].toplam_tahmin || 0 %> tahmin</div>
+                        <div class="podium-points"><%= (leaderboard[2].bi_coin || 0).toLocaleString('tr-TR') %> bi!</div>
+                        <div class="podium-stand">3</div>
+                    </div>
+                    <% } %>
+                </div>
+
+                <!-- Leaderboard List -->
+                <div class="leaderboard-list">
+                    <div class="leaderboard-header">
+                        <div>Sira</div>
+                        <div>Kullanici</div>
+                        <div>Tahmin</div>
+                        <div style="text-align: right;">Puan</div>
+                    </div>
+                    <div id="leaderboardBody">
+                        <% if (leaderboard && leaderboard.length > 0) { %>
+                            <% leaderboard.forEach(function(u, index) { %>
+                                <% const isCurrentUser = user && user.id === u.id; %>
+                                <div class="leaderboard-item <%= isCurrentUser ? 'current-user' : '' %>" data-user-id="<%= u.id %>">
+                                    <div class="lb-rank <%= index === 0 ? 'gold' : index === 1 ? 'silver' : index === 2 ? 'bronze' : '' %>">
+                                        <%= index + 1 %>
+                                    </div>
+                                    <div class="lb-user">
+                                        <div class="lb-avatar">
+                                            <% if (u.avatar) { %>
+                                                <img src="<%= u.avatar %>" alt="">
+                                            <% } else { %>
+                                                <%= u.ad_soyad ? u.ad_soyad.split(' ').map(n => n[0]).join('').substring(0,2).toUpperCase() : 'U' %>
+                                            <% } %>
+                                        </div>
+                                        <div class="lb-user-info">
+                                            <div class="lb-name"><%= u.ad_soyad || u.kullanici_adi %><%= isCurrentUser ? ' (Sen)' : '' %></div>
+                                            <div class="lb-username">@<%= u.kullanici_adi %></div>
+                                        </div>
+                                    </div>
+                                    <div class="lb-predictions">
+                                        <div class="lb-predictions-value"><%= u.dogru_tahmin || 0 %>/<%= u.toplam_tahmin || 0 %></div>
+                                        <div class="lb-predictions-label">dogru/toplam</div>
+                                    </div>
+                                    <div class="lb-points">
+                                        <div class="lb-points-value"><%= (u.bi_coin || 0).toLocaleString('tr-TR') %></div>
+                                        <div class="lb-points-label">bi!</div>
+                                    </div>
+                                </div>
+                            <% }); %>
+                        <% } else { %>
+                            <div class="empty-state">
+                                <h3>Henuz siralama yok</h3>
+                                <p>Tahmin yaparak siralamada yerini al!</p>
+                            </div>
+                        <% } %>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sidebar -->
+            <aside class="sidebar">
+                <!-- My Rank Card -->
+                <div class="card my-rank-card">
+                    <div class="card-header">
+                        <h3 class="card-title">Siralamaniz</h3>
+                    </div>
+                    <div class="my-rank-content">
+                        <div class="my-rank-avatar">
+                            <% if (user && user.avatar) { %>
+                                <img src="<%= user.avatar %>" alt="">
+                            <% } else { %>
+                                <%= user && user.ad_soyad ? user.ad_soyad.split(' ').map(n => n[0]).join('').substring(0,2).toUpperCase() : '?' %>
+                            <% } %>
+                        </div>
+                        <div class="my-rank-position">#<%= userRank || '-' %></div>
+                        <div class="my-rank-label">Genel Siralama</div>
+                        <div class="my-rank-stats">
+                            <div class="my-rank-stat">
+                                <div class="my-rank-stat-value" id="myBiCoin"><%= user ? (user.bi_coin || 0).toLocaleString('tr-TR') : '0' %></div>
+                                <div class="my-rank-stat-label">bi! Coin</div>
+                            </div>
+                            <div class="my-rank-stat">
+                                <div class="my-rank-stat-value"><%= user ? (user.dogru_tahmin || 0) : '0' %></div>
+                                <div class="my-rank-stat-label">Dogru Tahmin</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Weekly Rewards -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Haftalik Oduller</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="reward-item gold">
+                            <span class="reward-icon">🥇</span>
+                            <div class="reward-info">
+                                <div class="reward-rank">1. Sira</div>
+                                <div class="reward-desc">Haftalik sampiyon</div>
+                            </div>
+                            <div class="reward-amount">10,000 bi!</div>
+                        </div>
+                        <div class="reward-item">
+                            <span class="reward-icon">🥈</span>
+                            <div class="reward-info">
+                                <div class="reward-rank">2. Sira</div>
+                            </div>
+                            <div class="reward-amount">5,000 bi!</div>
+                        </div>
+                        <div class="reward-item">
+                            <span class="reward-icon">🥉</span>
+                            <div class="reward-info">
+                                <div class="reward-rank">3. Sira</div>
+                            </div>
+                            <div class="reward-amount">2,500 bi!</div>
+                        </div>
+                        <div class="reward-item">
+                            <span class="reward-icon">🏅</span>
+                            <div class="reward-info">
+                                <div class="reward-rank">4-10. Sira</div>
+                            </div>
+                            <div class="reward-amount">1,000 bi!</div>
+                        </div>
+                    </div>
+                </div>
+            </aside>
+        </div>
+    </div>
+
+    <%- include('../partials/footer') %>
+
+    <script>
+        const themeMode = localStorage.getItem('themeMode') || 'dark';
+        document.documentElement.setAttribute('data-theme', themeMode);
+
+        const socket = io();
+        <% if (typeof user !== 'undefined' && user) { %>
+        socket.emit('join', <%= user.id %>);
+        <% } %>
+        socket.emit('joinLeaderboard');
+
+        // Live bi! coin update
+        socket.on('biCoinUpdate', (data) => {
+            const el = document.getElementById('biCoinDisplay');
+            if (el) el.textContent = data.bi_coin.toLocaleString('tr-TR');
+            const myBiCoin = document.getElementById('myBiCoin');
+            if (myBiCoin) myBiCoin.textContent = data.bi_coin.toLocaleString('tr-TR');
+        });
+
+        // Live leaderboard update
+        socket.on('leaderboardUpdate', (users) => {
+            updateLeaderboard(users);
+        });
+
+        function updateLeaderboard(users) {
+            const body = document.getElementById('leaderboardBody');
+            if (!body || !users || users.length === 0) return;
+
+            const currentUserId = <%= user ? user.id : 'null' %>;
+
+            let html = '';
+            users.forEach((u, index) => {
+                const isCurrentUser = currentUserId && currentUserId === u.id;
+                const initials = u.ad_soyad ? u.ad_soyad.split(' ').map(n => n[0]).join('').substring(0,2).toUpperCase() : 'U';
+                const rankClass = index === 0 ? 'gold' : index === 1 ? 'silver' : index === 2 ? 'bronze' : '';
+
+                html += `
+                    <div class="leaderboard-item ${isCurrentUser ? 'current-user' : ''} highlight" data-user-id="${u.id}">
+                        <div class="lb-rank ${rankClass}">${index + 1}</div>
+                        <div class="lb-user">
+                            <div class="lb-avatar">
+                                ${u.avatar ? `<img src="${u.avatar}" alt="">` : initials}
+                            </div>
+                            <div class="lb-user-info">
+                                <div class="lb-name">${u.ad_soyad || u.kullanici_adi}${isCurrentUser ? ' (Sen)' : ''}</div>
+                                <div class="lb-username">@${u.kullanici_adi}</div>
+                            </div>
+                        </div>
+                        <div class="lb-predictions">
+                            <div class="lb-predictions-value">${u.dogru_tahmin || 0}/${u.toplam_tahmin || 0}</div>
+                            <div class="lb-predictions-label">dogru/toplam</div>
+                        </div>
+                        <div class="lb-points">
+                            <div class="lb-points-value">${(u.bi_coin || 0).toLocaleString('tr-TR')}</div>
+                            <div class="lb-points-label">bi!</div>
+                        </div>
+                    </div>
+                `;
+            });
+
+            body.innerHTML = html;
+        }
+
+        // Period tabs
+        document.querySelectorAll('.period-tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                document.querySelectorAll('.period-tab').forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+                // Future: Load filtered leaderboard
+            });
+        });
+    </script>
+</body>
+</html>

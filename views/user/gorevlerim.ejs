@@ -1,0 +1,133 @@
+<div class="dashboard-container">
+    <div class="page-header">
+        <h1>Görevlerim</h1>
+        <p>Görevleri tamamla, bi! ve XP kazan!</p>
+    </div>
+
+    <% const gunlukGorevler = gorevler.filter(g => g.tip === 'gunluk'); %>
+    <% const haftalikGorevler = gorevler.filter(g => g.tip === 'haftalik'); %>
+    <% const ozelGorevler = gorevler.filter(g => g.tip === 'ozel'); %>
+
+    <% if (gunlukGorevler.length > 0) { %>
+    <div class="missions-section">
+        <div class="section-header">
+            <h2 class="section-title">🎯 Günlük Görevler</h2>
+            <span class="section-reset">Her gün 00:00'da sıfırlanır</span>
+        </div>
+        <div class="missions-grid">
+            <% gunlukGorevler.forEach(function(gorev) { %>
+                <div class="mission-card <%= gorev.tamamlandi_mi ? 'completed' : '' %>">
+                    <div class="mission-header">
+                        <div class="mission-icon">🎯</div>
+                        <div class="mission-rewards">
+                            <span class="bi-reward">+<%= gorev.bi_odul %> bi!</span>
+                            <span class="xp-reward">+<%= gorev.xp_odul %> XP</span>
+                        </div>
+                    </div>
+                    <div class="mission-body">
+                        <h3 class="mission-title"><%= gorev.ad %></h3>
+                        <p class="mission-desc"><%= gorev.aciklama %></p>
+                        <div class="mission-progress">
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: <%= Math.min((gorev.ilerleme / gorev.kosul_deger) * 100, 100) %>%"></div>
+                            </div>
+                            <div class="progress-text">
+                                <% if (gorev.tamamlandi_mi) { %>
+                                    ✓ Tamamlandı!
+                                <% } else { %>
+                                    <%= gorev.ilerleme %> / <%= gorev.kosul_deger %>
+                                <% } %>
+                            </div>
+                        </div>
+                    </div>
+                    <% if (gorev.tamamlandi_mi) { %>
+                        <div class="mission-completed-badge">✓</div>
+                    <% } %>
+                </div>
+            <% }); %>
+        </div>
+    </div>
+    <% } %>
+
+    <% if (haftalikGorevler.length > 0) { %>
+    <div class="missions-section">
+        <div class="section-header">
+            <h2 class="section-title">📅 Haftalık Görevler</h2>
+            <span class="section-reset">Her pazartesi sıfırlanır</span>
+        </div>
+        <div class="missions-grid">
+            <% haftalikGorevler.forEach(function(gorev) { %>
+                <div class="mission-card <%= gorev.tamamlandi_mi ? 'completed' : '' %>">
+                    <div class="mission-header">
+                        <div class="mission-icon">📅</div>
+                        <div class="mission-rewards">
+                            <span class="bi-reward">+<%= gorev.bi_odul %> bi!</span>
+                            <span class="xp-reward">+<%= gorev.xp_odul %> XP</span>
+                        </div>
+                    </div>
+                    <div class="mission-body">
+                        <h3 class="mission-title"><%= gorev.ad %></h3>
+                        <p class="mission-desc"><%= gorev.aciklama %></p>
+                        <div class="mission-progress">
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: <%= Math.min((gorev.ilerleme / gorev.kosul_deger) * 100, 100) %>%"></div>
+                            </div>
+                            <div class="progress-text">
+                                <% if (gorev.tamamlandi_mi) { %>
+                                    ✓ Tamamlandı!
+                                <% } else { %>
+                                    <%= gorev.ilerleme %> / <%= gorev.kosul_deger %>
+                                <% } %>
+                            </div>
+                        </div>
+                    </div>
+                    <% if (gorev.tamamlandi_mi) { %>
+                        <div class="mission-completed-badge">✓</div>
+                    <% } %>
+                </div>
+            <% }); %>
+        </div>
+    </div>
+    <% } %>
+
+    <% if (ozelGorevler.length > 0) { %>
+    <div class="missions-section">
+        <div class="section-header">
+            <h2 class="section-title">⭐ Özel Görevler</h2>
+            <span class="section-reset">Tek seferlik</span>
+        </div>
+        <div class="missions-grid">
+            <% ozelGorevler.forEach(function(gorev) { %>
+                <div class="mission-card special <%= gorev.tamamlandi_mi ? 'completed' : '' %>">
+                    <div class="mission-header">
+                        <div class="mission-icon">⭐</div>
+                        <div class="mission-rewards">
+                            <span class="bi-reward">+<%= gorev.bi_odul %> bi!</span>
+                            <span class="xp-reward">+<%= gorev.xp_odul %> XP</span>
+                        </div>
+                    </div>
+                    <div class="mission-body">
+                        <h3 class="mission-title"><%= gorev.ad %></h3>
+                        <p class="mission-desc"><%= gorev.aciklama %></p>
+                        <div class="mission-progress">
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: <%= Math.min((gorev.ilerleme / gorev.kosul_deger) * 100, 100) %>%"></div>
+                            </div>
+                            <div class="progress-text">
+                                <% if (gorev.tamamlandi_mi) { %>
+                                    ✓ Tamamlandı!
+                                <% } else { %>
+                                    <%= gorev.ilerleme %> / <%= gorev.kosul_deger %>
+                                <% } %>
+                            </div>
+                        </div>
+                    </div>
+                    <% if (gorev.tamamlandi_mi) { %>
+                        <div class="mission-completed-badge">✓</div>
+                    <% } %>
+                </div>
+            <% }); %>
+        </div>
+    </div>
+    <% } %>
+</div>

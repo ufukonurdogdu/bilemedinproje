@@ -1,0 +1,824 @@
+<%# User Dashboard/Profile - uses user.ejs layout %>
+<style>
+    /* Profile Header */
+    .profile-header {
+        background: var(--bg-card);
+        border: 1px solid var(--border-color);
+        border-radius: 16px;
+        padding: 2rem;
+        margin-bottom: 1.5rem;
+        display: flex;
+        gap: 2rem;
+        align-items: flex-start;
+    }
+
+    .profile-avatar-large {
+        width: 120px;
+        height: 120px;
+        border-radius: 20px;
+        background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2.5rem;
+        font-weight: 800;
+        color: white;
+        position: relative;
+        flex-shrink: 0;
+    }
+
+    .profile-avatar-large .level-indicator {
+        position: absolute;
+        bottom: -8px;
+        right: -8px;
+        width: 36px;
+        height: 36px;
+        background: var(--bi-color);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.85rem;
+        font-weight: 800;
+        color: white;
+        border: 3px solid var(--bg-card);
+    }
+
+    .profile-info { flex: 1; }
+    .profile-name { font-size: 1.75rem; font-weight: 800; margin-bottom: 0.25rem; }
+    .profile-username { color: var(--text-muted); font-size: 0.95rem; margin-bottom: 1rem; }
+
+    .profile-badges { display: flex; gap: 0.5rem; margin-bottom: 1rem; flex-wrap: wrap; }
+
+    .badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.3rem;
+        padding: 0.35rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 600;
+    }
+
+    .badge.premium { background: linear-gradient(135deg, var(--bi-color), #d97706); color: white; }
+    .badge.verified { background: rgba(16, 185, 129, 0.15); color: var(--accent-success); }
+    .badge.top { background: rgba(99, 102, 241, 0.15); color: var(--accent-primary); }
+
+    .profile-level-section {
+        background: var(--bg-input);
+        border-radius: 12px;
+        padding: 1rem;
+        margin-bottom: 1rem;
+    }
+
+    .level-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 0.5rem;
+    }
+
+    .level-title { font-weight: 700; display: flex; align-items: center; gap: 0.5rem; }
+    .level-xp { font-size: 0.85rem; color: var(--text-muted); }
+
+    .level-progress {
+        height: 10px;
+        background: var(--bg-card);
+        border-radius: 5px;
+        overflow: hidden;
+    }
+
+    .level-fill {
+        height: 100%;
+        background: linear-gradient(90deg, var(--accent-primary), var(--accent-secondary));
+        border-radius: 5px;
+    }
+
+    .profile-stats-row { display: flex; gap: 2rem; flex-wrap: wrap; }
+
+    .profile-stat { text-align: center; }
+    .profile-stat-value { font-size: 1.5rem; font-weight: 800; }
+    .profile-stat-value.bi { color: var(--bi-color); }
+    .profile-stat-value.success { color: var(--accent-success); }
+    .profile-stat-label { font-size: 0.8rem; color: var(--text-muted); }
+
+    .profile-actions { display: flex; flex-direction: column; gap: 0.75rem; }
+
+    .profile-btn {
+        padding: 0.75rem 1.5rem;
+        border-radius: 10px;
+        font-weight: 600;
+        font-size: 0.9rem;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        text-align: center;
+        text-decoration: none;
+        border: none;
+    }
+
+    .profile-btn.primary {
+        background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+        color: white;
+    }
+
+    .profile-btn.secondary {
+        background: var(--bg-input);
+        border: 1px solid var(--border-color);
+        color: var(--text-primary);
+    }
+
+    .profile-btn:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); }
+
+    /* Dashboard Grid */
+    .dashboard-grid {
+        display: grid;
+        grid-template-columns: 2fr 1fr;
+        gap: 1.5rem;
+    }
+
+    /* Card */
+    .card {
+        background: var(--bg-card);
+        border: 1px solid var(--border-color);
+        border-radius: 12px;
+        overflow: hidden;
+        margin-bottom: 1.5rem;
+    }
+
+    .card-header {
+        padding: 1rem 1.25rem;
+        border-bottom: 1px solid var(--border-color);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .card-title {
+        font-size: 1rem;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .card-title svg { width: 18px; height: 18px; color: var(--accent-primary); }
+
+    .card-tabs { display: flex; gap: 0.25rem; }
+
+    .card-tab {
+        padding: 0.4rem 0.75rem;
+        background: transparent;
+        border: none;
+        border-radius: 6px;
+        font-size: 0.8rem;
+        font-weight: 500;
+        color: var(--text-muted);
+        cursor: pointer;
+    }
+
+    .card-tab.active { background: var(--accent-primary); color: white; }
+    .card-body { padding: 1.25rem; }
+
+    /* Prediction Items */
+    .prediction-item {
+        display: flex;
+        gap: 1rem;
+        padding: 1rem;
+        background: var(--bg-input);
+        border-radius: 10px;
+        margin-bottom: 0.75rem;
+        transition: all 0.2s ease;
+    }
+
+    .prediction-item:last-child { margin-bottom: 0; }
+    .prediction-item:hover { background: var(--bg-card-hover); }
+
+    .prediction-image {
+        width: 80px;
+        height: 60px;
+        border-radius: 8px;
+        overflow: hidden;
+        background: var(--bg-card);
+        flex-shrink: 0;
+    }
+
+    .prediction-image img { width: 100%; height: 100%; object-fit: cover; }
+
+    .prediction-content { flex: 1; min-width: 0; }
+    .prediction-title { font-size: 0.9rem; font-weight: 600; margin-bottom: 0.5rem; }
+
+    .prediction-meta {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        font-size: 0.8rem;
+        color: var(--text-muted);
+        flex-wrap: wrap;
+    }
+
+    .prediction-choice { display: flex; align-items: center; gap: 0.25rem; font-weight: 600; }
+    .prediction-choice.yes { color: var(--yes-color); }
+    .prediction-choice.no { color: var(--no-color); }
+
+    .prediction-status { margin-left: auto; text-align: right; flex-shrink: 0; }
+    .prediction-timer { font-size: 0.85rem; font-weight: 600; color: var(--accent-danger); margin-bottom: 0.25rem; }
+    .prediction-reward { font-size: 0.8rem; color: var(--bi-color); font-weight: 600; }
+
+    /* Missions */
+    .mission-item {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        padding: 1rem;
+        background: var(--bg-input);
+        border-radius: 10px;
+        margin-bottom: 0.75rem;
+    }
+
+    .mission-item:last-child { margin-bottom: 0; }
+
+    .mission-icon {
+        width: 44px;
+        height: 44px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.25rem;
+        flex-shrink: 0;
+    }
+
+    .mission-icon.daily { background: rgba(99, 102, 241, 0.15); }
+    .mission-icon.weekly { background: rgba(245, 158, 11, 0.15); }
+    .mission-icon.special { background: rgba(139, 92, 246, 0.15); }
+
+    .mission-content { flex: 1; min-width: 0; }
+    .mission-title { font-size: 0.9rem; font-weight: 600; margin-bottom: 0.4rem; }
+
+    .mission-progress-bar {
+        height: 6px;
+        background: var(--bg-card);
+        border-radius: 3px;
+        overflow: hidden;
+    }
+
+    .mission-progress-fill { height: 100%; background: var(--accent-primary); border-radius: 3px; }
+    .mission-progress-text { font-size: 0.75rem; color: var(--text-muted); margin-top: 0.25rem; }
+
+    .mission-reward { text-align: right; flex-shrink: 0; }
+    .mission-reward-value { font-size: 1rem; font-weight: 700; color: var(--bi-color); }
+    .mission-reward-label { font-size: 0.7rem; color: var(--text-muted); }
+
+    /* Badges Grid */
+    .badges-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 1rem;
+    }
+
+    .badge-item {
+        text-align: center;
+        padding: 1rem;
+        background: var(--bg-input);
+        border-radius: 12px;
+        transition: all 0.2s ease;
+    }
+
+    .badge-item:hover { transform: translateY(-2px); }
+    .badge-item.locked { opacity: 0.5; filter: grayscale(1); }
+
+    .badge-icon {
+        width: 50px;
+        height: 50px;
+        margin: 0 auto 0.5rem;
+        background: linear-gradient(135deg, rgba(99, 102, 241, 0.2), rgba(139, 92, 246, 0.2));
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+    }
+
+    .badge-item.locked .badge-icon { background: var(--bg-card); }
+    .badge-name { font-size: 0.8rem; font-weight: 600; }
+
+    /* History */
+    .history-item {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        padding: 1rem 0;
+        border-bottom: 1px solid var(--border-color);
+    }
+
+    .history-item:last-child { border-bottom: none; }
+
+    .history-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.1rem;
+        flex-shrink: 0;
+    }
+
+    .history-icon.win { background: rgba(16, 185, 129, 0.15); }
+    .history-icon.lose { background: rgba(239, 68, 68, 0.15); }
+
+    .history-content { flex: 1; min-width: 0; }
+    .history-title { font-size: 0.9rem; font-weight: 600; margin-bottom: 0.2rem; }
+    .history-date { font-size: 0.75rem; color: var(--text-muted); }
+
+    .history-result { text-align: right; flex-shrink: 0; }
+    .history-points { font-size: 1rem; font-weight: 700; }
+    .history-points.win { color: var(--accent-success); }
+    .history-points.lose { color: var(--accent-danger); }
+    .history-status { font-size: 0.75rem; color: var(--text-muted); }
+
+    /* Wallet Card */
+    .wallet-card {
+        background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+        border: none;
+        color: white;
+    }
+
+    .wallet-card .card-header { border-bottom-color: rgba(255,255,255,0.2); }
+    .wallet-card .card-title { color: white; }
+    .wallet-card .card-title svg { color: white; }
+
+    .wallet-balance { text-align: center; padding: 1.5rem; }
+
+    .wallet-amount {
+        font-size: 2.5rem;
+        font-weight: 800;
+        margin-bottom: 0.25rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+    }
+
+    .wallet-amount .bi-icon {
+        width: 32px;
+        height: 32px;
+        background: rgba(255,255,255,0.2);
+        font-size: 0.8rem;
+    }
+
+    .wallet-label { opacity: 0.9; font-size: 0.9rem; }
+
+    .wallet-actions { display: flex; gap: 0.75rem; padding: 0 1.5rem 1.5rem; }
+
+    .wallet-btn {
+        flex: 1;
+        padding: 0.75rem;
+        background: rgba(255,255,255,0.2);
+        border: none;
+        border-radius: 10px;
+        color: white;
+        font-weight: 600;
+        font-size: 0.85rem;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+
+    .wallet-btn:hover { background: rgba(255,255,255,0.3); }
+
+    /* Rank Card */
+    .rank-card { text-align: center; padding: 1.5rem; }
+    .rank-position { font-size: 3rem; font-weight: 800; color: var(--accent-primary); margin-bottom: 0.25rem; }
+    .rank-label { color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1rem; }
+
+    .rank-change {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.25rem;
+        padding: 0.35rem 0.75rem;
+        background: rgba(16, 185, 129, 0.15);
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: var(--accent-success);
+    }
+
+    .rank-change svg { width: 16px; height: 16px; }
+
+    /* Notifications */
+    .notification-item {
+        display: flex;
+        gap: 0.75rem;
+        padding: 0.75rem;
+        border-radius: 8px;
+        margin-bottom: 0.5rem;
+        background: var(--bg-input);
+    }
+
+    .notification-item:last-child { margin-bottom: 0; }
+    .notification-item.unread { background: rgba(99, 102, 241, 0.1); }
+
+    .notification-icon {
+        width: 32px;
+        height: 32px;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.9rem;
+        background: var(--bg-card);
+        flex-shrink: 0;
+    }
+
+    .notification-content { flex: 1; min-width: 0; }
+    .notification-text { font-size: 0.85rem; margin-bottom: 0.15rem; }
+    .notification-time { font-size: 0.7rem; color: var(--text-muted); }
+
+    /* Empty State */
+    .empty-state {
+        text-align: center;
+        padding: 2rem;
+        color: var(--text-muted);
+    }
+
+    .empty-state-icon { font-size: 3rem; margin-bottom: 1rem; opacity: 0.5; }
+    .empty-state-text { font-size: 0.95rem; }
+
+    @media (max-width: 1024px) {
+        .dashboard-grid { grid-template-columns: 1fr; }
+        .profile-header { flex-direction: column; align-items: center; text-align: center; }
+        .profile-stats-row { justify-content: center; }
+        .profile-actions { flex-direction: row; }
+    }
+
+    @media (max-width: 768px) {
+        .badges-grid { grid-template-columns: repeat(2, 1fr); }
+        .profile-actions { flex-direction: column; }
+    }
+</style>
+
+<!-- Profile Header -->
+<div class="profile-header">
+    <div class="profile-avatar-large">
+        <%
+            const adSoyad = user.ad_soyad || '';
+            const isimParcalari = adSoyad.split(' ');
+            const ilkHarf = isimParcalari[0] ? isimParcalari[0].charAt(0).toUpperCase() : '';
+            const ikinciHarf = isimParcalari[1] ? isimParcalari[1].charAt(0).toUpperCase() : '';
+        %>
+        <%= ilkHarf %><%= ikinciHarf %>
+        <span class="level-indicator"><%= user.seviye || 1 %></span>
+    </div>
+
+    <div class="profile-info">
+        <h1 class="profile-name"><%= user.ad_soyad || 'Kullanıcı' %></h1>
+        <p class="profile-username">@<%= user.kullanici_adi %> • Üyelik: <%= new Date(user.olusturma_tarihi || user.created_at || Date.now()).toLocaleDateString('tr-TR', { month: 'long', year: 'numeric' }) %></p>
+
+        <div class="profile-badges">
+            <% if (user.premium) { %>
+            <span class="badge premium">👑 Premium</span>
+            <% } %>
+            <% if (user.dogrulama_durumu) { %>
+            <span class="badge verified">✓ Onaylı</span>
+            <% } %>
+            <% if (typeof userRank !== 'undefined' && userRank <= 500) { %>
+            <span class="badge top">🏆 Top <%= userRank %></span>
+            <% } %>
+        </div>
+
+        <div class="profile-level-section">
+            <div class="level-header">
+                <span class="level-title">⭐ Seviye <%= user.seviye || 1 %></span>
+                <span class="level-xp"><%= user.xp || 0 %> / <%= (user.seviye || 1) * 1000 %> XP</span>
+            </div>
+            <div class="level-progress">
+                <div class="level-fill" style="width: <%= Math.min(((user.xp || 0) / ((user.seviye || 1) * 1000)) * 100, 100) %>%"></div>
+            </div>
+        </div>
+
+        <div class="profile-stats-row">
+            <div class="profile-stat">
+                <div class="profile-stat-value bi"><%= (user.bi_coin || 0).toLocaleString('tr-TR') %></div>
+                <div class="profile-stat-label">bi! Coin</div>
+            </div>
+            <div class="profile-stat">
+                <div class="profile-stat-value"><%= typeof totalPredictions !== 'undefined' ? totalPredictions : 0 %></div>
+                <div class="profile-stat-label">Tahmin</div>
+            </div>
+            <div class="profile-stat">
+                <div class="profile-stat-value success"><%= typeof accuracy !== 'undefined' ? accuracy : 0 %>%</div>
+                <div class="profile-stat-label">Doğruluk</div>
+            </div>
+            <div class="profile-stat">
+                <div class="profile-stat-value">#<%= typeof userRank !== 'undefined' ? userRank : '-' %></div>
+                <div class="profile-stat-label">Sıralama</div>
+            </div>
+            <div class="profile-stat">
+                <div class="profile-stat-value"><%= typeof streak !== 'undefined' ? streak : 0 %></div>
+                <div class="profile-stat-label">Seri 🔥</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="profile-actions">
+        <a href="/profilim/duzenle" class="profile-btn primary">Profili Düzenle</a>
+        <a href="/davet" class="profile-btn secondary">Arkadaş Davet Et</a>
+    </div>
+</div>
+
+<!-- Dashboard Grid -->
+<div class="dashboard-grid">
+    <!-- Left Column -->
+    <div>
+        <!-- Active Predictions -->
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                    Aktif Tahminlerim
+                </h3>
+                <div class="card-tabs">
+                    <button class="card-tab active">Aktif (<%= typeof activePredictions !== 'undefined' ? activePredictions.length : 0 %>)</button>
+                    <button class="card-tab">Bekleyen</button>
+                </div>
+            </div>
+            <div class="card-body">
+                <% if (typeof activePredictions !== 'undefined' && activePredictions.length > 0) { %>
+                    <% activePredictions.forEach(function(prediction) { %>
+                    <div class="prediction-item">
+                        <div class="prediction-image">
+                            <img src="<%= prediction.gorsel || 'https://via.placeholder.com/80x60' %>" alt="">
+                        </div>
+                        <div class="prediction-content">
+                            <div class="prediction-title"><%= prediction.baslik %></div>
+                            <div class="prediction-meta">
+                                <span class="prediction-choice <%= prediction.kullanici_tahmini === 'evet' ? 'yes' : 'no' %>">
+                                    <%= prediction.kullanici_tahmini === 'evet' ? '✓ EVET' : '✗ HAYIR' %>
+                                </span>
+                                <span>%<%= prediction.oran %> oran</span>
+                                <span><%= prediction.katilim_sayisi.toLocaleString('tr-TR') %> katılım</span>
+                            </div>
+                        </div>
+                        <div class="prediction-status">
+                            <div class="prediction-timer">⏱ <%= prediction.kalan_sure %></div>
+                            <div class="prediction-reward">+<%= prediction.bi_odul %> bi!</div>
+                        </div>
+                    </div>
+                    <% }); %>
+                <% } else { %>
+                <div class="empty-state">
+                    <div class="empty-state-icon">🎯</div>
+                    <div class="empty-state-text">Henüz aktif tahminin yok. <a href="/tahminler">Tahmin yapmaya başla!</a></div>
+                </div>
+                <% } %>
+            </div>
+        </div>
+
+        <!-- Missions -->
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                    Görevlerim
+                </h3>
+                <div class="card-tabs">
+                    <button class="card-tab active">Günlük</button>
+                    <button class="card-tab">Haftalık</button>
+                </div>
+            </div>
+            <div class="card-body">
+                <% if (typeof missions !== 'undefined' && missions.length > 0) { %>
+                    <% missions.forEach(function(mission) { %>
+                    <div class="mission-item">
+                        <div class="mission-icon <%= mission.tip %>"><%= mission.icon %></div>
+                        <div class="mission-content">
+                            <div class="mission-title"><%= mission.baslik %></div>
+                            <div class="mission-progress-bar">
+                                <div class="mission-progress-fill" style="width: <%= (mission.ilerleme / mission.hedef) * 100 %>%"></div>
+                            </div>
+                            <div class="mission-progress-text"><%= mission.ilerleme %> / <%= mission.hedef %> tamamlandı</div>
+                        </div>
+                        <div class="mission-reward">
+                            <div class="mission-reward-value">+<%= mission.odul %> bi!</div>
+                            <div class="mission-reward-label">Ödül</div>
+                        </div>
+                    </div>
+                    <% }); %>
+                <% } else { %>
+                <div class="mission-item">
+                    <div class="mission-icon daily">🎯</div>
+                    <div class="mission-content">
+                        <div class="mission-title">5 tahmin yap</div>
+                        <div class="mission-progress-bar">
+                            <div class="mission-progress-fill" style="width: 60%"></div>
+                        </div>
+                        <div class="mission-progress-text">3 / 5 tamamlandı</div>
+                    </div>
+                    <div class="mission-reward">
+                        <div class="mission-reward-value">+100 bi!</div>
+                        <div class="mission-reward-label">Ödül</div>
+                    </div>
+                </div>
+                <div class="mission-item">
+                    <div class="mission-icon daily">🔥</div>
+                    <div class="mission-content">
+                        <div class="mission-title">Giriş serisi devam ettir</div>
+                        <div class="mission-progress-bar">
+                            <div class="mission-progress-fill" style="width: 100%"></div>
+                        </div>
+                        <div class="mission-progress-text">✓ Tamamlandı!</div>
+                    </div>
+                    <div class="mission-reward">
+                        <div class="mission-reward-value">+50 bi!</div>
+                        <div class="mission-reward-label">Kazanıldı</div>
+                    </div>
+                </div>
+                <% } %>
+            </div>
+        </div>
+
+        <!-- Badges -->
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11"/></svg>
+                    Rozetlerim
+                </h3>
+                <span style="font-size: 0.85rem; color: var(--text-muted);"><%= typeof userBadges !== 'undefined' ? userBadges.length : 0 %> / 24 rozet</span>
+            </div>
+            <div class="card-body">
+                <div class="badges-grid">
+                    <div class="badge-item">
+                        <div class="badge-icon">🏆</div>
+                        <div class="badge-name">İlk Tahmin</div>
+                    </div>
+                    <div class="badge-item">
+                        <div class="badge-icon">🔥</div>
+                        <div class="badge-name">7 Gün Seri</div>
+                    </div>
+                    <div class="badge-item">
+                        <div class="badge-icon">🎯</div>
+                        <div class="badge-name">%80 Doğruluk</div>
+                    </div>
+                    <div class="badge-item">
+                        <div class="badge-icon">⭐</div>
+                        <div class="badge-name">100 Tahmin</div>
+                    </div>
+                    <div class="badge-item locked">
+                        <div class="badge-icon">🔒</div>
+                        <div class="badge-name">30 Gün Seri</div>
+                    </div>
+                    <div class="badge-item locked">
+                        <div class="badge-icon">🔒</div>
+                        <div class="badge-name">Top 10</div>
+                    </div>
+                    <div class="badge-item locked">
+                        <div class="badge-icon">🔒</div>
+                        <div class="badge-name">Premium</div>
+                    </div>
+                    <div class="badge-item locked">
+                        <div class="badge-icon">🔒</div>
+                        <div class="badge-name">1000 Tahmin</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- History -->
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                    Tahmin Geçmişi
+                </h3>
+                <a href="/profilim/gecmis" style="font-size: 0.85rem; color: var(--accent-primary);">Tümünü Gör</a>
+            </div>
+            <div class="card-body">
+                <% if (typeof predictionHistory !== 'undefined' && predictionHistory.length > 0) { %>
+                    <% predictionHistory.forEach(function(item) { %>
+                    <div class="history-item">
+                        <div class="history-icon <%= item.sonuc === 'kazandi' ? 'win' : 'lose' %>"><%= item.sonuc === 'kazandi' ? '✓' : '✗' %></div>
+                        <div class="history-content">
+                            <div class="history-title"><%= item.baslik %></div>
+                            <div class="history-date"><%= item.tarih %> • <%= item.kategori %></div>
+                        </div>
+                        <div class="history-result">
+                            <div class="history-points <%= item.sonuc === 'kazandi' ? 'win' : 'lose' %>"><%= item.sonuc === 'kazandi' ? '+' + item.kazanilan : '0' %> bi!</div>
+                            <div class="history-status"><%= item.sonuc === 'kazandi' ? 'Kazandın' : 'Kaybettin' %></div>
+                        </div>
+                    </div>
+                    <% }); %>
+                <% } else { %>
+                <div class="empty-state">
+                    <div class="empty-state-icon">📊</div>
+                    <div class="empty-state-text">Henüz tamamlanmış tahmin yok</div>
+                </div>
+                <% } %>
+            </div>
+        </div>
+    </div>
+
+    <!-- Right Column -->
+    <div>
+        <!-- Wallet -->
+        <div class="card wallet-card">
+            <div class="card-header">
+                <h3 class="card-title">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+                    bi! Cüzdanım
+                </h3>
+            </div>
+            <div class="wallet-balance">
+                <div class="wallet-amount">
+                    <div class="bi-icon" style="width: 32px; height: 32px; background: rgba(255,255,255,0.2); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.8rem; font-weight: 800; color: white;">bi!</div>
+                    <%= (user.bi_coin || 0).toLocaleString('tr-TR') %>
+                </div>
+                <div class="wallet-label">Toplam Bakiye</div>
+            </div>
+            <div class="wallet-actions">
+                <a href="/magaza" class="wallet-btn">bi! Satın Al</a>
+                <a href="/profilim/cuzdan" class="wallet-btn">Geçmiş</a>
+            </div>
+        </div>
+
+        <!-- Rank -->
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>
+                    Sıralama Durumum
+                </h3>
+            </div>
+            <div class="rank-card">
+                <div class="rank-position">#<%= typeof userRank !== 'undefined' ? userRank : '-' %></div>
+                <div class="rank-label">Genel Sıralama</div>
+                <% if (typeof rankChange !== 'undefined' && rankChange > 0) { %>
+                <div class="rank-change">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/></svg>
+                    +<%= rankChange %> bu hafta
+                </div>
+                <% } %>
+            </div>
+        </div>
+
+        <!-- Notifications -->
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+                    Bildirimler
+                </h3>
+                <a href="/bildirimler" style="font-size: 0.8rem; color: var(--accent-primary);">Tümünü Gör</a>
+            </div>
+            <div class="card-body">
+                <% if (typeof notifications !== 'undefined' && notifications.length > 0) { %>
+                    <% notifications.slice(0, 4).forEach(function(notif) { %>
+                    <div class="notification-item <%= !notif.okundu ? 'unread' : '' %>">
+                        <div class="notification-icon"><%= notif.icon %></div>
+                        <div class="notification-content">
+                            <div class="notification-text"><%= notif.mesaj %></div>
+                            <div class="notification-time"><%= notif.zaman %></div>
+                        </div>
+                    </div>
+                    <% }); %>
+                <% } else { %>
+                <div class="notification-item">
+                    <div class="notification-icon">🎉</div>
+                    <div class="notification-content">
+                        <div class="notification-text">Hoş geldin! İlk tahminini yap</div>
+                        <div class="notification-time">Az önce</div>
+                    </div>
+                </div>
+                <% } %>
+            </div>
+        </div>
+
+        <!-- Quick Links -->
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+                    Hızlı Erişim
+                </h3>
+            </div>
+            <div class="card-body" style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
+                <a href="/tahminler" style="display: flex; flex-direction: column; align-items: center; gap: 0.5rem; padding: 1rem; background: var(--bg-input); border-radius: 10px; text-decoration: none; color: var(--text-primary); transition: all 0.2s;">
+                    <span style="font-size: 1.5rem;">🎯</span>
+                    <span style="font-size: 0.8rem; font-weight: 600;">Tahminler</span>
+                </a>
+                <a href="/siralama" style="display: flex; flex-direction: column; align-items: center; gap: 0.5rem; padding: 1rem; background: var(--bg-input); border-radius: 10px; text-decoration: none; color: var(--text-primary); transition: all 0.2s;">
+                    <span style="font-size: 1.5rem;">🏆</span>
+                    <span style="font-size: 0.8rem; font-weight: 600;">Sıralama</span>
+                </a>
+                <a href="/magaza" style="display: flex; flex-direction: column; align-items: center; gap: 0.5rem; padding: 1rem; background: var(--bg-input); border-radius: 10px; text-decoration: none; color: var(--text-primary); transition: all 0.2s;">
+                    <span style="font-size: 1.5rem;">🛍️</span>
+                    <span style="font-size: 0.8rem; font-weight: 600;">Mağaza</span>
+                </a>
+                <a href="/gorevler" style="display: flex; flex-direction: column; align-items: center; gap: 0.5rem; padding: 1rem; background: var(--bg-input); border-radius: 10px; text-decoration: none; color: var(--text-primary); transition: all 0.2s;">
+                    <span style="font-size: 1.5rem;">✅</span>
+                    <span style="font-size: 0.8rem; font-weight: 600;">Görevler</span>
+                </a>
+            </div>
+        </div>
+    </div>
+</div>

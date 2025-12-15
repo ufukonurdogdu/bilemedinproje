@@ -1,0 +1,180 @@
+<div class="admin-page">
+    <div class="page-actions">
+        <a href="/admin/kullanicilar" class="btn btn-secondary">← Geri</a>
+    </div>
+
+    <div class="detail-grid">
+        <div class="detail-main">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">Kullanıcı Bilgileri</h3>
+                </div>
+                <div class="card-body">
+                    <div class="user-profile-header">
+                        <div class="user-avatar-large">
+                            <% if (kullanici.avatar) { %>
+                                <img src="<%= kullanici.avatar %>" alt="">
+                            <% } else { %>
+                                <%= kullanici.ad_soyad.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase() %>
+                            <% } %>
+                        </div>
+                        <div class="user-profile-info">
+                            <h2><%= kullanici.ad_soyad %></h2>
+                            <p>@<%= kullanici.kullanici_adi %></p>
+                            <div class="user-badges">
+                                <span class="role-badge <%= kullanici.rol %>">
+                                    <%= kullanici.rol === 'superadmin' ? 'Süper Admin' : kullanici.rol === 'admin' ? 'Admin' : kullanici.rol === 'moderator' ? 'Moderatör' : 'Kullanıcı' %>
+                                </span>
+                                <% if (kullanici.premium_mi) { %>
+                                    <span class="status-badge premium">Premium</span>
+                                <% } %>
+                                <% if (kullanici.dogrulanmis_mi) { %>
+                                    <span class="status-badge verified">Doğrulanmış</span>
+                                <% } %>
+                                <% if (kullanici.banlandi_mi) { %>
+                                    <span class="status-badge banned">Banlı</span>
+                                <% } %>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <span class="info-label">E-posta</span>
+                            <span class="info-value"><%= kullanici.email %></span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">bi! Coin</span>
+                            <span class="info-value"><%= kullanici.bi_coin.toLocaleString('tr-TR') %></span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Seviye</span>
+                            <span class="info-value"><%= kullanici.seviye %></span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">XP</span>
+                            <span class="info-value"><%= kullanici.xp.toLocaleString('tr-TR') %></span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Toplam Tahmin</span>
+                            <span class="info-value"><%= kullanici.toplam_tahmin %></span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Doğru Tahmin</span>
+                            <span class="info-value"><%= kullanici.dogru_tahmin %></span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Doğruluk Oranı</span>
+                            <span class="info-value"><%= kullanici.toplam_tahmin > 0 ? Math.round((kullanici.dogru_tahmin / kullanici.toplam_tahmin) * 100) : 0 %>%</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Seri</span>
+                            <span class="info-value"><%= kullanici.seri %></span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Giriş Yöntemi</span>
+                            <span class="info-value"><%= kullanici.giris_yontemi %></span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Kayıt Tarihi</span>
+                            <span class="info-value"><%= new Date(kullanici.olusturma_tarihi).toLocaleString('tr-TR') %></span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Son Giriş</span>
+                            <span class="info-value"><%= kullanici.son_giris ? new Date(kullanici.son_giris).toLocaleString('tr-TR') : 'Bilinmiyor' %></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">Son Tahminler</h3>
+                </div>
+                <div class="card-body">
+                    <% if (tahminler && tahminler.length > 0) { %>
+                        <div class="table-responsive">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>Tahmin</th>
+                                        <th>Seçim</th>
+                                        <th>Sonuç</th>
+                                        <th>Kazanılan</th>
+                                        <th>Tarih</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <% tahminler.forEach(function(t) { %>
+                                        <tr>
+                                            <td><%= t.baslik %></td>
+                                            <td><%= t.secim %></td>
+                                            <td>
+                                                <% if (t.dogru_mu === null) { %>
+                                                    <span class="status-badge pending">Bekliyor</span>
+                                                <% } else if (t.dogru_mu) { %>
+                                                    <span class="status-badge won">Kazandı</span>
+                                                <% } else { %>
+                                                    <span class="status-badge lost">Kaybetti</span>
+                                                <% } %>
+                                            </td>
+                                            <td><%= t.kazanilan_bi || 0 %> bi!</td>
+                                            <td><%= new Date(t.olusturma_tarihi).toLocaleDateString('tr-TR') %></td>
+                                        </tr>
+                                    <% }); %>
+                                </tbody>
+                            </table>
+                        </div>
+                    <% } else { %>
+                        <div class="empty-state small">
+                            <p>Henüz tahmin yok</p>
+                        </div>
+                    <% } %>
+                </div>
+            </div>
+        </div>
+
+        <div class="detail-sidebar">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">İşlemler</h3>
+                </div>
+                <div class="card-body">
+                    <form action="/admin/kullanicilar/<%= kullanici.id %>/ban" method="POST" class="admin-action-form">
+                        <% if (!kullanici.banlandi_mi) { %>
+                            <div class="form-group">
+                                <label>Ban Sebebi</label>
+                                <textarea name="ban_sebebi" rows="3" placeholder="Ban sebebini yazın..."></textarea>
+                            </div>
+                            <button type="submit" class="btn btn-danger btn-block">Kullanıcıyı Banla</button>
+                        <% } else { %>
+                            <div class="ban-info">
+                                <strong>Ban Sebebi:</strong>
+                                <p><%= kullanici.ban_sebebi || 'Belirtilmemiş' %></p>
+                            </div>
+                            <button type="submit" class="btn btn-success btn-block">Banı Kaldır</button>
+                        <% } %>
+                    </form>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">Rol Değiştir</h3>
+                </div>
+                <div class="card-body">
+                    <form class="admin-action-form">
+                        <div class="form-group">
+                            <select name="rol" class="form-select">
+                                <option value="kullanici" <%= kullanici.rol === 'kullanici' ? 'selected' : '' %>>Kullanıcı</option>
+                                <option value="moderator" <%= kullanici.rol === 'moderator' ? 'selected' : '' %>>Moderatör</option>
+                                <option value="admin" <%= kullanici.rol === 'admin' ? 'selected' : '' %>>Admin</option>
+                            </select>
+                        </div>
+                        <button type="button" class="btn btn-primary btn-block">Rolü Güncelle</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

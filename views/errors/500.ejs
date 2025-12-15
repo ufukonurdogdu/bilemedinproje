@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>500 - Sunucu Hatası | Bilemezsin</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #f8fafc;
+            --bg-secondary: #f1f5f9;
+            --card-bg: #ffffff;
+            --text-primary: #1e293b;
+            --text-secondary: #64748b;
+            --text-muted: #94a3b8;
+            --border-color: #e2e8f0;
+            --accent-primary: #6366f1;
+            --accent-secondary: #4f46e5;
+            --error-color: #ef4444;
+            --bi-color: #f59e0b;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+        }
+
+        .error-container {
+            text-align: center;
+            max-width: 500px;
+        }
+
+        .error-illustration {
+            margin-bottom: 2rem;
+            position: relative;
+        }
+
+        .error-code {
+            font-size: 8rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--error-color), #dc2626);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            line-height: 1;
+            margin-bottom: 0.5rem;
+            position: relative;
+        }
+
+        .error-icon {
+            position: absolute;
+            top: -1.5rem;
+            right: -0.5rem;
+            font-size: 3rem;
+            animation: shake 0.5s infinite;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: rotate(0deg); }
+            25% { transform: rotate(-5deg); }
+            75% { transform: rotate(5deg); }
+        }
+
+        .error-title {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 1rem;
+        }
+
+        .error-message {
+            font-size: 1rem;
+            color: var(--text-secondary);
+            line-height: 1.6;
+            margin-bottom: 2rem;
+        }
+
+        .error-actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 0.875rem 1.75rem;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            color: white;
+            border: none;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(99, 102, 241, 0.3);
+        }
+
+        .btn-secondary {
+            background: var(--card-bg);
+            color: var(--text-primary);
+            border: 2px solid var(--border-color);
+        }
+
+        .btn-secondary:hover {
+            border-color: var(--accent-primary);
+            color: var(--accent-primary);
+        }
+
+        .status-info {
+            margin-top: 3rem;
+            padding: 1.5rem;
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+        }
+
+        .status-header {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+            margin-bottom: 1rem;
+        }
+
+        .status-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #10b981;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .status-dot.error {
+            background: var(--error-color);
+        }
+
+        .status-header h4 {
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .status-text {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            line-height: 1.5;
+        }
+
+        .status-text a {
+            color: var(--accent-primary);
+            text-decoration: none;
+        }
+
+        .status-text a:hover {
+            text-decoration: underline;
+        }
+
+        .error-details {
+            margin-top: 2rem;
+            padding: 1rem;
+            background: #fef2f2;
+            border: 1px solid #fecaca;
+            border-radius: 8px;
+            text-align: left;
+        }
+
+        .error-details summary {
+            cursor: pointer;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--error-color);
+        }
+
+        .error-details pre {
+            margin-top: 1rem;
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            overflow-x: auto;
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+
+        .floating-shapes {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            overflow: hidden;
+            z-index: -1;
+        }
+
+        .shape {
+            position: absolute;
+            opacity: 0.08;
+        }
+
+        .shape-1 {
+            top: 15%;
+            left: 5%;
+            font-size: 4rem;
+        }
+
+        .shape-2 {
+            top: 60%;
+            left: 85%;
+            font-size: 3rem;
+        }
+
+        .shape-3 {
+            top: 25%;
+            right: 8%;
+            font-size: 5rem;
+        }
+
+        .shape-4 {
+            bottom: 15%;
+            left: 12%;
+            font-size: 3.5rem;
+        }
+
+        @media (max-width: 480px) {
+            .error-code {
+                font-size: 5rem;
+            }
+
+            .error-title {
+                font-size: 1.5rem;
+            }
+
+            .error-actions {
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="floating-shapes">
+        <div class="shape shape-1">⚙️</div>
+        <div class="shape shape-2">🔧</div>
+        <div class="shape shape-3">💻</div>
+        <div class="shape shape-4">🛠️</div>
+    </div>
+
+    <div class="error-container">
+        <div class="error-illustration">
+            <div class="error-code">
+                500
+                <span class="error-icon">⚡</span>
+            </div>
+        </div>
+        
+        <h1 class="error-title">Bir Şeyler Yanlış Gitti!</h1>
+        
+        <p class="error-message">
+            Sunucumuzda beklenmeyen bir hata oluştu. 
+            Endişelenme, ekibimiz sorunu çözmek için çalışıyor! 🔧
+        </p>
+
+        <div class="error-actions">
+            <a href="/" class="btn btn-primary">
+                🏠 Ana Sayfaya Dön
+            </a>
+            <a href="javascript:location.reload()" class="btn btn-secondary">
+                🔄 Sayfayı Yenile
+            </a>
+        </div>
+
+        <div class="status-info">
+            <div class="status-header">
+                <span class="status-dot"></span>
+                <h4>Sistem Durumu</h4>
+            </div>
+            <p class="status-text">
+                Sistemlerimiz genellikle sorunsuz çalışmaktadır. Bu geçici bir sorun olabilir.
+                <br><br>
+                Sorun devam ederse <a href="/iletisim">bize ulaşın</a> veya 
+                <a href="https://twitter.com/bilemezsin" target="_blank">Twitter</a>'dan takip edin.
+            </p>
+        </div>
+
+        <% if (typeof error !== 'undefined' && process.env.NODE_ENV === 'development') { %>
+        <details class="error-details">
+            <summary>Hata Detayları (Geliştirici)</summary>
+            <pre><%= error.stack || error.message || error %></pre>
+        </details>
+        <% } %>
+    </div>
+</body>
+</html>

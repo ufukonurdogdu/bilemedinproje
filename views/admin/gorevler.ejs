@@ -1,0 +1,386 @@
+<%# Admin Gorevler - uses admin.ejs layout %>
+<style>
+    .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1.5rem;
+    }
+    .btn-primary {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.75rem 1.25rem;
+        background: var(--accent-primary);
+        border: none;
+        border-radius: 8px;
+        color: white;
+        font-size: 0.9rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+    .btn-primary:hover { background: #5558e3; }
+    .btn-primary svg { width: 18px; height: 18px; }
+
+    .gorevler-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+        gap: 1rem;
+    }
+    .gorev-card {
+        background: var(--bg-card);
+        border: 1px solid var(--border-color);
+        border-radius: 12px;
+        padding: 1.25rem;
+        transition: all 0.2s;
+    }
+    .gorev-card:hover {
+        box-shadow: var(--shadow-md);
+        border-color: var(--accent-primary);
+    }
+    .gorev-header {
+        display: flex;
+        align-items: flex-start;
+        gap: 1rem;
+        margin-bottom: 1rem;
+    }
+    .gorev-icon {
+        width: 48px;
+        height: 48px;
+        border-radius: 12px;
+        background: rgba(99, 102, 241, 0.1);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 24px;
+    }
+    .gorev-info { flex: 1; }
+    .gorev-ad {
+        font-size: 1rem;
+        font-weight: 600;
+        margin-bottom: 0.25rem;
+    }
+    .gorev-tip {
+        font-size: 0.75rem;
+        padding: 0.2rem 0.5rem;
+        border-radius: 4px;
+        background: var(--bg-input);
+        color: var(--text-muted);
+        display: inline-block;
+    }
+    .gorev-tip.baslangic { background: rgba(16, 185, 129, 0.1); color: #10b981; }
+    .gorev-tip.sosyal { background: rgba(59, 130, 246, 0.1); color: #3b82f6; }
+    .gorev-tip.gunluk { background: rgba(245, 158, 11, 0.1); color: #f59e0b; }
+    .gorev-tip.haftalik { background: rgba(139, 92, 246, 0.1); color: #8b5cf6; }
+    .gorev-tip.ozel { background: rgba(239, 68, 68, 0.1); color: #ef4444; }
+
+    .gorev-aciklama {
+        font-size: 0.85rem;
+        color: var(--text-secondary);
+        margin-bottom: 1rem;
+        line-height: 1.5;
+    }
+    .gorev-odul {
+        display: flex;
+        gap: 1rem;
+        padding-top: 1rem;
+        border-top: 1px solid var(--border-color);
+    }
+    .odul-item {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 0.9rem;
+        font-weight: 600;
+    }
+    .odul-bi { color: #f59e0b; }
+    .odul-xp { color: #10b981; }
+
+    .gorev-actions {
+        display: flex;
+        gap: 0.5rem;
+        margin-top: 1rem;
+        padding-top: 1rem;
+        border-top: 1px solid var(--border-color);
+    }
+    .btn-sm {
+        padding: 0.5rem 0.75rem;
+        font-size: 0.8rem;
+        border-radius: 6px;
+        cursor: pointer;
+        transition: all 0.2s;
+        border: 1px solid var(--border-color);
+        background: var(--bg-input);
+        color: var(--text-secondary);
+    }
+    .btn-sm:hover { background: var(--bg-card-hover); color: var(--text-primary); }
+    .btn-sm.danger { color: #ef4444; }
+    .btn-sm.danger:hover { background: rgba(239, 68, 68, 0.1); border-color: #ef4444; }
+
+    .gorev-status {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: #10b981;
+    }
+    .gorev-status.inactive { background: #6b6b6b; }
+
+    /* Modal */
+    .modal-overlay {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.7);
+        z-index: 1000;
+        align-items: center;
+        justify-content: center;
+    }
+    .modal-overlay.active { display: flex; }
+    .modal {
+        background: var(--bg-card);
+        border: 1px solid var(--border-color);
+        border-radius: 16px;
+        width: 100%;
+        max-width: 500px;
+        max-height: 90vh;
+        overflow-y: auto;
+    }
+    .modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 1.25rem;
+        border-bottom: 1px solid var(--border-color);
+    }
+    .modal-title { font-size: 1.1rem; font-weight: 700; }
+    .modal-close {
+        width: 32px;
+        height: 32px;
+        border-radius: 8px;
+        border: none;
+        background: var(--bg-input);
+        color: var(--text-muted);
+        cursor: pointer;
+    }
+    .modal-body { padding: 1.25rem; }
+    .form-group { margin-bottom: 1rem; }
+    .form-label {
+        display: block;
+        font-size: 0.85rem;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+        color: var(--text-secondary);
+    }
+    .form-input, .form-select, .form-textarea {
+        width: 100%;
+        padding: 0.75rem 1rem;
+        background: var(--bg-input);
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        color: var(--text-primary);
+        font-size: 0.9rem;
+    }
+    .form-input:focus, .form-select:focus, .form-textarea:focus {
+        outline: none;
+        border-color: var(--accent-primary);
+    }
+    .form-row {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1rem;
+    }
+    .modal-footer {
+        display: flex;
+        justify-content: flex-end;
+        gap: 0.75rem;
+        padding: 1.25rem;
+        border-top: 1px solid var(--border-color);
+    }
+    .btn-cancel {
+        padding: 0.75rem 1.25rem;
+        background: var(--bg-input);
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        color: var(--text-secondary);
+        cursor: pointer;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 3rem;
+        color: var(--text-muted);
+    }
+    .empty-state .icon { font-size: 3rem; margin-bottom: 1rem; }
+</style>
+
+<div class="page-header">
+    <h2>Gorev Yonetimi</h2>
+    <button class="btn-primary" onclick="openModal()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Yeni Gorev
+    </button>
+</div>
+
+<div class="gorevler-grid">
+    <% if (typeof gorevler !== 'undefined' && gorevler.length > 0) { %>
+        <% gorevler.forEach(function(gorev) { %>
+        <div class="gorev-card">
+            <div class="gorev-header">
+                <div class="gorev-icon"><%= gorev.ikon || '📋' %></div>
+                <div class="gorev-info">
+                    <div style="display: flex; align-items: center; gap: 0.5rem;">
+                        <span class="gorev-status <%= gorev.aktif_mi ? '' : 'inactive' %>"></span>
+                        <h3 class="gorev-ad"><%= gorev.ad %></h3>
+                    </div>
+                    <span class="gorev-tip <%= gorev.tip %>"><%= gorev.tip %></span>
+                </div>
+            </div>
+            <p class="gorev-aciklama"><%= gorev.aciklama || 'Aciklama yok' %></p>
+            <div class="gorev-odul">
+                <span class="odul-item odul-bi">🪙 <%= gorev.bi_odul || 0 %> bi!</span>
+                <span class="odul-item odul-xp">⭐ <%= gorev.xp_odul || 0 %> XP</span>
+            </div>
+            <div class="gorev-actions">
+                <button class="btn-sm" onclick="editGorev(<%= gorev.id %>, '<%= gorev.ad %>', '<%= gorev.aciklama || '' %>', '<%= gorev.tip %>', '<%= gorev.kosul_tip %>', '<%= gorev.kosul_deger || '' %>', <%= gorev.bi_odul || 0 %>, <%= gorev.xp_odul || 0 %>, '<%= gorev.ikon || '' %>', '<%= gorev.link || '' %>', <%= gorev.aktif_mi %>)">Duzenle</button>
+                <form action="/admin/gorevler/<%= gorev.id %>/sil" method="POST" style="display: inline;" onsubmit="return confirm('Bu gorevi silmek istediginize emin misiniz?')">
+                    <button type="submit" class="btn-sm danger">Sil</button>
+                </form>
+            </div>
+        </div>
+        <% }); %>
+    <% } else { %>
+        <div class="empty-state" style="grid-column: 1/-1;">
+            <div class="icon">📋</div>
+            <h3>Henuz gorev yok</h3>
+            <p>Yeni gorev ekleyerek baslayin</p>
+        </div>
+    <% } %>
+</div>
+
+<!-- Modal -->
+<div class="modal-overlay" id="gorevModal">
+    <div class="modal">
+        <div class="modal-header">
+            <h3 class="modal-title" id="modalTitle">Yeni Gorev</h3>
+            <button class="modal-close" onclick="closeModal()">X</button>
+        </div>
+        <form id="gorevForm" action="/admin/gorevler/ekle" method="POST">
+            <div class="modal-body">
+                <div class="form-group">
+                    <label class="form-label">Gorev Adi</label>
+                    <input type="text" name="ad" class="form-input" required id="formAd">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Aciklama</label>
+                    <textarea name="aciklama" class="form-textarea" rows="3" id="formAciklama"></textarea>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">Tip</label>
+                        <select name="tip" class="form-select" id="formTip">
+                            <option value="baslangic">Baslangic</option>
+                            <option value="sosyal">Sosyal</option>
+                            <option value="gunluk">Gunluk</option>
+                            <option value="haftalik">Haftalik</option>
+                            <option value="ozel">Ozel</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Kosul Tipi</label>
+                        <select name="kosul_tip" class="form-select" id="formKosulTip">
+                            <option value="google_bagli">Google Bagli</option>
+                            <option value="facebook_bagli">Facebook Bagli</option>
+                            <option value="profil_tamamla">Profil Tamamla</option>
+                            <option value="ilk_tahmin">Ilk Tahmin</option>
+                            <option value="twitter_takip">Twitter Takip</option>
+                            <option value="instagram_takip">Instagram Takip</option>
+                            <option value="tahmin_sayisi">Tahmin Sayisi</option>
+                            <option value="dogru_tahmin">Dogru Tahmin</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Kosul Degeri (opsiyonel)</label>
+                    <input type="text" name="kosul_deger" class="form-input" placeholder="ornek: 10" id="formKosulDeger">
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">bi! Odul</label>
+                        <input type="number" name="bi_odul" class="form-input" value="0" id="formBiOdul">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">XP Odul</label>
+                        <input type="number" name="xp_odul" class="form-input" value="0" id="formXpOdul">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">Ikon (emoji)</label>
+                        <input type="text" name="ikon" class="form-input" placeholder="📋" id="formIkon">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Link (opsiyonel)</label>
+                        <input type="text" name="link" class="form-input" placeholder="https://..." id="formLink">
+                    </div>
+                </div>
+                <div class="form-group" id="aktifGroup" style="display: none;">
+                    <label style="display: flex; align-items: center; gap: 0.5rem;">
+                        <input type="checkbox" name="aktif_mi" value="1" id="formAktif" checked>
+                        Aktif
+                    </label>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn-cancel" onclick="closeModal()">Iptal</button>
+                <button type="submit" class="btn-primary">Kaydet</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    function openModal() {
+        document.getElementById('modalTitle').textContent = 'Yeni Gorev';
+        document.getElementById('gorevForm').action = '/admin/gorevler/ekle';
+        document.getElementById('formAd').value = '';
+        document.getElementById('formAciklama').value = '';
+        document.getElementById('formTip').value = 'baslangic';
+        document.getElementById('formKosulTip').value = 'google_bagli';
+        document.getElementById('formKosulDeger').value = '';
+        document.getElementById('formBiOdul').value = '0';
+        document.getElementById('formXpOdul').value = '0';
+        document.getElementById('formIkon').value = '';
+        document.getElementById('formLink').value = '';
+        document.getElementById('aktifGroup').style.display = 'none';
+        document.getElementById('gorevModal').classList.add('active');
+    }
+
+    function editGorev(id, ad, aciklama, tip, kosulTip, kosulDeger, biOdul, xpOdul, ikon, link, aktif) {
+        document.getElementById('modalTitle').textContent = 'Gorev Duzenle';
+        document.getElementById('gorevForm').action = '/admin/gorevler/' + id + '/duzenle';
+        document.getElementById('formAd').value = ad;
+        document.getElementById('formAciklama').value = aciklama;
+        document.getElementById('formTip').value = tip;
+        document.getElementById('formKosulTip').value = kosulTip;
+        document.getElementById('formKosulDeger').value = kosulDeger;
+        document.getElementById('formBiOdul').value = biOdul;
+        document.getElementById('formXpOdul').value = xpOdul;
+        document.getElementById('formIkon').value = ikon;
+        document.getElementById('formLink').value = link;
+        document.getElementById('formAktif').checked = aktif;
+        document.getElementById('aktifGroup').style.display = 'block';
+        document.getElementById('gorevModal').classList.add('active');
+    }
+
+    function closeModal() {
+        document.getElementById('gorevModal').classList.remove('active');
+    }
+
+    document.getElementById('gorevModal').addEventListener('click', function(e) {
+        if (e.target === this) closeModal();
+    });
+</script>

@@ -1,0 +1,123 @@
+<div class="dashboard-container">
+    <div class="page-header">
+        <h1>Ayarlar</h1>
+        <p>Hesap ve uygulama ayarlarını yönet</p>
+    </div>
+
+    <% 
+        let ayarlar = { tema: 'auto', bildirimler: true, email_bildirimleri: true, dil: 'tr' };
+        try {
+            if (user.ayarlar) {
+                ayarlar = typeof user.ayarlar === 'string' ? JSON.parse(user.ayarlar) : user.ayarlar;
+            }
+        } catch(e) {}
+    %>
+
+    <div class="settings-grid">
+        <div class="settings-main">
+            <form action="/dashboard/ayarlar" method="POST">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">🎨 Görünüm</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="setting-item">
+                            <div class="setting-info">
+                                <div class="setting-label">Tema</div>
+                                <div class="setting-desc">Uygulama temasını seç</div>
+                            </div>
+                            <div class="setting-control">
+                                <select name="tema" class="form-select">
+                                    <option value="auto" <%= ayarlar.tema === 'auto' ? 'selected' : '' %>>Otomatik (Saat bazlı)</option>
+                                    <option value="light" <%= ayarlar.tema === 'light' ? 'selected' : '' %>>Açık</option>
+                                    <option value="dark" <%= ayarlar.tema === 'dark' ? 'selected' : '' %>>Koyu</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">🔔 Bildirimler</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="setting-item">
+                            <div class="setting-info">
+                                <div class="setting-label">Uygulama Bildirimleri</div>
+                                <div class="setting-desc">Uygulama içi bildirimleri al</div>
+                            </div>
+                            <div class="setting-control">
+                                <label class="toggle">
+                                    <input type="checkbox" name="bildirimler" <%= ayarlar.bildirimler ? 'checked' : '' %>>
+                                    <span class="toggle-slider"></span>
+                                </label>
+                            </div>
+                        </div>
+                        <div class="setting-item">
+                            <div class="setting-info">
+                                <div class="setting-label">E-posta Bildirimleri</div>
+                                <div class="setting-desc">Önemli güncellemeleri e-posta ile al</div>
+                            </div>
+                            <div class="setting-control">
+                                <label class="toggle">
+                                    <input type="checkbox" name="email_bildirimleri" <%= ayarlar.email_bildirimleri ? 'checked' : '' %>>
+                                    <span class="toggle-slider"></span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">🔒 Gizlilik</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="setting-item">
+                            <div class="setting-info">
+                                <div class="setting-label">Profil Görünürlüğü</div>
+                                <div class="setting-desc">Profilinin diğer kullanıcılara görünürlüğü</div>
+                            </div>
+                            <div class="setting-control">
+                                <select class="form-select">
+                                    <option value="public" selected>Herkese Açık</option>
+                                    <option value="friends">Sadece Arkadaşlar</option>
+                                    <option value="private">Gizli</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">Ayarları Kaydet</button>
+                </div>
+            </form>
+        </div>
+
+        <div class="settings-sidebar">
+            <div class="card danger-zone">
+                <div class="card-header">
+                    <h3 class="card-title">⚠️ Tehlikeli Bölge</h3>
+                </div>
+                <div class="card-body">
+                    <div class="danger-item">
+                        <div class="danger-info">
+                            <div class="danger-label">Hesabı Devre Dışı Bırak</div>
+                            <div class="danger-desc">Hesabını geçici olarak devre dışı bırak</div>
+                        </div>
+                        <button type="button" class="btn btn-outline-danger">Devre Dışı Bırak</button>
+                    </div>
+                    <div class="danger-item">
+                        <div class="danger-info">
+                            <div class="danger-label">Hesabı Sil</div>
+                            <div class="danger-desc">Hesabını ve tüm verilerini kalıcı olarak sil</div>
+                        </div>
+                        <button type="button" class="btn btn-danger">Hesabı Sil</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

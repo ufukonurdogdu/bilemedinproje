@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html lang="tr" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= typeof title !== 'undefined' ? title + ' - ' : '' %>Bilemezsin - Tahmin Platformu</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #f5f5f5;
+            --bg-secondary: #ffffff;
+            --bg-card: #ffffff;
+            --bg-card-hover: #f9f9f9;
+            --bg-input: #f1f3f4;
+            --text-primary: #1a1a1a;
+            --text-secondary: #5f6368;
+            --text-muted: #80868b;
+            --border-color: #e5e5e5;
+            --shadow-sm: 0 1px 2px rgba(0,0,0,0.05);
+            --shadow-md: 0 4px 12px rgba(0,0,0,0.08);
+            --shadow-lg: 0 8px 24px rgba(0,0,0,0.12);
+            --accent-primary: #6366f1;
+            --accent-secondary: #8b5cf6;
+            --accent-success: #10b981;
+            --accent-warning: #f59e0b;
+            --accent-danger: #ef4444;
+            --accent-info: #06b6d4;
+            --bi-color: #f59e0b;
+            --bi-bg: rgba(245, 158, 11, 0.1);
+            --navbar-bg: rgba(255, 255, 255, 0.98);
+            --card-border: #e5e5e5;
+            --yes-color: #10b981;
+            --yes-bg: rgba(16, 185, 129, 0.1);
+            --no-color: #ef4444;
+            --no-bg: rgba(239, 68, 68, 0.1);
+            --sponsor-bg: #fffbeb;
+            --sponsor-border: #fde68a;
+        }
+
+        [data-theme="dark"] {
+            --bg-primary: #0a0a0a;
+            --bg-secondary: #141414;
+            --bg-card: #1a1a1a;
+            --bg-card-hover: #222222;
+            --bg-input: #252525;
+            --text-primary: #ffffff;
+            --text-secondary: #a1a1aa;
+            --text-muted: #71717a;
+            --border-color: #2a2a2a;
+            --shadow-sm: 0 1px 2px rgba(0,0,0,0.3);
+            --shadow-md: 0 4px 12px rgba(0,0,0,0.4);
+            --shadow-lg: 0 8px 24px rgba(0,0,0,0.5);
+            --navbar-bg: rgba(14, 14, 14, 0.98);
+            --card-border: #2a2a2a;
+            --yes-bg: rgba(16, 185, 129, 0.15);
+            --no-bg: rgba(239, 68, 68, 0.15);
+            --sponsor-bg: rgba(245, 158, 11, 0.1);
+            --sponsor-border: rgba(245, 158, 11, 0.3);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            transition: background 0.3s ease, color 0.3s ease;
+        }
+
+        /* Navbar */
+        .navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            background: var(--navbar-bg);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .navbar-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 1.5rem;
+            height: 64px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            text-decoration: none;
+            color: var(--text-primary);
+        }
+
+        .logo-icon {
+            width: 38px;
+            height: 38px;
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            font-size: 1.1rem;
+            color: white;
+        }
+
+        .logo-text {
+            font-size: 1.3rem;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+        }
+
+        .nav-center {
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+
+        .nav-link {
+            padding: 0.5rem 1rem;
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 0.9rem;
+            border-radius: 8px;
+            transition: all 0.2s ease;
+        }
+
+        .nav-link:hover {
+            color: var(--text-primary);
+            background: var(--bg-input);
+        }
+
+        .nav-link.active {
+            color: var(--accent-primary);
+            background: rgba(99, 102, 241, 0.1);
+        }
+
+        .nav-right {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        /* bi! Coin Badge */
+        .bi-badge {
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            padding: 0.4rem 0.9rem;
+            background: var(--bi-bg);
+            border-radius: 20px;
+            font-weight: 700;
+            font-size: 0.9rem;
+            color: var(--bi-color);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-decoration: none;
+        }
+
+        .bi-badge:hover {
+            background: rgba(245, 158, 11, 0.2);
+        }
+
+        .bi-icon {
+            width: 20px;
+            height: 20px;
+            background: var(--bi-color);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.6rem;
+            font-weight: 800;
+            color: white;
+        }
+
+        /* Theme Toggle */
+        .theme-toggle {
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+            padding: 0.3rem;
+            background: var(--bg-input);
+            border-radius: 20px;
+            border: 1px solid var(--border-color);
+        }
+
+        .theme-btn {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            border: none;
+            background: transparent;
+            color: var(--text-muted);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+        }
+
+        .theme-btn.active {
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .theme-btn svg {
+            width: 16px;
+            height: 16px;
+        }
+
+        .auto-indicator {
+            font-size: 0.6rem;
+            font-weight: 700;
+            color: var(--accent-primary);
+            padding: 0.1rem 0.35rem;
+            background: rgba(99, 102, 241, 0.1);
+            border-radius: 4px;
+        }
+
+        .user-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 0.85rem;
+            color: white;
+            cursor: pointer;
+            text-decoration: none;
+            overflow: hidden;
+        }
+
+        .user-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .user-dropdown:hover .dropdown-menu {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+        .dropdown-menu a:hover {
+            background: var(--bg-input);
+        }
+
+        .auth-buttons {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .auth-btn {
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            text-decoration: none;
+            transition: all 0.2s ease;
+        }
+
+        .auth-btn.login {
+            color: var(--text-primary);
+            background: var(--bg-input);
+        }
+
+        .auth-btn.login:hover {
+            background: var(--bg-card-hover);
+        }
+
+        .auth-btn.register {
+            color: white;
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+        }
+
+        .auth-btn.register:hover {
+            opacity: 0.9;
+        }
+
+        /* Main Content */
+        main {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 80px 1.5rem 2rem;
+        }
+
+        /* Alerts */
+        .alert {
+            padding: 1rem 1.5rem;
+            border-radius: 10px;
+            margin-bottom: 1rem;
+            font-weight: 500;
+        }
+
+        .alert-success {
+            background: rgba(16, 185, 129, 0.15);
+            color: var(--accent-success);
+            border: 1px solid var(--accent-success);
+        }
+
+        .alert-error, .alert-danger {
+            background: rgba(239, 68, 68, 0.15);
+            color: var(--accent-danger);
+            border: 1px solid var(--accent-danger);
+        }
+
+        /* Footer */
+        footer {
+            background: var(--bg-secondary);
+            border-top: 1px solid var(--border-color);
+            padding: 2rem 1.5rem;
+            margin-top: 3rem;
+        }
+
+        .footer-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .footer-links {
+            display: flex;
+            gap: 1.5rem;
+        }
+
+        .footer-links a {
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 0.85rem;
+        }
+
+        .footer-links a:hover {
+            color: var(--text-primary);
+        }
+
+        .footer-copy {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .nav-center {
+                display: none;
+            }
+
+            .footer-content {
+                flex-direction: column;
+                gap: 1rem;
+                text-align: center;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .bi-badge span {
+                display: none;
+            }
+
+            .theme-toggle .auto-indicator {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="navbar-content">
+            <a href="/" class="logo">
+                <div class="logo-icon">B</div>
+                <span class="logo-text">Bilemezsin</span>
+            </a>
+
+            <div class="nav-center">
+                <a href="/" class="nav-link active">Ana Sayfa</a>
+                <a href="/tahminler" class="nav-link">Tahminler</a>
+                <a href="/siralama" class="nav-link">Sıralama</a>
+                <a href="/magaza" class="nav-link">Mağaza</a>
+                <a href="/gorevler" class="nav-link">Görevler</a>
+            </div>
+
+            <div class="nav-right">
+                <% if (typeof user !== 'undefined' && user) { %>
+                    <a href="/dashboard" class="bi-badge">
+                        <div class="bi-icon">bi!</div>
+                        <span><%= user.bi_coin ? user.bi_coin.toLocaleString('tr-TR') : '0' %></span>
+                    </a>
+
+                    <div class="theme-toggle">
+                        <button class="theme-btn" id="lightBtn" title="Light Mode">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="12" cy="12" r="5"/>
+                                <path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>
+                            </svg>
+                        </button>
+                        <button class="theme-btn" id="darkBtn" title="Dark Mode">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+                            </svg>
+                        </button>
+                        <button class="theme-btn" id="autoBtn" title="Otomatik (07:00-18:30 Light)">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="12" cy="12" r="10"/>
+                                <polyline points="12 6 12 12 16 14"/>
+                            </svg>
+                        </button>
+                        <span class="auto-indicator" id="autoIndicator" style="display: none;">OTO</span>
+                    </div>
+
+                    <div class="user-dropdown" style="position: relative;">
+                        <div class="user-avatar">
+                            <% if (user.avatar) { %>
+                                <img src="<%= user.avatar %>" alt="<%= user.ad_soyad %>">
+                            <% } else { %>
+                                <%= user.ad_soyad ? user.ad_soyad.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase() : 'U' %>
+                            <% } %>
+                        </div>
+                        <div class="dropdown-menu" style="position: absolute; top: calc(100% + 8px); right: 0; min-width: 180px; background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 12px; box-shadow: 0 8px 32px rgba(0,0,0,0.2); opacity: 0; visibility: hidden; transform: translateY(-10px); transition: all 0.2s; z-index: 1001;">
+                            <a href="/dashboard" style="display: block; padding: 12px 16px; color: var(--text-secondary); text-decoration: none; font-size: 14px;">Dashboard</a>
+                            <a href="/profil" style="display: block; padding: 12px 16px; color: var(--text-secondary); text-decoration: none; font-size: 14px;">Profil Ayarlari</a>
+                            <% if (user && (user.rol === 'admin' || user.rol === 'superadmin' || user.rol === 'moderator')) { %>
+                            <a href="/admin" style="display: block; padding: 12px 16px; color: var(--text-secondary); text-decoration: none; font-size: 14px;">Admin Panel</a>
+                            <% } %>
+                            <div style="height: 1px; background: var(--border-color); margin: 4px 0;"></div>
+                            <a href="/auth/cikis" style="display: block; padding: 12px 16px; color: #ef4444; text-decoration: none; font-size: 14px;">Cikis Yap</a>
+                        </div>
+                    </div>
+                <% } else { %>
+                    <div class="theme-toggle">
+                        <button class="theme-btn" id="lightBtn" title="Light Mode">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="12" cy="12" r="5"/>
+                                <path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>
+                            </svg>
+                        </button>
+                        <button class="theme-btn" id="darkBtn" title="Dark Mode">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+                            </svg>
+                        </button>
+                        <button class="theme-btn" id="autoBtn" title="Otomatik (07:00-18:30 Light)">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="12" cy="12" r="10"/>
+                                <polyline points="12 6 12 12 16 14"/>
+                            </svg>
+                        </button>
+                        <span class="auto-indicator" id="autoIndicator" style="display: none;">OTO</span>
+                    </div>
+
+                    <div class="auth-buttons">
+                        <a href="/auth/giris" class="auth-btn login">Giriş</a>
+                        <a href="/auth/kayit" class="auth-btn register">Kayıt Ol</a>
+                    </div>
+                <% } %>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main>
+        <% if (typeof success_msg !== 'undefined' && success_msg && success_msg.length > 0) { %>
+            <div class="alert alert-success"><%= success_msg %></div>
+        <% } %>
+        <% if (typeof error_msg !== 'undefined' && error_msg && error_msg.length > 0) { %>
+            <div class="alert alert-error"><%= error_msg %></div>
+        <% } %>
+        <% if (typeof error !== 'undefined' && error && error.length > 0) { %>
+            <div class="alert alert-error"><%= error %></div>
+        <% } %>
+
+        <%- body %>
+    </main>
+
+    <!-- Footer -->
+    <footer>
+        <div class="footer-content">
+            <div class="footer-links">
+                <a href="/hakkimizda">Hakkımızda</a>
+                <a href="#">Reklam Ver</a>
+                <a href="/gizlilik">Gizlilik</a>
+                <a href="/kullanim-sartlari">Kullanım Şartları</a>
+                <a href="/iletisim">İletişim</a>
+            </div>
+            <div class="footer-copy">© 2025 Bilemezsin. Tüm hakları saklıdır.</div>
+        </div>
+    </footer>
+
+    <script>
+        // Theme Management
+        const html = document.documentElement;
+        const lightBtn = document.getElementById('lightBtn');
+        const darkBtn = document.getElementById('darkBtn');
+        const autoBtn = document.getElementById('autoBtn');
+        const autoIndicator = document.getElementById('autoIndicator');
+
+        let themeMode = localStorage.getItem('themeMode') || 'auto';
+
+        function shouldBeLightMode() {
+            const now = new Date();
+            const hours = now.getHours();
+            const minutes = now.getMinutes();
+            const currentTime = hours * 60 + minutes;
+            const lightStart = 7 * 60; // 07:00
+            const lightEnd = 18 * 60 + 30; // 18:30
+            return currentTime >= lightStart && currentTime < lightEnd;
+        }
+
+        function applyTheme() {
+            let theme;
+            if (themeMode === 'light') {
+                theme = 'light';
+            } else if (themeMode === 'dark') {
+                theme = 'dark';
+            } else {
+                theme = shouldBeLightMode() ? 'light' : 'dark';
+            }
+            html.setAttribute('data-theme', theme);
+            updateButtonStates();
+        }
+
+        function updateButtonStates() {
+            lightBtn.classList.remove('active');
+            darkBtn.classList.remove('active');
+            autoBtn.classList.remove('active');
+            
+            if (themeMode === 'light') {
+                lightBtn.classList.add('active');
+                autoIndicator.style.display = 'none';
+            } else if (themeMode === 'dark') {
+                darkBtn.classList.add('active');
+                autoIndicator.style.display = 'none';
+            } else {
+                autoBtn.classList.add('active');
+                autoIndicator.style.display = 'inline';
+            }
+        }
+
+        function setThemeMode(mode) {
+            themeMode = mode;
+            localStorage.setItem('themeMode', mode);
+            applyTheme();
+        }
+
+        lightBtn.addEventListener('click', () => setThemeMode('light'));
+        darkBtn.addEventListener('click', () => setThemeMode('dark'));
+        autoBtn.addEventListener('click', () => setThemeMode('auto'));
+
+        applyTheme();
+        setInterval(() => {
+            if (themeMode === 'auto') applyTheme();
+        }, 60000);
+    </script>
+</body>
+</html>

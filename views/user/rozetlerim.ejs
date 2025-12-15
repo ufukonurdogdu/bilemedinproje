@@ -1,0 +1,73 @@
+<div class="dashboard-container">
+    <div class="page-header">
+        <h1>Rozetlerim</h1>
+        <p>Kazandığın ve kazanabileceğin rozetler</p>
+    </div>
+
+    <div class="badges-stats">
+        <div class="stat-card">
+            <div class="stat-value"><%= rozetler.filter(r => r.kazanildi).length %></div>
+            <div class="stat-label">Kazanılan</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value"><%= rozetler.length %></div>
+            <div class="stat-label">Toplam</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value"><%= rozetler.filter(r => !r.kazanildi).length %></div>
+            <div class="stat-label">Kalan</div>
+        </div>
+    </div>
+
+    <div class="badges-section">
+        <h2 class="section-title">🏆 Kazanılan Rozetler</h2>
+        <div class="badges-grid-large">
+            <% const kazanilanlar = rozetler.filter(r => r.kazanildi); %>
+            <% if (kazanilanlar.length > 0) { %>
+                <% kazanilanlar.forEach(function(rozet) { %>
+                    <div class="badge-card earned">
+                        <div class="badge-icon-large"><%= rozet.ikon %></div>
+                        <div class="badge-info">
+                            <h3 class="badge-name"><%= rozet.ad %></h3>
+                            <p class="badge-desc"><%= rozet.aciklama %></p>
+                            <div class="badge-earned-date">
+                                Kazanıldı: <%= new Date(rozet.kazanilma_tarihi).toLocaleDateString('tr-TR') %>
+                            </div>
+                        </div>
+                        <div class="badge-reward">+<%= rozet.bi_odul %> bi!</div>
+                    </div>
+                <% }); %>
+            <% } else { %>
+                <div class="empty-state small">
+                    <p>Henüz rozet kazanmadın. Görevleri tamamlayarak rozet kazanabilirsin!</p>
+                </div>
+            <% } %>
+        </div>
+    </div>
+
+    <div class="badges-section">
+        <h2 class="section-title">🔒 Kilitli Rozetler</h2>
+        <div class="badges-grid-large">
+            <% const kilitliler = rozetler.filter(r => !r.kazanildi); %>
+            <% if (kilitliler.length > 0) { %>
+                <% kilitliler.forEach(function(rozet) { %>
+                    <div class="badge-card locked">
+                        <div class="badge-icon-large locked">🔒</div>
+                        <div class="badge-info">
+                            <h3 class="badge-name"><%= rozet.ad %></h3>
+                            <p class="badge-desc"><%= rozet.aciklama %></p>
+                            <div class="badge-requirement">
+                                Gereksinim: <%= rozet.kosul_deger %> <%= rozet.kosul_tip %>
+                            </div>
+                        </div>
+                        <div class="badge-reward locked">+<%= rozet.bi_odul %> bi!</div>
+                    </div>
+                <% }); %>
+            <% } else { %>
+                <div class="empty-state small">
+                    <p>Tebrikler! Tüm rozetleri kazandın! 🎉</p>
+                </div>
+            <% } %>
+        </div>
+    </div>
+</div>

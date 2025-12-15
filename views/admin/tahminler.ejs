@@ -1,0 +1,1020 @@
+<% layout('layouts/admin') -%>
+<% activeMenu = 'tahminler' %>
+
+<style>
+.page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+    gap: 16px;
+}
+
+.page-title {
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.page-subtitle {
+    font-size: 14px;
+    color: var(--text-secondary);
+    margin-top: 4px;
+}
+
+.header-actions {
+    display: flex;
+    gap: 12px;
+}
+
+.btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    border: none;
+    text-decoration: none;
+}
+
+.btn-primary {
+    background: var(--accent-primary);
+    color: white;
+}
+
+.btn-primary:hover {
+    background: var(--accent-hover);
+    transform: translateY(-1px);
+}
+
+.btn-secondary {
+    background: var(--bg-tertiary);
+    color: var(--text-primary);
+    border: 1px solid var(--border-color);
+}
+
+.btn-secondary:hover {
+    background: var(--bg-hover);
+}
+
+.btn-sm {
+    padding: 6px 12px;
+    font-size: 12px;
+}
+
+.btn-icon {
+    padding: 8px;
+    border-radius: 6px;
+}
+
+.filters-card {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 24px;
+}
+
+.filters-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px;
+}
+
+.filter-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.filter-label {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text-secondary);
+}
+
+.filter-input,
+.filter-select {
+    padding: 10px 12px;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    font-size: 14px;
+    transition: border-color 0.2s;
+}
+
+.filter-input:focus,
+.filter-select:focus {
+    outline: none;
+    border-color: var(--accent-primary);
+}
+
+.table-card {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.table-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.table-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.table-info {
+    font-size: 13px;
+    color: var(--text-secondary);
+}
+
+.table-wrapper {
+    overflow-x: auto;
+}
+
+.data-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.data-table th,
+.data-table td {
+    padding: 14px 16px;
+    text-align: left;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.data-table th {
+    background: var(--bg-tertiary);
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.data-table tr:hover {
+    background: var(--bg-hover);
+}
+
+.data-table tr:last-child td {
+    border-bottom: none;
+}
+
+.prediction-cell {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.prediction-image {
+    width: 48px;
+    height: 48px;
+    border-radius: 8px;
+    object-fit: cover;
+    background: var(--bg-tertiary);
+}
+
+.prediction-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.prediction-title {
+    font-weight: 500;
+    color: var(--text-primary);
+    font-size: 14px;
+}
+
+.prediction-category {
+    font-size: 12px;
+    color: var(--text-secondary);
+}
+
+.status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.status-active {
+    background: rgba(34, 197, 94, 0.1);
+    color: #22c55e;
+}
+
+.status-pending {
+    background: rgba(245, 158, 11, 0.1);
+    color: #f59e0b;
+}
+
+.status-completed {
+    background: rgba(99, 102, 241, 0.1);
+    color: #6366f1;
+}
+
+.status-cancelled {
+    background: rgba(239, 68, 68, 0.1);
+    color: #ef4444;
+}
+
+.actions-cell {
+    display: flex;
+    gap: 8px;
+}
+
+.action-btn {
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 6px;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s;
+    background: var(--bg-tertiary);
+    color: var(--text-secondary);
+}
+
+.action-btn:hover {
+    background: var(--accent-primary);
+    color: white;
+}
+
+.action-btn.delete:hover {
+    background: #ef4444;
+}
+
+.pagination {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 20px;
+    border-top: 1px solid var(--border-color);
+}
+
+.pagination-info {
+    font-size: 13px;
+    color: var(--text-secondary);
+}
+
+.pagination-buttons {
+    display: flex;
+    gap: 8px;
+}
+
+.page-btn {
+    padding: 8px 14px;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.page-btn:hover:not(:disabled) {
+    background: var(--bg-tertiary);
+}
+
+.page-btn.active {
+    background: var(--accent-primary);
+    color: white;
+    border-color: var(--accent-primary);
+}
+
+.page-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* Modal */
+.modal-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 1000;
+    align-items: center;
+    justify-content: center;
+}
+
+.modal-overlay.active {
+    display: flex;
+}
+
+.modal {
+    background: var(--bg-secondary);
+    border-radius: 16px;
+    width: 100%;
+    max-width: 600px;
+    max-height: 90vh;
+    overflow-y: auto;
+    margin: 20px;
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 24px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.modal-title {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.modal-close {
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    background: var(--bg-tertiary);
+    border-radius: 8px;
+    cursor: pointer;
+    color: var(--text-secondary);
+    transition: all 0.2s;
+}
+
+.modal-close:hover {
+    background: var(--bg-hover);
+    color: var(--text-primary);
+}
+
+.modal-body {
+    padding: 24px;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-label {
+    display: block;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text-primary);
+    margin-bottom: 8px;
+}
+
+.form-input,
+.form-select,
+.form-textarea {
+    width: 100%;
+    padding: 12px 14px;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    font-size: 14px;
+    transition: border-color 0.2s;
+}
+
+.form-input:focus,
+.form-select:focus,
+.form-textarea:focus {
+    outline: none;
+    border-color: var(--accent-primary);
+}
+
+.form-textarea {
+    min-height: 100px;
+    resize: vertical;
+}
+
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+}
+
+.form-help {
+    font-size: 12px;
+    color: var(--text-secondary);
+    margin-top: 6px;
+}
+
+.modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    padding: 16px 24px;
+    border-top: 1px solid var(--border-color);
+}
+
+.checkbox-group {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.checkbox-group input {
+    width: 18px;
+    height: 18px;
+    accent-color: var(--accent-primary);
+}
+
+.image-upload {
+    border: 2px dashed var(--border-color);
+    border-radius: 8px;
+    padding: 30px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.image-upload:hover {
+    border-color: var(--accent-primary);
+    background: var(--bg-tertiary);
+}
+
+.image-upload-icon {
+    width: 48px;
+    height: 48px;
+    margin: 0 auto 12px;
+    color: var(--text-secondary);
+}
+
+.image-upload-text {
+    font-size: 14px;
+    color: var(--text-secondary);
+}
+
+.stats-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    margin-bottom: 24px;
+}
+
+.stat-card {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 20px;
+}
+
+.stat-label {
+    font-size: 13px;
+    color: var(--text-secondary);
+    margin-bottom: 8px;
+}
+
+.stat-value {
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.stat-change {
+    font-size: 12px;
+    margin-top: 4px;
+}
+
+.stat-change.positive {
+    color: #22c55e;
+}
+
+.stat-change.negative {
+    color: #ef4444;
+}
+
+@media (max-width: 768px) {
+    .stats-row {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .form-row {
+        grid-template-columns: 1fr;
+    }
+    
+    .filters-grid {
+        grid-template-columns: 1fr;
+    }
+}
+</style>
+
+<!-- Stats Row -->
+<div class="stats-row">
+    <div class="stat-card">
+        <div class="stat-label">Toplam Tahmin</div>
+        <div class="stat-value"><%= typeof stats !== 'undefined' ? stats.total : '1,234' %></div>
+        <div class="stat-change positive">↑ 12% bu ay</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-label">Aktif Tahminler</div>
+        <div class="stat-value"><%= typeof stats !== 'undefined' ? stats.active : '156' %></div>
+        <div class="stat-change positive">↑ 8% bu hafta</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-label">Bekleyen Onay</div>
+        <div class="stat-value"><%= typeof stats !== 'undefined' ? stats.pending : '23' %></div>
+        <div class="stat-change negative">↓ 5% dün</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-label">Tamamlanan</div>
+        <div class="stat-value"><%= typeof stats !== 'undefined' ? stats.completed : '1,055' %></div>
+        <div class="stat-change positive">↑ 15% bu ay</div>
+    </div>
+</div>
+
+<!-- Page Header -->
+<div class="page-header">
+    <div>
+        <h1 class="page-title">Tahmin Yönetimi</h1>
+        <p class="page-subtitle">Tüm tahminleri görüntüleyin, düzenleyin ve yönetin</p>
+    </div>
+    <div class="header-actions">
+        <button class="btn btn-secondary" onclick="exportData()">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                <polyline points="7 10 12 15 17 10"/>
+                <line x1="12" y1="15" x2="12" y2="3"/>
+            </svg>
+            Dışa Aktar
+        </button>
+        <button class="btn btn-primary" onclick="openModal('addModal')">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="12" y1="5" x2="12" y2="19"/>
+                <line x1="5" y1="12" x2="19" y2="12"/>
+            </svg>
+            Yeni Tahmin
+        </button>
+    </div>
+</div>
+
+<!-- Filters -->
+<div class="filters-card">
+    <div class="filters-grid">
+        <div class="filter-group">
+            <label class="filter-label">Ara</label>
+            <input type="text" class="filter-input" placeholder="Tahmin adı veya ID..." id="searchInput">
+        </div>
+        <div class="filter-group">
+            <label class="filter-label">Kategori</label>
+            <select class="filter-select" id="categoryFilter">
+                <option value="">Tümü</option>
+                <option value="spor">Spor</option>
+                <option value="ekonomi">Ekonomi</option>
+                <option value="teknoloji">Teknoloji</option>
+                <option value="eglence">Eğlence</option>
+                <option value="siyaset">Siyaset</option>
+            </select>
+        </div>
+        <div class="filter-group">
+            <label class="filter-label">Durum</label>
+            <select class="filter-select" id="statusFilter">
+                <option value="">Tümü</option>
+                <option value="active">Aktif</option>
+                <option value="pending">Beklemede</option>
+                <option value="completed">Tamamlandı</option>
+                <option value="cancelled">İptal</option>
+            </select>
+        </div>
+        <div class="filter-group">
+            <label class="filter-label">Tarih Aralığı</label>
+            <input type="date" class="filter-input" id="dateFilter">
+        </div>
+    </div>
+</div>
+
+<!-- Predictions Table -->
+<div class="table-card">
+    <div class="table-header">
+        <span class="table-title">Tahminler</span>
+        <span class="table-info"><%= typeof predictions !== 'undefined' ? predictions.length : '156' %> tahmin listeleniyor</span>
+    </div>
+    <div class="table-wrapper">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Tahmin</th>
+                    <th>Kategori</th>
+                    <th>Bitiş Tarihi</th>
+                    <th>Katılımcı</th>
+                    <th>Havuz</th>
+                    <th>Durum</th>
+                    <th>İşlemler</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% if (typeof predictions !== 'undefined' && predictions.length > 0) { %>
+                    <% predictions.forEach(function(prediction) { %>
+                    <tr>
+                        <td>
+                            <div class="prediction-cell">
+                                <img src="<%= prediction.image || '/images/placeholder.jpg' %>" alt="" class="prediction-image">
+                                <div class="prediction-info">
+                                    <span class="prediction-title"><%= prediction.title %></span>
+                                    <span class="prediction-category">ID: #<%= prediction.id %></span>
+                                </div>
+                            </div>
+                        </td>
+                        <td><%= prediction.category %></td>
+                        <td><%= new Date(prediction.end_date).toLocaleDateString('tr-TR') %></td>
+                        <td><%= prediction.participants %></td>
+                        <td><%= prediction.pool.toLocaleString('tr-TR') %> bi!</td>
+                        <td>
+                            <span class="status-badge status-<%= prediction.status %>">
+                                <%= prediction.status === 'active' ? 'Aktif' : 
+                                    prediction.status === 'pending' ? 'Beklemede' : 
+                                    prediction.status === 'completed' ? 'Tamamlandı' : 'İptal' %>
+                            </span>
+                        </td>
+                        <td>
+                            <div class="actions-cell">
+                                <button class="action-btn" onclick="viewPrediction(<%= prediction.id %>)" title="Görüntüle">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                                        <circle cx="12" cy="12" r="3"/>
+                                    </svg>
+                                </button>
+                                <button class="action-btn" onclick="editPrediction(<%= prediction.id %>)" title="Düzenle">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                                        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                                    </svg>
+                                </button>
+                                <button class="action-btn delete" onclick="deletePrediction(<%= prediction.id %>)" title="Sil">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <polyline points="3 6 5 6 21 6"/>
+                                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                                    </svg>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    <% }); %>
+                <% } else { %>
+                    <!-- Demo Data -->
+                    <tr>
+                        <td>
+                            <div class="prediction-cell">
+                                <div class="prediction-image" style="background: linear-gradient(135deg, #6366f1, #8b5cf6);"></div>
+                                <div class="prediction-info">
+                                    <span class="prediction-title">Galatasaray vs Fenerbahçe Maç Skoru</span>
+                                    <span class="prediction-category">ID: #1234</span>
+                                </div>
+                            </div>
+                        </td>
+                        <td>Spor</td>
+                        <td>15.12.2024</td>
+                        <td>2,456</td>
+                        <td>125,000 bi!</td>
+                        <td><span class="status-badge status-active">Aktif</span></td>
+                        <td>
+                            <div class="actions-cell">
+                                <button class="action-btn" title="Görüntüle">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                                        <circle cx="12" cy="12" r="3"/>
+                                    </svg>
+                                </button>
+                                <button class="action-btn" title="Düzenle">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                                        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                                    </svg>
+                                </button>
+                                <button class="action-btn delete" title="Sil">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <polyline points="3 6 5 6 21 6"/>
+                                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                                    </svg>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <div class="prediction-cell">
+                                <div class="prediction-image" style="background: linear-gradient(135deg, #f59e0b, #ef4444);"></div>
+                                <div class="prediction-info">
+                                    <span class="prediction-title">Bitcoin 2024 Yıl Sonu Fiyatı</span>
+                                    <span class="prediction-category">ID: #1233</span>
+                                </div>
+                            </div>
+                        </td>
+                        <td>Ekonomi</td>
+                        <td>31.12.2024</td>
+                        <td>5,123</td>
+                        <td>450,000 bi!</td>
+                        <td><span class="status-badge status-active">Aktif</span></td>
+                        <td>
+                            <div class="actions-cell">
+                                <button class="action-btn" title="Görüntüle">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                                        <circle cx="12" cy="12" r="3"/>
+                                    </svg>
+                                </button>
+                                <button class="action-btn" title="Düzenle">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                                        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                                    </svg>
+                                </button>
+                                <button class="action-btn delete" title="Sil">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <polyline points="3 6 5 6 21 6"/>
+                                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                                    </svg>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <div class="prediction-cell">
+                                <div class="prediction-image" style="background: linear-gradient(135deg, #22c55e, #14b8a6);"></div>
+                                <div class="prediction-info">
+                                    <span class="prediction-title">Oscar En İyi Film 2025</span>
+                                    <span class="prediction-category">ID: #1232</span>
+                                </div>
+                            </div>
+                        </td>
+                        <td>Eğlence</td>
+                        <td>02.03.2025</td>
+                        <td>1,789</td>
+                        <td>78,500 bi!</td>
+                        <td><span class="status-badge status-pending">Beklemede</span></td>
+                        <td>
+                            <div class="actions-cell">
+                                <button class="action-btn" title="Görüntüle">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                                        <circle cx="12" cy="12" r="3"/>
+                                    </svg>
+                                </button>
+                                <button class="action-btn" title="Düzenle">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                                        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                                    </svg>
+                                </button>
+                                <button class="action-btn delete" title="Sil">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <polyline points="3 6 5 6 21 6"/>
+                                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                                    </svg>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <div class="prediction-cell">
+                                <div class="prediction-image" style="background: linear-gradient(135deg, #ec4899, #8b5cf6);"></div>
+                                <div class="prediction-info">
+                                    <span class="prediction-title">iPhone 16 Türkiye Satış Fiyatı</span>
+                                    <span class="prediction-category">ID: #1231</span>
+                                </div>
+                            </div>
+                        </td>
+                        <td>Teknoloji</td>
+                        <td>20.09.2024</td>
+                        <td>3,456</td>
+                        <td>234,000 bi!</td>
+                        <td><span class="status-badge status-completed">Tamamlandı</span></td>
+                        <td>
+                            <div class="actions-cell">
+                                <button class="action-btn" title="Görüntüle">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                                        <circle cx="12" cy="12" r="3"/>
+                                    </svg>
+                                </button>
+                                <button class="action-btn" title="Düzenle">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                                        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                                    </svg>
+                                </button>
+                                <button class="action-btn delete" title="Sil">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <polyline points="3 6 5 6 21 6"/>
+                                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                                    </svg>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                <% } %>
+            </tbody>
+        </table>
+    </div>
+    <div class="pagination">
+        <span class="pagination-info">1-10 / 156 tahmin gösteriliyor</span>
+        <div class="pagination-buttons">
+            <button class="page-btn" disabled>← Önceki</button>
+            <button class="page-btn active">1</button>
+            <button class="page-btn">2</button>
+            <button class="page-btn">3</button>
+            <button class="page-btn">...</button>
+            <button class="page-btn">16</button>
+            <button class="page-btn">Sonraki →</button>
+        </div>
+    </div>
+</div>
+
+<!-- Add/Edit Modal -->
+<div class="modal-overlay" id="addModal">
+    <div class="modal">
+        <div class="modal-header">
+            <h3 class="modal-title">Yeni Tahmin Ekle</h3>
+            <button class="modal-close" onclick="closeModal('addModal')">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="18" y1="6" x2="6" y2="18"/>
+                    <line x1="6" y1="6" x2="18" y2="18"/>
+                </svg>
+            </button>
+        </div>
+        <form action="/admin/tahminler/ekle" method="POST" enctype="multipart/form-data">
+            <div class="modal-body">
+                <div class="form-group">
+                    <label class="form-label">Tahmin Başlığı *</label>
+                    <input type="text" class="form-input" name="title" placeholder="Örn: Galatasaray vs Fenerbahçe Maç Skoru" required>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Açıklama</label>
+                    <textarea class="form-textarea" name="description" placeholder="Tahmin hakkında detaylı açıklama..."></textarea>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">Kategori *</label>
+                        <select class="form-select" name="category" required>
+                            <option value="">Seçiniz</option>
+                            <option value="spor">Spor</option>
+                            <option value="ekonomi">Ekonomi</option>
+                            <option value="teknoloji">Teknoloji</option>
+                            <option value="eglence">Eğlence</option>
+                            <option value="siyaset">Siyaset</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Bitiş Tarihi *</label>
+                        <input type="datetime-local" class="form-input" name="end_date" required>
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">Minimum Bahis (bi!)</label>
+                        <input type="number" class="form-input" name="min_bet" value="100" min="10">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Maksimum Bahis (bi!)</label>
+                        <input type="number" class="form-input" name="max_bet" value="10000" min="100">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Tahmin Seçenekleri</label>
+                    <div id="optionsContainer">
+                        <div class="form-row" style="margin-bottom: 8px;">
+                            <input type="text" class="form-input" name="options[]" placeholder="Seçenek 1" required>
+                            <input type="text" class="form-input" name="options[]" placeholder="Seçenek 2" required>
+                        </div>
+                    </div>
+                    <button type="button" class="btn btn-secondary btn-sm" onclick="addOption()" style="margin-top: 8px;">
+                        + Seçenek Ekle
+                    </button>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Görsel</label>
+                    <div class="image-upload" onclick="document.getElementById('imageInput').click()">
+                        <svg class="image-upload-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                            <circle cx="8.5" cy="8.5" r="1.5"/>
+                            <polyline points="21 15 16 10 5 21"/>
+                        </svg>
+                        <p class="image-upload-text">Görsel yüklemek için tıklayın veya sürükleyin</p>
+                    </div>
+                    <input type="file" id="imageInput" name="image" accept="image/*" hidden>
+                </div>
+                
+                <div class="checkbox-group">
+                    <input type="checkbox" id="featured" name="featured">
+                    <label for="featured">Öne çıkan tahmin olarak işaretle</label>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="closeModal('addModal')">İptal</button>
+                <button type="submit" class="btn btn-primary">Tahmin Ekle</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+function openModal(modalId) {
+    document.getElementById(modalId).classList.add('active');
+}
+
+function closeModal(modalId) {
+    document.getElementById(modalId).classList.remove('active');
+}
+
+function addOption() {
+    const container = document.getElementById('optionsContainer');
+    const row = document.createElement('div');
+    row.className = 'form-row';
+    row.style.marginBottom = '8px';
+    row.innerHTML = `
+        <input type="text" class="form-input" name="options[]" placeholder="Yeni seçenek">
+        <button type="button" class="btn btn-secondary btn-icon" onclick="this.parentElement.remove()">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="18" y1="6" x2="6" y2="18"/>
+                <line x1="6" y1="6" x2="18" y2="18"/>
+            </svg>
+        </button>
+    `;
+    container.appendChild(row);
+}
+
+function viewPrediction(id) {
+    window.location.href = '/admin/tahminler/' + id;
+}
+
+function editPrediction(id) {
+    window.location.href = '/admin/tahminler/' + id + '/duzenle';
+}
+
+function deletePrediction(id) {
+    if (confirm('Bu tahmini silmek istediğinizden emin misiniz?')) {
+        fetch('/admin/tahminler/' + id, {
+            method: 'DELETE',
+            headers: { 'Content-Type': 'application/json' }
+        }).then(response => {
+            if (response.ok) {
+                window.location.reload();
+            }
+        });
+    }
+}
+
+function exportData() {
+    window.location.href = '/admin/tahminler/export';
+}
+
+// Filter functionality
+document.getElementById('searchInput').addEventListener('input', filterTable);
+document.getElementById('categoryFilter').addEventListener('change', filterTable);
+document.getElementById('statusFilter').addEventListener('change', filterTable);
+
+function filterTable() {
+    // Client-side filtering logic
+    const search = document.getElementById('searchInput').value.toLowerCase();
+    const category = document.getElementById('categoryFilter').value.toLowerCase();
+    const status = document.getElementById('statusFilter').value.toLowerCase();
+    
+    const rows = document.querySelectorAll('.data-table tbody tr');
+    rows.forEach(row => {
+        const text = row.textContent.toLowerCase();
+        const matchSearch = !search || text.includes(search);
+        const matchCategory = !category || text.includes(category);
+        const matchStatus = !status || row.querySelector('.status-badge')?.classList.contains('status-' + status);
+        
+        row.style.display = matchSearch && matchCategory && matchStatus ? '' : 'none';
+    });
+}
+
+// Close modal on outside click
+document.querySelectorAll('.modal-overlay').forEach(modal => {
+    modal.addEventListener('click', function(e) {
+        if (e.target === this) {
+            this.classList.remove('active');
+        }
+    });
+});
+</script>

@@ -1,0 +1,951 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gorevler - Bilemezsin</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="/socket.io/socket.io.js"></script>
+    <style>
+        :root, [data-theme="dark"] {
+            --bg-dark: #0a0a0b;
+            --bg-card: #141416;
+            --bg-card-hover: #1a1a1d;
+            --border-color: #2a2a2d;
+            --text-primary: #ffffff;
+            --text-secondary: #a0a0a0;
+            --text-muted: #6b6b6b;
+            --accent-primary: #6366f1;
+            --accent-primary-hover: #5558e3;
+            --bi-color: #f59e0b;
+            --bi-color-light: #fbbf24;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --info: #3b82f6;
+        }
+
+        [data-theme="light"] {
+            --bg-dark: #f5f5f5;
+            --bg-card: #ffffff;
+            --bg-card-hover: #f9f9f9;
+            --border-color: #e5e5e5;
+            --text-primary: #1a1a1a;
+            --text-secondary: #5f6368;
+            --text-muted: #80868b;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text-primary);
+            min-height: 100vh;
+        }
+
+        /* Main Content */
+        .main-content {
+            padding: 24px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .page-header {
+            margin-bottom: 32px;
+            text-align: center;
+        }
+
+        .page-title {
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .page-subtitle {
+            color: var(--text-secondary);
+            font-size: 16px;
+        }
+
+        /* Stats Cards */
+        .stats-row {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+            margin-bottom: 32px;
+        }
+
+        .stat-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .stat-value.bi {
+            color: var(--bi-color);
+        }
+
+        .stat-value.success {
+            color: var(--success);
+        }
+
+        .stat-label {
+            color: var(--text-secondary);
+            font-size: 14px;
+        }
+
+        /* Section */
+        .section {
+            margin-bottom: 32px;
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 16px;
+        }
+
+        .section-title {
+            font-size: 20px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .section-badge {
+            background: var(--accent-primary);
+            color: white;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        /* Task Card */
+        .task-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 16px;
+        }
+
+        .task-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 20px;
+            transition: all 0.3s ease;
+        }
+
+        .task-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+        }
+
+        .task-card.completed {
+            opacity: 0.7;
+            border-color: var(--success);
+        }
+
+        .task-header {
+            display: flex;
+            align-items: flex-start;
+            gap: 16px;
+            margin-bottom: 16px;
+        }
+
+        .task-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            flex-shrink: 0;
+        }
+
+        .task-icon.baslangic {
+            background: rgba(99, 102, 241, 0.15);
+        }
+
+        .task-icon.sosyal {
+            background: rgba(59, 130, 246, 0.15);
+        }
+
+        .task-icon.gunluk {
+            background: rgba(16, 185, 129, 0.15);
+        }
+
+        .task-icon.haftalik {
+            background: rgba(139, 92, 246, 0.15);
+        }
+
+        .task-icon.ozel {
+            background: rgba(245, 158, 11, 0.15);
+        }
+
+        .task-info {
+            flex: 1;
+        }
+
+        .task-name {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .task-desc {
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+
+        .task-reward {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            background: linear-gradient(135deg, rgba(245, 158, 11, 0.15), rgba(245, 158, 11, 0.05));
+            border: 1px solid rgba(245, 158, 11, 0.3);
+            border-radius: 20px;
+            color: var(--bi-color);
+            font-weight: 700;
+            font-size: 14px;
+        }
+
+        .task-footer {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+        }
+
+        .task-btn {
+            flex: 1;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-decoration: none;
+            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .task-btn.primary {
+            background: var(--accent-primary);
+            color: white;
+        }
+
+        .task-btn.primary:hover {
+            background: var(--accent-primary-hover);
+        }
+
+        .task-btn.secondary {
+            background: var(--bg-card-hover);
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+        }
+
+        .task-btn.secondary:hover {
+            background: var(--bg-dark);
+        }
+
+        .task-btn.success {
+            background: rgba(16, 185, 129, 0.15);
+            color: var(--success);
+            cursor: default;
+        }
+
+        .task-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* Progress bar */
+        .task-progress {
+            margin-bottom: 16px;
+        }
+
+        .progress-bar {
+            height: 8px;
+            background: var(--bg-card-hover);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent-primary), var(--success));
+            border-radius: 4px;
+            transition: width 0.3s ease;
+        }
+
+        .progress-text {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-top: 6px;
+        }
+
+        /* Footer Styles */
+        .footer {
+            background: var(--bg-card);
+            border-top: 1px solid var(--border-color);
+            padding: 48px 24px 24px;
+            margin-top: 48px;
+        }
+
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 1fr;
+            gap: 48px;
+        }
+
+        .footer-section {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .footer-section .logo {
+            margin-bottom: 16px;
+        }
+
+        .footer-desc {
+            color: var(--text-secondary);
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .footer-section h4 {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 16px;
+            color: var(--text-primary);
+        }
+
+        .footer-section ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .footer-section ul li {
+            margin-bottom: 8px;
+        }
+
+        .footer-section ul li a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 14px;
+            transition: color 0.2s;
+        }
+
+        .footer-section ul li a:hover {
+            color: var(--accent-primary);
+        }
+
+        .social-links {
+            display: flex;
+            gap: 12px;
+        }
+
+        .social-link {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 14px;
+            transition: color 0.2s;
+        }
+
+        .social-link:hover {
+            color: var(--accent-primary);
+        }
+
+        .footer-bottom {
+            max-width: 1200px;
+            margin: 32px auto 0;
+            padding-top: 24px;
+            border-top: 1px solid var(--border-color);
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 13px;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .stats-row {
+                grid-template-columns: 1fr;
+            }
+
+            .task-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .footer-content {
+                grid-template-columns: 1fr 1fr;
+                gap: 32px;
+            }
+
+            .nav-center {
+                display: none;
+            }
+        }
+
+        /* Toast notification */
+        .toast {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            padding: 16px 24px;
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            z-index: 9999;
+            transform: translateY(100px);
+            opacity: 0;
+            transition: all 0.3s ease;
+        }
+
+        .toast.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        .toast.success {
+            border-color: var(--success);
+        }
+
+        .toast.error {
+            border-color: var(--danger);
+        }
+
+        .toast-content {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .toast-icon {
+            font-size: 24px;
+        }
+
+        .toast-message {
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        /* Spinner */
+        .spinner {
+            width: 16px;
+            height: 16px;
+            border: 2px solid transparent;
+            border-top-color: currentColor;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <%- include('../partials/user-navbar') %>
+
+    <div class="main-content">
+        <div class="page-header">
+            <h1 class="page-title">Gorevler</h1>
+            <p class="page-subtitle">Gorevleri tamamla, bi! coin kazan!</p>
+        </div>
+
+        <!-- Stats -->
+        <div class="stats-row">
+            <div class="stat-card">
+                <div class="stat-value bi"><%= toplamKazanilabilir %></div>
+                <div class="stat-label">Kazanilabilir bi!</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value success"><%= tamamlananSayisi %>/<%= toplamGorev %></div>
+                <div class="stat-label">Tamamlanan Gorev</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value"><%= user && user.bi_coin ? user.bi_coin.toLocaleString('tr-TR') : '0' %></div>
+                <div class="stat-label">Mevcut bi! Bakiye</div>
+            </div>
+        </div>
+
+        <% if (gorevler.baslangic && gorevler.baslangic.length > 0) { %>
+        <!-- Baslangic Gorevleri -->
+        <div class="section">
+            <div class="section-header">
+                <h2 class="section-title">
+                    Baslangic Gorevleri
+                    <span class="section-badge">Yeni Uyelere Ozel</span>
+                </h2>
+            </div>
+            <div class="task-grid">
+                <% gorevler.baslangic.forEach(function(gorev) { %>
+                <div class="task-card <%= gorev.tamamlandi_mi ? 'completed' : '' %>" data-gorev-id="<%= gorev.id %>">
+                    <div class="task-header">
+                        <div class="task-icon baslangic"><%= gorev.ikon %></div>
+                        <div class="task-info">
+                            <div class="task-name"><%= gorev.ad %></div>
+                            <div class="task-desc"><%= gorev.aciklama %></div>
+                        </div>
+                        <div class="task-reward">
+                            <span>+<%= gorev.bi_odul %></span>
+                            <span>bi!</span>
+                        </div>
+                    </div>
+                    <div class="task-footer">
+                        <% if (gorev.tamamlandi_mi) { %>
+                            <button class="task-btn success" disabled>Tamamlandi</button>
+                        <% } else if (gorev.link && gorev.link.startsWith('/auth/')) { %>
+                            <a href="<%= gorev.link %>" class="task-btn secondary">Bagla</a>
+                            <button class="task-btn primary" onclick="tamamlaGorev(<%= gorev.id %>)">Kontrol Et</button>
+                        <% } else if (gorev.link) { %>
+                            <a href="<%= gorev.link %>" class="task-btn secondary">Git</a>
+                            <button class="task-btn primary" onclick="tamamlaGorev(<%= gorev.id %>)">Tamamla</button>
+                        <% } else { %>
+                            <button class="task-btn primary" onclick="tamamlaGorev(<%= gorev.id %>)">Tamamla</button>
+                        <% } %>
+                    </div>
+                </div>
+                <% }); %>
+            </div>
+        </div>
+        <% } %>
+
+        <% if (gorevler.sosyal && gorevler.sosyal.length > 0) { %>
+        <!-- Sosyal Gorevler -->
+        <div class="section">
+            <div class="section-header">
+                <h2 class="section-title">
+                    Sosyal Medya Gorevleri
+                </h2>
+            </div>
+            <div class="task-grid">
+                <% gorevler.sosyal.forEach(function(gorev) { %>
+                <div class="task-card <%= gorev.tamamlandi_mi ? 'completed' : '' %>" data-gorev-id="<%= gorev.id %>" data-gorev-link="<%= gorev.link %>">
+                    <div class="task-header">
+                        <div class="task-icon sosyal"><%= gorev.ikon %></div>
+                        <div class="task-info">
+                            <div class="task-name"><%= gorev.ad %></div>
+                            <div class="task-desc"><%= gorev.aciklama %></div>
+                        </div>
+                        <div class="task-reward">
+                            <span>+<%= gorev.bi_odul %></span>
+                            <span>bi!</span>
+                        </div>
+                    </div>
+                    <div class="task-footer">
+                        <% if (gorev.tamamlandi_mi) { %>
+                            <button class="task-btn success" disabled>Tamamlandi</button>
+                        <% } else { %>
+                            <button class="task-btn secondary sosyal-link-btn" data-gorev-id="<%= gorev.id %>" data-link="<%= gorev.link %>">
+                                Takip Et
+                            </button>
+                            <button class="task-btn primary sosyal-tamamla-btn" data-gorev-id="<%= gorev.id %>" disabled style="opacity: 0.5;">
+                                Önce Takip Et
+                            </button>
+                        <% } %>
+                    </div>
+                    <div class="sosyal-countdown" id="countdown-<%= gorev.id %>" style="display: none; margin-top: 12px; text-align: center; font-size: 13px; color: var(--text-secondary);"></div>
+                </div>
+                <% }); %>
+            </div>
+        </div>
+        <% } %>
+
+        <% if (gorevler.gunluk && gorevler.gunluk.length > 0) { %>
+        <!-- Gunluk Gorevler -->
+        <div class="section">
+            <div class="section-header">
+                <h2 class="section-title">
+                    Gunluk Gorevler
+                </h2>
+            </div>
+            <div class="task-grid">
+                <% gorevler.gunluk.forEach(function(gorev) { %>
+                <div class="task-card <%= gorev.tamamlandi_mi ? 'completed' : '' %>" data-gorev-id="<%= gorev.id %>">
+                    <div class="task-header">
+                        <div class="task-icon gunluk"><%= gorev.ikon %></div>
+                        <div class="task-info">
+                            <div class="task-name"><%= gorev.ad %></div>
+                            <div class="task-desc"><%= gorev.aciklama %></div>
+                        </div>
+                        <div class="task-reward">
+                            <span>+<%= gorev.bi_odul %></span>
+                            <span>bi!</span>
+                        </div>
+                    </div>
+                    <% if (gorev.kosul_deger > 1) { %>
+                    <div class="task-progress">
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: <%= Math.min((gorev.ilerleme / gorev.kosul_deger) * 100, 100) %>%"></div>
+                        </div>
+                        <div class="progress-text"><%= gorev.ilerleme %> / <%= gorev.kosul_deger %></div>
+                    </div>
+                    <% } %>
+                    <div class="task-footer">
+                        <% if (gorev.tamamlandi_mi) { %>
+                            <button class="task-btn success" disabled>Tamamlandi</button>
+                        <% } else { %>
+                            <span class="task-desc">Otomatik tamamlanir</span>
+                        <% } %>
+                    </div>
+                </div>
+                <% }); %>
+            </div>
+        </div>
+        <% } %>
+
+        <% if (gorevler.haftalik && gorevler.haftalik.length > 0) { %>
+        <!-- Haftalik Gorevler -->
+        <div class="section">
+            <div class="section-header">
+                <h2 class="section-title">
+                    Haftalik Gorevler
+                </h2>
+            </div>
+            <div class="task-grid">
+                <% gorevler.haftalik.forEach(function(gorev) { %>
+                <div class="task-card <%= gorev.tamamlandi_mi ? 'completed' : '' %>" data-gorev-id="<%= gorev.id %>">
+                    <div class="task-header">
+                        <div class="task-icon haftalik"><%= gorev.ikon %></div>
+                        <div class="task-info">
+                            <div class="task-name"><%= gorev.ad %></div>
+                            <div class="task-desc"><%= gorev.aciklama %></div>
+                        </div>
+                        <div class="task-reward">
+                            <span>+<%= gorev.bi_odul %></span>
+                            <span>bi!</span>
+                        </div>
+                    </div>
+                    <% if (gorev.kosul_deger > 1) { %>
+                    <div class="task-progress">
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: <%= Math.min((gorev.ilerleme / gorev.kosul_deger) * 100, 100) %>%"></div>
+                        </div>
+                        <div class="progress-text"><%= gorev.ilerleme %> / <%= gorev.kosul_deger %></div>
+                    </div>
+                    <% } %>
+                    <div class="task-footer">
+                        <% if (gorev.tamamlandi_mi) { %>
+                            <button class="task-btn success" disabled>Tamamlandi</button>
+                        <% } else { %>
+                            <span class="task-desc">Otomatik tamamlanir</span>
+                        <% } %>
+                    </div>
+                </div>
+                <% }); %>
+            </div>
+        </div>
+        <% } %>
+
+        <% if (gorevler.ozel && gorevler.ozel.length > 0) { %>
+        <!-- Ozel Gorevler -->
+        <div class="section">
+            <div class="section-header">
+                <h2 class="section-title">
+                    Ozel Gorevler
+                    <span class="section-badge">Yuksek Odul</span>
+                </h2>
+            </div>
+            <div class="task-grid">
+                <% gorevler.ozel.forEach(function(gorev) { %>
+                <div class="task-card <%= gorev.tamamlandi_mi ? 'completed' : '' %>" data-gorev-id="<%= gorev.id %>">
+                    <div class="task-header">
+                        <div class="task-icon ozel"><%= gorev.ikon %></div>
+                        <div class="task-info">
+                            <div class="task-name"><%= gorev.ad %></div>
+                            <div class="task-desc"><%= gorev.aciklama %></div>
+                        </div>
+                        <div class="task-reward">
+                            <span>+<%= gorev.bi_odul %></span>
+                            <span>bi!</span>
+                        </div>
+                    </div>
+                    <div class="task-footer">
+                        <% if (gorev.tamamlandi_mi) { %>
+                            <button class="task-btn success" disabled>Tamamlandi</button>
+                        <% } else { %>
+                            <span class="task-desc">Otomatik tamamlanir</span>
+                        <% } %>
+                    </div>
+                </div>
+                <% }); %>
+            </div>
+        </div>
+        <% } %>
+    </div>
+
+    <%- include('../partials/footer') %>
+
+    <!-- Toast -->
+    <div id="toast" class="toast">
+        <div class="toast-content">
+            <span class="toast-icon" id="toastIcon"></span>
+            <span class="toast-message" id="toastMessage"></span>
+        </div>
+    </div>
+
+    <script>
+        // Socket.io baglantisi
+        const socket = io();
+        <% if (typeof user !== 'undefined' && user) { %>
+        socket.emit('join', <%= user.id %>);
+        <% } %>
+
+        // Live bi! coin update
+        socket.on('biCoinUpdate', (data) => {
+            const el = document.getElementById('biCoinDisplay');
+            if (el) el.textContent = data.bi_coin.toLocaleString('tr-TR');
+            // Stats card guncelle
+            const statCard = document.querySelector('.stat-card:last-child .stat-value');
+            if (statCard) statCard.textContent = data.bi_coin.toLocaleString('tr-TR');
+        });
+
+        // Theme Management
+        const html = document.documentElement;
+        const themeMode = localStorage.getItem('themeMode') || 'dark';
+        html.setAttribute('data-theme', themeMode);
+
+        // Sosyal medya gorev geri sayımlari (localStorage'da sakliyoruz)
+        const sosyalTimers = JSON.parse(localStorage.getItem('sosyalTimers') || '{}');
+
+        // Toast goster
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            const toastIcon = document.getElementById('toastIcon');
+            const toastMessage = document.getElementById('toastMessage');
+
+            toast.className = 'toast ' + type;
+            toastIcon.textContent = type === 'success' ? '' : '';
+            toastMessage.textContent = message;
+
+            toast.classList.add('show');
+
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+
+        // Sosyal medya linki tiklandi
+        async function sosyalLinkTiklandi(gorevId, link) {
+            const linkBtn = document.querySelector(`.sosyal-link-btn[data-gorev-id="${gorevId}"]`);
+            const tamamlaBtn = document.querySelector(`.sosyal-tamamla-btn[data-gorev-id="${gorevId}"]`);
+            const countdownEl = document.getElementById(`countdown-${gorevId}`);
+
+            // Linki yeni sekmede ac
+            window.open(link, '_blank');
+
+            // Backend'e bildir
+            try {
+                const response = await fetch(`/gorevler/link-tiklandi/${gorevId}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+                const data = await response.json();
+
+                if (data.success) {
+                    // localStorage'a kaydet
+                    const baslangicZamani = Date.now();
+                    sosyalTimers[gorevId] = baslangicZamani;
+                    localStorage.setItem('sosyalTimers', JSON.stringify(sosyalTimers));
+
+                    // Geri sayimi baslat
+                    baslatGeriSayim(gorevId, 15);
+                    showToast('Hesabı takip edin, 15 saniye sonra onaylayabilirsiniz', 'success');
+                } else {
+                    showToast(data.message, 'error');
+                }
+            } catch (err) {
+                showToast('Bir hata oluştu', 'error');
+            }
+        }
+
+        // Geri sayim baslat
+        function baslatGeriSayim(gorevId, saniye) {
+            const tamamlaBtn = document.querySelector(`.sosyal-tamamla-btn[data-gorev-id="${gorevId}"]`);
+            const countdownEl = document.getElementById(`countdown-${gorevId}`);
+
+            if (!tamamlaBtn || !countdownEl) return;
+
+            countdownEl.style.display = 'block';
+
+            const interval = setInterval(() => {
+                if (saniye <= 0) {
+                    clearInterval(interval);
+                    countdownEl.innerHTML = '<span style="color: var(--success);">✓ Şimdi onaylayabilirsiniz!</span>';
+                    tamamlaBtn.disabled = false;
+                    tamamlaBtn.style.opacity = '1';
+                    tamamlaBtn.textContent = 'Takip Ettim';
+                    return;
+                }
+
+                countdownEl.innerHTML = `⏳ Bekleniyor... ${saniye} saniye`;
+                saniye--;
+            }, 1000);
+        }
+
+        // Sosyal gorev tamamla
+        async function sosyalGorevTamamla(gorevId) {
+            const card = document.querySelector(`[data-gorev-id="${gorevId}"]`);
+            const btn = document.querySelector(`.sosyal-tamamla-btn[data-gorev-id="${gorevId}"]`);
+
+            if (!btn || btn.disabled) return;
+
+            // Loading state
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<div class="spinner"></div>';
+            btn.disabled = true;
+
+            try {
+                const response = await fetch(`/gorevler/tamamla/${gorevId}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    showToast(data.message, 'success');
+
+                    // localStorage'dan temizle
+                    delete sosyalTimers[gorevId];
+                    localStorage.setItem('sosyalTimers', JSON.stringify(sosyalTimers));
+
+                    // Karti guncelle
+                    card.classList.add('completed');
+                    const footer = card.querySelector('.task-footer');
+                    footer.innerHTML = '<button class="task-btn success" disabled>Tamamlandi</button>';
+                    const countdownEl = document.getElementById(`countdown-${gorevId}`);
+                    if (countdownEl) countdownEl.style.display = 'none';
+
+                    // Sayfayi yenile
+                    setTimeout(() => window.location.reload(), 1500);
+                } else {
+                    showToast(data.message, 'error');
+                    btn.innerHTML = originalText;
+                    btn.disabled = false;
+                }
+            } catch (err) {
+                showToast('Bir hata olustu', 'error');
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }
+        }
+
+        // Gorev tamamla (diger gorevler icin)
+        async function tamamlaGorev(gorevId) {
+            const card = document.querySelector(`[data-gorev-id="${gorevId}"]`);
+            const btn = card.querySelector('.task-btn.primary');
+
+            if (!btn) return;
+
+            // Loading state
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<div class="spinner"></div>';
+            btn.disabled = true;
+
+            try {
+                const response = await fetch(`/gorevler/tamamla/${gorevId}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    showToast(data.message, 'success');
+
+                    // Karti guncelle
+                    card.classList.add('completed');
+                    const footer = card.querySelector('.task-footer');
+                    footer.innerHTML = '<button class="task-btn success" disabled>Tamamlandi</button>';
+
+                    // Sayfayi yenile
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 1500);
+                } else {
+                    showToast(data.message, 'error');
+                    btn.innerHTML = originalText;
+                    btn.disabled = false;
+                }
+            } catch (err) {
+                showToast('Bir hata olustu', 'error');
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }
+        }
+
+        // Sayfa yuklendiginde sosyal butonlara event listener ekle ve devam eden geri sayimlari kontrol et
+        document.addEventListener('DOMContentLoaded', function() {
+            // Sosyal link butonlarina click event ekle
+            document.querySelectorAll('.sosyal-link-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const gorevId = this.dataset.gorevId;
+                    const link = this.dataset.link;
+                    sosyalLinkTiklandi(gorevId, link);
+                });
+            });
+
+            // Sosyal tamamla butonlarina click event ekle
+            document.querySelectorAll('.sosyal-tamamla-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const gorevId = this.dataset.gorevId;
+                    sosyalGorevTamamla(gorevId);
+                });
+            });
+
+            // Onceden baslatilmis geri sayimlari devam ettir
+            Object.keys(sosyalTimers).forEach(gorevId => {
+                const baslangicZamani = sosyalTimers[gorevId];
+                const gecenSure = Math.floor((Date.now() - baslangicZamani) / 1000);
+                const kalanSure = 15 - gecenSure;
+
+                const tamamlaBtn = document.querySelector(`.sosyal-tamamla-btn[data-gorev-id="${gorevId}"]`);
+                const countdownEl = document.getElementById(`countdown-${gorevId}`);
+
+                if (tamamlaBtn && countdownEl) {
+                    if (kalanSure <= 0) {
+                        // Sure dolmus, butonu aktif et
+                        countdownEl.style.display = 'block';
+                        countdownEl.innerHTML = '<span style="color: var(--success);">✓ Şimdi onaylayabilirsiniz!</span>';
+                        tamamlaBtn.disabled = false;
+                        tamamlaBtn.style.opacity = '1';
+                        tamamlaBtn.textContent = 'Takip Ettim';
+                    } else {
+                        // Geri sayimi devam ettir
+                        baslatGeriSayim(gorevId, kalanSure);
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+</html>

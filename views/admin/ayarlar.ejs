@@ -1,0 +1,920 @@
+<% layout('layouts/admin') -%>
+<% activeMenu = 'ayarlar' %>
+
+<style>
+.page-header {
+    margin-bottom: 24px;
+}
+
+.page-title {
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.page-subtitle {
+    font-size: 14px;
+    color: var(--text-secondary);
+    margin-top: 4px;
+}
+
+.settings-layout {
+    display: grid;
+    grid-template-columns: 250px 1fr;
+    gap: 24px;
+}
+
+.settings-nav {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 16px;
+    height: fit-content;
+    position: sticky;
+    top: 24px;
+}
+
+.nav-title {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding: 8px 12px;
+}
+
+.nav-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px;
+    border-radius: 8px;
+    color: var(--text-secondary);
+    text-decoration: none;
+    font-size: 14px;
+    transition: all 0.2s;
+    cursor: pointer;
+}
+
+.nav-item:hover {
+    background: var(--bg-tertiary);
+    color: var(--text-primary);
+}
+
+.nav-item.active {
+    background: rgba(99, 102, 241, 0.1);
+    color: var(--accent-primary);
+}
+
+.settings-content {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+.settings-card {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 24px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.card-title {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.card-subtitle {
+    font-size: 13px;
+    color: var(--text-secondary);
+    margin-top: 4px;
+}
+
+.card-body {
+    padding: 24px;
+}
+
+.form-group {
+    margin-bottom: 24px;
+}
+
+.form-group:last-child {
+    margin-bottom: 0;
+}
+
+.form-label {
+    display: block;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text-primary);
+    margin-bottom: 8px;
+}
+
+.form-help {
+    font-size: 12px;
+    color: var(--text-secondary);
+    margin-top: 6px;
+}
+
+.form-input,
+.form-select,
+.form-textarea {
+    width: 100%;
+    padding: 12px 14px;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    font-size: 14px;
+    transition: border-color 0.2s;
+}
+
+.form-input:focus,
+.form-select:focus,
+.form-textarea:focus {
+    outline: none;
+    border-color: var(--accent-primary);
+}
+
+.form-textarea {
+    min-height: 100px;
+    resize: vertical;
+}
+
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+}
+
+.toggle-group {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 0;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.toggle-group:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+}
+
+.toggle-info {
+    flex: 1;
+}
+
+.toggle-title {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text-primary);
+}
+
+.toggle-desc {
+    font-size: 13px;
+    color: var(--text-secondary);
+    margin-top: 2px;
+}
+
+.toggle-switch {
+    position: relative;
+    width: 48px;
+    height: 26px;
+}
+
+.toggle-switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.toggle-slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: var(--bg-tertiary);
+    border-radius: 26px;
+    transition: 0.3s;
+}
+
+.toggle-slider:before {
+    position: absolute;
+    content: "";
+    height: 20px;
+    width: 20px;
+    left: 3px;
+    bottom: 3px;
+    background: white;
+    border-radius: 50%;
+    transition: 0.3s;
+}
+
+.toggle-switch input:checked + .toggle-slider {
+    background: var(--accent-primary);
+}
+
+.toggle-switch input:checked + .toggle-slider:before {
+    transform: translateX(22px);
+}
+
+.btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    border: none;
+}
+
+.btn-primary {
+    background: var(--accent-primary);
+    color: white;
+}
+
+.btn-primary:hover {
+    background: var(--accent-hover);
+}
+
+.btn-secondary {
+    background: var(--bg-tertiary);
+    color: var(--text-primary);
+    border: 1px solid var(--border-color);
+}
+
+.btn-secondary:hover {
+    background: var(--bg-hover);
+}
+
+.btn-danger {
+    background: #ef4444;
+    color: white;
+}
+
+.btn-danger:hover {
+    background: #dc2626;
+}
+
+.card-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    padding: 16px 24px;
+    background: var(--bg-tertiary);
+    border-top: 1px solid var(--border-color);
+}
+
+.logo-upload {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.logo-preview {
+    width: 120px;
+    height: 60px;
+    background: var(--bg-tertiary);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    font-weight: 800;
+    color: var(--accent-primary);
+}
+
+.logo-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.color-input-group {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.color-preview {
+    width: 40px;
+    height: 40px;
+    border-radius: 8px;
+    border: 2px solid var(--border-color);
+}
+
+.color-input {
+    flex: 1;
+}
+
+.danger-zone {
+    border-color: rgba(239, 68, 68, 0.3);
+}
+
+.danger-zone .card-header {
+    background: rgba(239, 68, 68, 0.05);
+}
+
+.danger-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 0;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.danger-item:last-child {
+    border-bottom: none;
+}
+
+.danger-info h4 {
+    font-size: 14px;
+    font-weight: 500;
+    color: #ef4444;
+    margin-bottom: 4px;
+}
+
+.danger-info p {
+    font-size: 13px;
+    color: var(--text-secondary);
+}
+
+.stat-box {
+    background: var(--bg-tertiary);
+    border-radius: 8px;
+    padding: 16px;
+    text-align: center;
+}
+
+.stat-box-value {
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.stat-box-label {
+    font-size: 12px;
+    color: var(--text-secondary);
+    margin-top: 4px;
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    margin-bottom: 24px;
+}
+
+@media (max-width: 1024px) {
+    .settings-layout {
+        grid-template-columns: 1fr;
+    }
+    
+    .settings-nav {
+        position: static;
+    }
+    
+    .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 768px) {
+    .form-row {
+        grid-template-columns: 1fr;
+    }
+    
+    .logo-upload {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+}
+</style>
+
+<div class="page-header">
+    <h1 class="page-title">Site Ayarları</h1>
+    <p class="page-subtitle">Platform ayarlarını yönetin ve özelleştirin</p>
+</div>
+
+<div class="settings-layout">
+    <!-- Settings Navigation -->
+    <nav class="settings-nav">
+        <div class="nav-title">Ayarlar</div>
+        <a class="nav-item active" href="#genel" onclick="showSection('genel')">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="3"/>
+                <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+            </svg>
+            Genel
+        </a>
+        <a class="nav-item" href="#bicoin" onclick="showSection('bicoin')">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"/>
+                <path d="M12 6v12M9 9h4.5a2.5 2.5 0 0 1 0 5H9"/>
+            </svg>
+            bi! Coin
+        </a>
+        <a class="nav-item" href="#eposta" onclick="showSection('eposta')">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+                <polyline points="22,6 12,13 2,6"/>
+            </svg>
+            E-posta
+        </a>
+        <a class="nav-item" href="#bildirimler" onclick="showSection('bildirimler')">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+                <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+            </svg>
+            Bildirimler
+        </a>
+        <a class="nav-item" href="#guvenlik" onclick="showSection('guvenlik')">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+            </svg>
+            Güvenlik
+        </a>
+        <a class="nav-item" href="#bakim" onclick="showSection('bakim')">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>
+            </svg>
+            Bakım
+        </a>
+    </nav>
+
+    <!-- Settings Content -->
+    <div class="settings-content">
+        <!-- Genel Ayarlar -->
+        <div class="settings-section" id="genel">
+            <form action="/admin/ayarlar/genel" method="POST" enctype="multipart/form-data">
+                <div class="settings-card">
+                    <div class="card-header">
+                        <div>
+                            <h2 class="card-title">Genel Ayarlar</h2>
+                            <p class="card-subtitle">Site başlığı, logo ve temel bilgiler</p>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="form-group">
+                            <label class="form-label">Site Adı</label>
+                            <input type="text" class="form-input" name="site_name" value="<%= typeof settings !== 'undefined' ? settings.site_name : 'Bilemezsin' %>">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">Site Açıklaması</label>
+                            <textarea class="form-textarea" name="site_description"><%= typeof settings !== 'undefined' ? settings.site_description : 'Türkiyenin en eğlenceli tahmin platformu!' %></textarea>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">Logo</label>
+                            <div class="logo-upload">
+                                <div class="logo-preview">bi!</div>
+                                <div class="logo-actions">
+                                    <button type="button" class="btn btn-secondary" onclick="document.getElementById('logoInput').click()">
+                                        Logo Yükle
+                                    </button>
+                                    <input type="file" id="logoInput" name="logo" accept="image/*" hidden>
+                                    <p class="form-help">PNG, JPG veya SVG. Max 2MB</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">Ana Renk</label>
+                                <div class="color-input-group">
+                                    <div class="color-preview" style="background: #6366f1;"></div>
+                                    <input type="text" class="form-input color-input" name="primary_color" value="#6366f1">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">bi! Coin Rengi</label>
+                                <div class="color-input-group">
+                                    <div class="color-preview" style="background: #f59e0b;"></div>
+                                    <input type="text" class="form-input color-input" name="bi_color" value="#f59e0b">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">İletişim E-postası</label>
+                                <input type="email" class="form-input" name="contact_email" value="info@bilemezsin.com">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Destek E-postası</label>
+                                <input type="email" class="form-input" name="support_email" value="destek@bilemezsin.com">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-footer">
+                        <button type="submit" class="btn btn-primary">Değişiklikleri Kaydet</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <!-- bi! Coin Ayarları -->
+        <div class="settings-section" id="bicoin" style="display: none;">
+            <form action="/admin/ayarlar/bicoin" method="POST">
+                <div class="settings-card">
+                    <div class="card-header">
+                        <div>
+                            <h2 class="card-title">bi! Coin Ayarları</h2>
+                            <p class="card-subtitle">Sanal para birimi ve ödül sistemi</p>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="stats-grid">
+                            <div class="stat-box">
+                                <div class="stat-box-value">125.4M</div>
+                                <div class="stat-box-label">Toplam bi! Coin</div>
+                            </div>
+                            <div class="stat-box">
+                                <div class="stat-box-value">89.2M</div>
+                                <div class="stat-box-label">Dolaşımda</div>
+                            </div>
+                            <div class="stat-box">
+                                <div class="stat-box-value">36.2M</div>
+                                <div class="stat-box-label">Havuzlarda</div>
+                            </div>
+                            <div class="stat-box">
+                                <div class="stat-box-value">10,124</div>
+                                <div class="stat-box-label">Ortalama/Kullanıcı</div>
+                            </div>
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">Kayıt Bonusu</label>
+                                <input type="number" class="form-input" name="signup_bonus" value="1000">
+                                <p class="form-help">Yeni kullanıcılara verilen bi! coin</p>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Günlük Giriş Bonusu</label>
+                                <input type="number" class="form-input" name="daily_bonus" value="50">
+                                <p class="form-help">Her gün giriş yapanlara verilir</p>
+                            </div>
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">Minimum Bahis</label>
+                                <input type="number" class="form-input" name="min_bet" value="10">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Maksimum Bahis</label>
+                                <input type="number" class="form-input" name="max_bet" value="100000">
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">Platform Komisyonu (%)</label>
+                            <input type="number" class="form-input" name="commission_rate" value="5" min="0" max="20" step="0.1">
+                            <p class="form-help">Her tahmin havuzundan alınan komisyon oranı</p>
+                        </div>
+                    </div>
+                    <div class="card-footer">
+                        <button type="submit" class="btn btn-primary">Değişiklikleri Kaydet</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <!-- E-posta Ayarları -->
+        <div class="settings-section" id="eposta" style="display: none;">
+            <form action="/admin/ayarlar/eposta" method="POST">
+                <div class="settings-card">
+                    <div class="card-header">
+                        <div>
+                            <h2 class="card-title">E-posta Ayarları</h2>
+                            <p class="card-subtitle">SMTP ve e-posta gönderim ayarları</p>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">SMTP Sunucu</label>
+                                <input type="text" class="form-input" name="smtp_host" value="smtp.gmail.com">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">SMTP Port</label>
+                                <input type="number" class="form-input" name="smtp_port" value="587">
+                            </div>
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">SMTP Kullanıcı</label>
+                                <input type="text" class="form-input" name="smtp_user" value="">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">SMTP Şifre</label>
+                                <input type="password" class="form-input" name="smtp_password" value="">
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">Gönderen E-posta</label>
+                            <input type="email" class="form-input" name="from_email" value="noreply@bilemezsin.com">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">Gönderen Adı</label>
+                            <input type="text" class="form-input" name="from_name" value="Bilemezsin">
+                        </div>
+                    </div>
+                    <div class="card-footer">
+                        <button type="button" class="btn btn-secondary" onclick="testEmail()">Test E-postası Gönder</button>
+                        <button type="submit" class="btn btn-primary">Değişiklikleri Kaydet</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <!-- Bildirim Ayarları -->
+        <div class="settings-section" id="bildirimler" style="display: none;">
+            <form action="/admin/ayarlar/bildirimler" method="POST">
+                <div class="settings-card">
+                    <div class="card-header">
+                        <div>
+                            <h2 class="card-title">Bildirim Ayarları</h2>
+                            <p class="card-subtitle">E-posta ve push bildirim tercihleri</p>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="toggle-group">
+                            <div class="toggle-info">
+                                <div class="toggle-title">Hoş Geldin E-postası</div>
+                                <div class="toggle-desc">Yeni kullanıcılara hoş geldin e-postası gönder</div>
+                            </div>
+                            <label class="toggle-switch">
+                                <input type="checkbox" name="welcome_email" checked>
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+                        
+                        <div class="toggle-group">
+                            <div class="toggle-info">
+                                <div class="toggle-title">Tahmin Sonuç Bildirimi</div>
+                                <div class="toggle-desc">Tahmin sonuçlandığında kullanıcıları bilgilendir</div>
+                            </div>
+                            <label class="toggle-switch">
+                                <input type="checkbox" name="result_notification" checked>
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+                        
+                        <div class="toggle-group">
+                            <div class="toggle-info">
+                                <div class="toggle-title">Kazanç Bildirimi</div>
+                                <div class="toggle-desc">Kullanıcılar kazandığında e-posta gönder</div>
+                            </div>
+                            <label class="toggle-switch">
+                                <input type="checkbox" name="win_notification" checked>
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+                        
+                        <div class="toggle-group">
+                            <div class="toggle-info">
+                                <div class="toggle-title">Haftalık Özet</div>
+                                <div class="toggle-desc">Kullanıcılara haftalık aktivite özeti gönder</div>
+                            </div>
+                            <label class="toggle-switch">
+                                <input type="checkbox" name="weekly_summary">
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+                        
+                        <div class="toggle-group">
+                            <div class="toggle-info">
+                                <div class="toggle-title">Yeni Tahmin Bildirimi</div>
+                                <div class="toggle-desc">Popüler tahminler için bildirim gönder</div>
+                            </div>
+                            <label class="toggle-switch">
+                                <input type="checkbox" name="new_prediction_alert">
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+                    </div>
+                    <div class="card-footer">
+                        <button type="submit" class="btn btn-primary">Değişiklikleri Kaydet</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <!-- Güvenlik Ayarları -->
+        <div class="settings-section" id="guvenlik" style="display: none;">
+            <form action="/admin/ayarlar/guvenlik" method="POST">
+                <div class="settings-card">
+                    <div class="card-header">
+                        <div>
+                            <h2 class="card-title">Güvenlik Ayarları</h2>
+                            <p class="card-subtitle">Hesap güvenliği ve oturum ayarları</p>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="toggle-group">
+                            <div class="toggle-info">
+                                <div class="toggle-title">İki Faktörlü Doğrulama (Admin)</div>
+                                <div class="toggle-desc">Admin girişlerinde 2FA zorunlu olsun</div>
+                            </div>
+                            <label class="toggle-switch">
+                                <input type="checkbox" name="admin_2fa" checked>
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+                        
+                        <div class="toggle-group">
+                            <div class="toggle-info">
+                                <div class="toggle-title">E-posta Doğrulama</div>
+                                <div class="toggle-desc">Yeni hesaplar için e-posta doğrulaması zorunlu olsun</div>
+                            </div>
+                            <label class="toggle-switch">
+                                <input type="checkbox" name="email_verification" checked>
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+                        
+                        <div class="toggle-group">
+                            <div class="toggle-info">
+                                <div class="toggle-title">reCAPTCHA</div>
+                                <div class="toggle-desc">Kayıt ve giriş formlarında reCAPTCHA kullan</div>
+                            </div>
+                            <label class="toggle-switch">
+                                <input type="checkbox" name="recaptcha" checked>
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+                        
+                        <div class="form-row" style="margin-top: 24px;">
+                            <div class="form-group">
+                                <label class="form-label">Oturum Süresi (dakika)</label>
+                                <input type="number" class="form-input" name="session_timeout" value="60">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Max Giriş Denemesi</label>
+                                <input type="number" class="form-input" name="max_login_attempts" value="5">
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">Hesap Kilitleme Süresi (dakika)</label>
+                            <input type="number" class="form-input" name="lockout_duration" value="30">
+                            <p class="form-help">Başarısız giriş denemelerinden sonra hesap bu süre kadar kilitlenir</p>
+                        </div>
+                    </div>
+                    <div class="card-footer">
+                        <button type="submit" class="btn btn-primary">Değişiklikleri Kaydet</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <!-- Bakım Modu -->
+        <div class="settings-section" id="bakim" style="display: none;">
+            <form action="/admin/ayarlar/bakim" method="POST">
+                <div class="settings-card">
+                    <div class="card-header">
+                        <div>
+                            <h2 class="card-title">Bakım Modu</h2>
+                            <p class="card-subtitle">Site bakım ve önbellek ayarları</p>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="toggle-group">
+                            <div class="toggle-info">
+                                <div class="toggle-title">Bakım Modu</div>
+                                <div class="toggle-desc">Siteyi bakım moduna al (sadece adminler erişebilir)</div>
+                            </div>
+                            <label class="toggle-switch">
+                                <input type="checkbox" name="maintenance_mode">
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+                        
+                        <div class="form-group" style="margin-top: 24px;">
+                            <label class="form-label">Bakım Mesajı</label>
+                            <textarea class="form-textarea" name="maintenance_message">Sitemiz şu anda bakımda. Kısa süre içinde tekrar hizmetinizde olacağız!</textarea>
+                        </div>
+                    </div>
+                    <div class="card-footer">
+                        <button type="button" class="btn btn-secondary" onclick="clearCache()">Önbelleği Temizle</button>
+                        <button type="submit" class="btn btn-primary">Değişiklikleri Kaydet</button>
+                    </div>
+                </div>
+            </form>
+            
+            <!-- Danger Zone -->
+            <div class="settings-card danger-zone" style="margin-top: 24px;">
+                <div class="card-header">
+                    <div>
+                        <h2 class="card-title" style="color: #ef4444;">Tehlikeli Bölge</h2>
+                        <p class="card-subtitle">Bu işlemler geri alınamaz</p>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="danger-item">
+                        <div class="danger-info">
+                            <h4>Tüm Önbelleği Sil</h4>
+                            <p>Tüm önbellek verilerini temizle</p>
+                        </div>
+                        <button type="button" class="btn btn-danger" onclick="clearAllCache()">Temizle</button>
+                    </div>
+                    <div class="danger-item">
+                        <div class="danger-info">
+                            <h4>Tüm Oturumları Sonlandır</h4>
+                            <p>Tüm kullanıcıların oturumlarını kapat</p>
+                        </div>
+                        <button type="button" class="btn btn-danger" onclick="terminateSessions()">Sonlandır</button>
+                    </div>
+                    <div class="danger-item">
+                        <div class="danger-info">
+                            <h4>Veritabanı Yedeği Al</h4>
+                            <p>Tüm veritabanının yedeğini indir</p>
+                        </div>
+                        <button type="button" class="btn btn-secondary" onclick="backupDatabase()">Yedek Al</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function showSection(sectionId) {
+    // Hide all sections
+    document.querySelectorAll('.settings-section').forEach(section => {
+        section.style.display = 'none';
+    });
+    
+    // Remove active from all nav items
+    document.querySelectorAll('.nav-item').forEach(item => {
+        item.classList.remove('active');
+    });
+    
+    // Show selected section
+    document.getElementById(sectionId).style.display = 'block';
+    
+    // Add active to clicked nav item
+    event.currentTarget.classList.add('active');
+}
+
+function testEmail() {
+    if (confirm('Test e-postası göndermek istiyor musunuz?')) {
+        fetch('/admin/ayarlar/test-email', { method: 'POST' })
+            .then(response => response.json())
+            .then(data => {
+                alert(data.success ? 'Test e-postası gönderildi!' : 'E-posta gönderilemedi: ' + data.error);
+            });
+    }
+}
+
+function clearCache() {
+    if (confirm('Önbelleği temizlemek istiyor musunuz?')) {
+        fetch('/admin/ayarlar/clear-cache', { method: 'POST' })
+            .then(() => alert('Önbellek temizlendi!'));
+    }
+}
+
+function clearAllCache() {
+    if (confirm('TÜM önbelleği temizlemek istiyor musunuz? Bu işlem geri alınamaz.')) {
+        fetch('/admin/ayarlar/clear-all-cache', { method: 'POST' })
+            .then(() => alert('Tüm önbellek temizlendi!'));
+    }
+}
+
+function terminateSessions() {
+    if (confirm('TÜM kullanıcı oturumlarını sonlandırmak istiyor musunuz? Herkes yeniden giriş yapmak zorunda kalacak.')) {
+        fetch('/admin/ayarlar/terminate-sessions', { method: 'POST' })
+            .then(() => alert('Tüm oturumlar sonlandırıldı!'));
+    }
+}
+
+function backupDatabase() {
+    window.location.href = '/admin/ayarlar/backup';
+}
+
+// Color preview update
+document.querySelectorAll('.color-input').forEach(input => {
+    input.addEventListener('input', function() {
+        this.parentElement.querySelector('.color-preview').style.background = this.value;
+    });
+});
+</script>

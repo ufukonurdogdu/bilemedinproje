@@ -1,0 +1,722 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gizlilik Politikası - Bilemezsin</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #0a0a0f;
+            --bg-secondary: #12121a;
+            --bg-tertiary: #1a1a25;
+            --text-primary: #ffffff;
+            --text-secondary: #a0a0b0;
+            --text-muted: #6b6b80;
+            --accent-primary: #6366f1;
+            --accent-secondary: #8b5cf6;
+            --bi-color: #f59e0b;
+            --border-color: rgba(255,255,255,0.08);
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.7;
+            min-height: 100vh;
+        }
+
+        /* Header */
+        .header {
+            background: var(--bg-secondary);
+            border-bottom: 1px solid var(--border-color);
+            padding: 1rem 2rem;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: var(--text-primary);
+            text-decoration: none;
+        }
+
+        .logo span {
+            color: var(--bi-color);
+        }
+
+        .header-nav {
+            display: flex;
+            gap: 1.5rem;
+            align-items: center;
+        }
+
+        .header-nav a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: color 0.3s;
+        }
+
+        .header-nav a:hover {
+            color: var(--text-primary);
+        }
+
+        /* Hero */
+        .hero {
+            background: linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-primary) 100%);
+            padding: 4rem 2rem;
+            text-align: center;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .hero h1 {
+            font-size: 2.5rem;
+            font-weight: 800;
+            margin-bottom: 1rem;
+        }
+
+        .hero p {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .last-updated {
+            display: inline-block;
+            margin-top: 1.5rem;
+            padding: 0.5rem 1rem;
+            background: var(--bg-tertiary);
+            border-radius: 20px;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        /* Content */
+        .content-wrapper {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 3rem 2rem;
+        }
+
+        .toc {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 2rem;
+            margin-bottom: 3rem;
+        }
+
+        .toc h3 {
+            font-size: 1.1rem;
+            margin-bottom: 1rem;
+            color: var(--text-primary);
+        }
+
+        .toc-list {
+            list-style: none;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 0.5rem;
+        }
+
+        .toc-list li a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem;
+            border-radius: 8px;
+            transition: all 0.3s;
+        }
+
+        .toc-list li a:hover {
+            background: var(--bg-tertiary);
+            color: var(--accent-primary);
+        }
+
+        .toc-list li a::before {
+            content: "→";
+            color: var(--accent-primary);
+        }
+
+        .section {
+            margin-bottom: 3rem;
+        }
+
+        .section h2 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 2px solid var(--accent-primary);
+            display: inline-block;
+        }
+
+        .section h3 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin: 1.5rem 0 1rem;
+            color: var(--text-primary);
+        }
+
+        .section p {
+            color: var(--text-secondary);
+            margin-bottom: 1rem;
+        }
+
+        .section ul, .section ol {
+            color: var(--text-secondary);
+            margin-left: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .section li {
+            margin-bottom: 0.5rem;
+        }
+
+        .highlight-box {
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.1) 0%, rgba(139, 92, 246, 0.1) 100%);
+            border: 1px solid rgba(99, 102, 241, 0.3);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+        }
+
+        .highlight-box.warning {
+            background: linear-gradient(135deg, rgba(245, 158, 11, 0.1) 0%, rgba(239, 68, 68, 0.1) 100%);
+            border-color: rgba(245, 158, 11, 0.3);
+        }
+
+        .highlight-box h4 {
+            font-size: 1rem;
+            margin-bottom: 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .highlight-box p {
+            margin-bottom: 0;
+            font-size: 0.95rem;
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+            background: var(--bg-secondary);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .data-table th,
+        .data-table td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .data-table th {
+            background: var(--bg-tertiary);
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .data-table td {
+            color: var(--text-secondary);
+        }
+
+        .data-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .contact-card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-top: 2rem;
+        }
+
+        .contact-card h4 {
+            margin-bottom: 1rem;
+        }
+
+        .contact-card a {
+            color: var(--accent-primary);
+            text-decoration: none;
+        }
+
+        .contact-card a:hover {
+            text-decoration: underline;
+        }
+
+        /* Footer */
+        .footer {
+            background: var(--bg-secondary);
+            border-top: 1px solid var(--border-color);
+            padding: 3rem 2rem;
+            margin-top: 4rem;
+        }
+
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 2rem;
+        }
+
+        .footer-section h4 {
+            font-size: 1rem;
+            margin-bottom: 1rem;
+            color: var(--text-primary);
+        }
+
+        .footer-section a {
+            display: block;
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.9rem;
+            margin-bottom: 0.5rem;
+            transition: color 0.3s;
+        }
+
+        .footer-section a:hover {
+            color: var(--accent-primary);
+        }
+
+        .footer-bottom {
+            max-width: 1200px;
+            margin: 2rem auto 0;
+            padding-top: 2rem;
+            border-top: 1px solid var(--border-color);
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+
+        /* Back to top */
+        .back-to-top {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            width: 48px;
+            height: 48px;
+            background: var(--accent-primary);
+            border: none;
+            border-radius: 50%;
+            color: white;
+            font-size: 1.25rem;
+            cursor: pointer;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s;
+            z-index: 99;
+        }
+
+        .back-to-top.visible {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .back-to-top:hover {
+            background: var(--accent-secondary);
+            transform: translateY(-3px);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .header {
+                padding: 1rem;
+            }
+
+            .header-nav {
+                display: none;
+            }
+
+            .hero {
+                padding: 3rem 1rem;
+            }
+
+            .hero h1 {
+                font-size: 1.75rem;
+            }
+
+            .content-wrapper {
+                padding: 2rem 1rem;
+            }
+
+            .toc-list {
+                grid-template-columns: 1fr;
+            }
+
+            .data-table {
+                display: block;
+                overflow-x: auto;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-content">
+            <a href="/" class="logo"><span>bi</span>lemezsin</a>
+            <nav class="header-nav">
+                <a href="/">Ana Sayfa</a>
+                <a href="/hakkimizda">Hakkımızda</a>
+                <a href="/iletisim">İletişim</a>
+                <a href="/giris">Giriş Yap</a>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Hero -->
+    <section class="hero">
+        <h1>🔒 Gizlilik Politikası</h1>
+        <p>Kişisel verilerinizin güvenliği bizim için çok önemli. Bu politika, verilerinizi nasıl topladığımızı, kullandığımızı ve koruduğumuzu açıklar.</p>
+        <span class="last-updated">📅 Son Güncelleme: 12 Aralık 2024</span>
+    </section>
+
+    <!-- Content -->
+    <div class="content-wrapper">
+        <!-- Table of Contents -->
+        <nav class="toc">
+            <h3>📑 İçindekiler</h3>
+            <ul class="toc-list">
+                <li><a href="#giris">Giriş</a></li>
+                <li><a href="#toplanan-veriler">Toplanan Veriler</a></li>
+                <li><a href="#veri-kullanimi">Veri Kullanımı</a></li>
+                <li><a href="#cerezler">Çerezler</a></li>
+                <li><a href="#veri-paylasimi">Veri Paylaşımı</a></li>
+                <li><a href="#veri-guvenligi">Veri Güvenliği</a></li>
+                <li><a href="#haklariniz">Haklarınız (KVKK)</a></li>
+                <li><a href="#saklama-suresi">Saklama Süresi</a></li>
+                <li><a href="#degisiklikler">Politika Değişiklikleri</a></li>
+                <li><a href="#iletisim">İletişim</a></li>
+            </ul>
+        </nav>
+
+        <!-- Sections -->
+        <section id="giris" class="section">
+            <h2>1. Giriş</h2>
+            <p>Bilemezsin ("biz", "bizim" veya "Platform") olarak, 6698 sayılı Kişisel Verilerin Korunması Kanunu ("KVKK") ve ilgili mevzuat kapsamında kişisel verilerinizin korunmasına büyük önem veriyoruz.</p>
+            <p>Bu Gizlilik Politikası, platformumuzu kullanırken toplanan, işlenen ve saklanan kişisel verileriniz hakkında sizi bilgilendirmek amacıyla hazırlanmıştır.</p>
+            
+            <div class="highlight-box">
+                <h4>ℹ️ Önemli Bilgi</h4>
+                <p>Platformumuzu kullanarak bu Gizlilik Politikası'nda belirtilen uygulamaları kabul etmiş sayılırsınız. Politikamızı kabul etmiyorsanız, lütfen platformumuzu kullanmayınız.</p>
+            </div>
+        </section>
+
+        <section id="toplanan-veriler" class="section">
+            <h2>2. Toplanan Veriler</h2>
+            <p>Platformumuzda aşağıdaki kişisel veriler toplanmaktadır:</p>
+            
+            <h3>2.1 Kimlik Bilgileri</h3>
+            <ul>
+                <li>Ad ve soyad</li>
+                <li>Kullanıcı adı</li>
+                <li>E-posta adresi</li>
+                <li>Profil fotoğrafı (isteğe bağlı)</li>
+            </ul>
+
+            <h3>2.2 İletişim Bilgileri</h3>
+            <ul>
+                <li>E-posta adresi</li>
+                <li>İletişim formu üzerinden gönderilen mesajlar</li>
+            </ul>
+
+            <h3>2.3 Kullanım Verileri</h3>
+            <ul>
+                <li>Tahmin geçmişi ve istatistikleri</li>
+                <li>bi! coin işlem geçmişi</li>
+                <li>Görev tamamlama kayıtları</li>
+                <li>Mağaza satın alma geçmişi</li>
+                <li>Platform üzerindeki etkileşimler</li>
+            </ul>
+
+            <h3>2.4 Teknik Veriler</h3>
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Veri Türü</th>
+                        <th>Açıklama</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>IP Adresi</td>
+                        <td>Güvenlik ve konum bazlı hizmetler için</td>
+                    </tr>
+                    <tr>
+                        <td>Cihaz Bilgileri</td>
+                        <td>Tarayıcı türü, işletim sistemi</td>
+                    </tr>
+                    <tr>
+                        <td>Çerez Verileri</td>
+                        <td>Oturum ve tercih bilgileri</td>
+                    </tr>
+                    <tr>
+                        <td>Log Kayıtları</td>
+                        <td>Sistem ve güvenlik logları</td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+
+        <section id="veri-kullanimi" class="section">
+            <h2>3. Veri Kullanımı</h2>
+            <p>Topladığımız kişisel veriler aşağıdaki amaçlarla kullanılmaktadır:</p>
+            
+            <ul>
+                <li><strong>Hizmet Sunumu:</strong> Platform hesabınızın oluşturulması ve yönetimi</li>
+                <li><strong>Tahmin Sistemi:</strong> Tahminlerinizin kaydedilmesi ve sonuçlarının hesaplanması</li>
+                <li><strong>bi! coin Sistemi:</strong> Sanal para birimi işlemlerinin gerçekleştirilmesi</li>
+                <li><strong>Sıralama:</strong> Liderlik tablolarının oluşturulması</li>
+                <li><strong>İletişim:</strong> Bildirimler, duyurular ve destek hizmetleri</li>
+                <li><strong>Güvenlik:</strong> Hesap güvenliği ve dolandırıcılık önleme</li>
+                <li><strong>İyileştirme:</strong> Platform deneyiminin geliştirilmesi</li>
+                <li><strong>Yasal Yükümlülükler:</strong> Mevzuat gerekliliklerinin yerine getirilmesi</li>
+            </ul>
+
+            <div class="highlight-box warning">
+                <h4>⚠️ Dikkat</h4>
+                <p>Kişisel verileriniz hiçbir koşulda üçüncü taraflara pazarlama amacıyla satılmaz veya kiralanmaz.</p>
+            </div>
+        </section>
+
+        <section id="cerezler" class="section">
+            <h2>4. Çerezler</h2>
+            <p>Platformumuz, kullanıcı deneyimini iyileştirmek için çerezler kullanmaktadır.</p>
+            
+            <h3>4.1 Kullanılan Çerez Türleri</h3>
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Çerez Türü</th>
+                        <th>Amaç</th>
+                        <th>Süre</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Zorunlu Çerezler</td>
+                        <td>Oturum yönetimi, güvenlik</td>
+                        <td>Oturum süresi</td>
+                    </tr>
+                    <tr>
+                        <td>İşlevsel Çerezler</td>
+                        <td>Dil ve tema tercihleri</td>
+                        <td>1 yıl</td>
+                    </tr>
+                    <tr>
+                        <td>Analitik Çerezler</td>
+                        <td>Kullanım istatistikleri</td>
+                        <td>6 ay</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h3>4.2 Çerez Yönetimi</h3>
+            <p>Tarayıcı ayarlarınızdan çerezleri devre dışı bırakabilirsiniz. Ancak bu durumda platformun bazı özellikleri düzgün çalışmayabilir.</p>
+        </section>
+
+        <section id="veri-paylasimi" class="section">
+            <h2>5. Veri Paylaşımı</h2>
+            <p>Kişisel verileriniz aşağıdaki durumlar dışında üçüncü taraflarla paylaşılmaz:</p>
+            
+            <ul>
+                <li><strong>Hizmet Sağlayıcılar:</strong> Hosting, e-posta ve analitik hizmetleri sunan iş ortaklarımız</li>
+                <li><strong>Yasal Zorunluluklar:</strong> Mahkeme kararı veya yasal düzenleme gerektirdiğinde</li>
+                <li><strong>Güvenlik:</strong> Dolandırıcılık veya güvenlik ihlali durumlarında</li>
+                <li><strong>Açık Rıza:</strong> Sizin açık onayınızla</li>
+            </ul>
+
+            <p>Hizmet sağlayıcılarımızla yapılan sözleşmelerde KVKK uyumluluğu şartı aranmaktadır.</p>
+        </section>
+
+        <section id="veri-guvenligi" class="section">
+            <h2>6. Veri Güvenliği</h2>
+            <p>Kişisel verilerinizin güvenliği için aşağıdaki önlemleri almaktayız:</p>
+            
+            <ul>
+                <li>SSL/TLS şifreleme ile güvenli veri iletimi</li>
+                <li>Şifrelerinizin hash algoritmaları ile saklanması</li>
+                <li>Düzenli güvenlik testleri ve güncellemeler</li>
+                <li>Erişim kontrolü ve yetkilendirme sistemleri</li>
+                <li>Veri merkezlerinde fiziksel güvenlik önlemleri</li>
+                <li>Çalışan eğitimleri ve gizlilik sözleşmeleri</li>
+            </ul>
+
+            <div class="highlight-box">
+                <h4>🔐 Güvenlik Tavsiyesi</h4>
+                <p>Hesabınızın güvenliği için güçlü bir şifre kullanmanızı ve şifrenizi kimseyle paylaşmamanızı öneririz.</p>
+            </div>
+        </section>
+
+        <section id="haklariniz" class="section">
+            <h2>7. Haklarınız (KVKK Kapsamında)</h2>
+            <p>6698 sayılı KVKK'nın 11. maddesi kapsamında aşağıdaki haklara sahipsiniz:</p>
+            
+            <ol>
+                <li>Kişisel verilerinizin işlenip işlenmediğini öğrenme</li>
+                <li>İşlenmişse buna ilişkin bilgi talep etme</li>
+                <li>İşlenme amacını ve amacına uygun kullanılıp kullanılmadığını öğrenme</li>
+                <li>Yurt içinde veya yurt dışında aktarıldığı üçüncü kişileri bilme</li>
+                <li>Eksik veya yanlış işlenmişse düzeltilmesini isteme</li>
+                <li>KVKK'nın 7. maddesindeki şartlar çerçevesinde silinmesini veya yok edilmesini isteme</li>
+                <li>Düzeltme, silme ve yok etme işlemlerinin aktarıldığı üçüncü kişilere bildirilmesini isteme</li>
+                <li>İşlenen verilerin münhasıran otomatik sistemler vasıtasıyla analiz edilmesi suretiyle aleyhinize bir sonucun ortaya çıkmasına itiraz etme</li>
+                <li>Kanuna aykırı işleme nedeniyle zarara uğramanız halinde zararın giderilmesini talep etme</li>
+            </ol>
+
+            <p>Bu haklarınızı kullanmak için aşağıdaki iletişim kanallarından bize ulaşabilirsiniz.</p>
+        </section>
+
+        <section id="saklama-suresi" class="section">
+            <h2>8. Veri Saklama Süresi</h2>
+            <p>Kişisel verileriniz, işlenme amaçları için gerekli olan süre boyunca saklanır:</p>
+            
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Veri Kategorisi</th>
+                        <th>Saklama Süresi</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Hesap Bilgileri</td>
+                        <td>Hesap aktif olduğu sürece + 2 yıl</td>
+                    </tr>
+                    <tr>
+                        <td>İşlem Geçmişi</td>
+                        <td>10 yıl (yasal zorunluluk)</td>
+                    </tr>
+                    <tr>
+                        <td>İletişim Kayıtları</td>
+                        <td>3 yıl</td>
+                    </tr>
+                    <tr>
+                        <td>Log Kayıtları</td>
+                        <td>2 yıl</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <p>Saklama süresi dolan veriler, güvenli yöntemlerle silinir veya anonim hale getirilir.</p>
+        </section>
+
+        <section id="degisiklikler" class="section">
+            <h2>9. Politika Değişiklikleri</h2>
+            <p>Bu Gizlilik Politikası zaman zaman güncellenebilir. Önemli değişiklikler yapıldığında:</p>
+            
+            <ul>
+                <li>Platform üzerinde duyuru yapılacaktır</li>
+                <li>Kayıtlı e-posta adresinize bilgilendirme gönderilecektir</li>
+                <li>Son güncelleme tarihi bu sayfada belirtilecektir</li>
+            </ul>
+
+            <p>Değişikliklerden sonra platformu kullanmaya devam etmeniz, güncellenmiş politikayı kabul ettiğiniz anlamına gelir.</p>
+        </section>
+
+        <section id="iletisim" class="section">
+            <h2>10. İletişim</h2>
+            <p>Gizlilik politikamız veya kişisel verilerinizle ilgili sorularınız için bizimle iletişime geçebilirsiniz:</p>
+            
+            <div class="contact-card">
+                <h4>📧 Veri Sorumlusu İletişim Bilgileri</h4>
+                <p><strong>Şirket:</strong> Bilemezsin Teknoloji A.Ş.</p>
+                <p><strong>Adres:</strong> Levent Mah. Teknoloji Cad. No:42 Beşiktaş/İstanbul</p>
+                <p><strong>E-posta:</strong> <a href="mailto:kvkk@bilemezsin.com">kvkk@bilemezsin.com</a></p>
+                <p><strong>Genel İletişim:</strong> <a href="mailto:destek@bilemezsin.com">destek@bilemezsin.com</a></p>
+                <p><strong>Telefon:</strong> +90 (212) 555 00 00</p>
+            </div>
+
+            <p style="margin-top: 1.5rem;">KVKK kapsamındaki başvurularınız için <a href="/iletisim" style="color: var(--accent-primary);">İletişim</a> sayfamızdaki formu kullanabilir veya doğrudan <a href="mailto:kvkk@bilemezsin.com" style="color: var(--accent-primary);">kvkk@bilemezsin.com</a> adresine e-posta gönderebilirsiniz.</p>
+        </section>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-section">
+                <h4>Bilemezsin</h4>
+                <a href="/hakkimizda">Hakkımızda</a>
+                <a href="/iletisim">İletişim</a>
+                <a href="/sikca-sorulan-sorular">S.S.S.</a>
+            </div>
+            <div class="footer-section">
+                <h4>Yasal</h4>
+                <a href="/gizlilik">Gizlilik Politikası</a>
+                <a href="/kullanim-sartlari">Kullanım Şartları</a>
+                <a href="/cerez-politikasi">Çerez Politikası</a>
+            </div>
+            <div class="footer-section">
+                <h4>Sosyal Medya</h4>
+                <a href="#">Twitter</a>
+                <a href="#">Instagram</a>
+                <a href="#">Discord</a>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2024 Bilemezsin. Tüm hakları saklıdır.</p>
+        </div>
+    </footer>
+
+    <!-- Back to Top -->
+    <button class="back-to-top" onclick="window.scrollTo({top: 0, behavior: 'smooth'})">↑</button>
+
+    <script>
+        // Back to top button visibility
+        window.addEventListener('scroll', function() {
+            const btn = document.querySelector('.back-to-top');
+            if (window.scrollY > 300) {
+                btn.classList.add('visible');
+            } else {
+                btn.classList.remove('visible');
+            }
+        });
+
+        // Smooth scroll for TOC links
+        document.querySelectorAll('.toc-list a').forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                const targetId = this.getAttribute('href').substring(1);
+                const target = document.getElementById(targetId);
+                if (target) {
+                    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            });
+        });
+    </script>
+</body>
+</html>

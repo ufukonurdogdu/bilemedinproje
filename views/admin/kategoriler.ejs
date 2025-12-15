@@ -1,0 +1,811 @@
+<% layout('layouts/admin') -%>
+<% activeMenu = 'kategoriler' %>
+
+<style>
+.page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+}
+
+.page-title {
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.page-subtitle {
+    font-size: 14px;
+    color: var(--text-secondary);
+    margin-top: 4px;
+}
+
+.btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    border: none;
+}
+
+.btn-primary {
+    background: var(--accent-primary);
+    color: white;
+}
+
+.btn-primary:hover {
+    background: var(--accent-hover);
+}
+
+.btn-secondary {
+    background: var(--bg-tertiary);
+    color: var(--text-primary);
+    border: 1px solid var(--border-color);
+}
+
+.btn-secondary:hover {
+    background: var(--bg-hover);
+}
+
+.btn-sm {
+    padding: 6px 12px;
+    font-size: 12px;
+}
+
+.categories-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 20px;
+}
+
+.category-card {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    overflow: hidden;
+    transition: all 0.2s;
+}
+
+.category-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+}
+
+.category-header {
+    padding: 20px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.category-icon {
+    width: 56px;
+    height: 56px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+}
+
+.category-info {
+    flex: 1;
+}
+
+.category-name {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 4px;
+}
+
+.category-slug {
+    font-size: 13px;
+    color: var(--text-secondary);
+}
+
+.category-status {
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.status-active {
+    background: rgba(34, 197, 94, 0.1);
+    color: #22c55e;
+}
+
+.status-inactive {
+    background: rgba(107, 114, 128, 0.1);
+    color: #6b7280;
+}
+
+.category-stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1px;
+    background: var(--border-color);
+}
+
+.stat-item {
+    background: var(--bg-secondary);
+    padding: 16px;
+    text-align: center;
+}
+
+.stat-value {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.stat-label {
+    font-size: 12px;
+    color: var(--text-secondary);
+    margin-top: 4px;
+}
+
+.category-footer {
+    padding: 16px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: var(--bg-tertiary);
+}
+
+.category-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.action-btn {
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 6px;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s;
+    background: var(--bg-secondary);
+    color: var(--text-secondary);
+}
+
+.action-btn:hover {
+    background: var(--accent-primary);
+    color: white;
+}
+
+.action-btn.delete:hover {
+    background: #ef4444;
+}
+
+.category-date {
+    font-size: 12px;
+    color: var(--text-secondary);
+}
+
+/* Modal Styles */
+.modal-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 1000;
+    align-items: center;
+    justify-content: center;
+}
+
+.modal-overlay.active {
+    display: flex;
+}
+
+.modal {
+    background: var(--bg-secondary);
+    border-radius: 16px;
+    width: 100%;
+    max-width: 500px;
+    max-height: 90vh;
+    overflow-y: auto;
+    margin: 20px;
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 24px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.modal-title {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.modal-close {
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    background: var(--bg-tertiary);
+    border-radius: 8px;
+    cursor: pointer;
+    color: var(--text-secondary);
+}
+
+.modal-body {
+    padding: 24px;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-label {
+    display: block;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text-primary);
+    margin-bottom: 8px;
+}
+
+.form-input,
+.form-select,
+.form-textarea {
+    width: 100%;
+    padding: 12px 14px;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    font-size: 14px;
+}
+
+.form-input:focus,
+.form-select:focus,
+.form-textarea:focus {
+    outline: none;
+    border-color: var(--accent-primary);
+}
+
+.form-textarea {
+    min-height: 80px;
+    resize: vertical;
+}
+
+.form-help {
+    font-size: 12px;
+    color: var(--text-secondary);
+    margin-top: 6px;
+}
+
+.icon-picker {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 8px;
+    margin-top: 8px;
+}
+
+.icon-option {
+    width: 44px;
+    height: 44px;
+    border-radius: 8px;
+    border: 2px solid var(--border-color);
+    background: var(--bg-primary);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    transition: all 0.2s;
+}
+
+.icon-option:hover {
+    border-color: var(--accent-primary);
+}
+
+.icon-option.selected {
+    border-color: var(--accent-primary);
+    background: rgba(99, 102, 241, 0.1);
+}
+
+.color-picker {
+    display: grid;
+    grid-template-columns: repeat(8, 1fr);
+    gap: 8px;
+    margin-top: 8px;
+}
+
+.color-option {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    cursor: pointer;
+    border: 3px solid transparent;
+    transition: all 0.2s;
+}
+
+.color-option:hover {
+    transform: scale(1.1);
+}
+
+.color-option.selected {
+    border-color: var(--text-primary);
+}
+
+.modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    padding: 16px 24px;
+    border-top: 1px solid var(--border-color);
+}
+
+.checkbox-group {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.checkbox-group input {
+    width: 18px;
+    height: 18px;
+    accent-color: var(--accent-primary);
+}
+
+.empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+}
+
+.empty-state-icon {
+    width: 64px;
+    height: 64px;
+    margin: 0 auto 16px;
+    color: var(--text-secondary);
+}
+
+.empty-state-title {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 8px;
+}
+
+.empty-state-text {
+    font-size: 14px;
+    color: var(--text-secondary);
+    margin-bottom: 20px;
+}
+
+@media (max-width: 768px) {
+    .categories-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .icon-picker {
+        grid-template-columns: repeat(5, 1fr);
+    }
+}
+</style>
+
+<!-- Page Header -->
+<div class="page-header">
+    <div>
+        <h1 class="page-title">Kategori Yönetimi</h1>
+        <p class="page-subtitle">Tahmin kategorilerini oluşturun ve düzenleyin</p>
+    </div>
+    <button class="btn btn-primary" onclick="openModal('addCategoryModal')">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="12" y1="5" x2="12" y2="19"/>
+            <line x1="5" y1="12" x2="19" y2="12"/>
+        </svg>
+        Yeni Kategori
+    </button>
+</div>
+
+<!-- Categories Grid -->
+<div class="categories-grid">
+    <% if (typeof categories !== 'undefined' && categories.length > 0) { %>
+        <% categories.forEach(function(cat) { %>
+        <div class="category-card">
+            <div class="category-header">
+                <div class="category-icon" style="background: <%= cat.color %>20; color: <%= cat.color %>;">
+                    <%= cat.icon %>
+                </div>
+                <div class="category-info">
+                    <div class="category-name"><%= cat.name %></div>
+                    <div class="category-slug">/<%= cat.slug %></div>
+                </div>
+                <span class="category-status status-<%= cat.status %>">
+                    <%= cat.status === 'active' ? 'Aktif' : 'Pasif' %>
+                </span>
+            </div>
+            <div class="category-stats">
+                <div class="stat-item">
+                    <div class="stat-value"><%= cat.prediction_count %></div>
+                    <div class="stat-label">Tahmin</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value"><%= cat.participant_count %></div>
+                    <div class="stat-label">Katılımcı</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value"><%= cat.total_pool %></div>
+                    <div class="stat-label">Toplam bi!</div>
+                </div>
+            </div>
+            <div class="category-footer">
+                <span class="category-date">Oluşturulma: <%= new Date(cat.created_at).toLocaleDateString('tr-TR') %></span>
+                <div class="category-actions">
+                    <button class="action-btn" onclick="editCategory(<%= cat.id %>)" title="Düzenle">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                        </svg>
+                    </button>
+                    <button class="action-btn delete" onclick="deleteCategory(<%= cat.id %>)" title="Sil">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="3 6 5 6 21 6"/>
+                            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+        <% }); %>
+    <% } else { %>
+        <!-- Demo Categories -->
+        <div class="category-card">
+            <div class="category-header">
+                <div class="category-icon" style="background: rgba(34, 197, 94, 0.1); color: #22c55e;">⚽</div>
+                <div class="category-info">
+                    <div class="category-name">Spor</div>
+                    <div class="category-slug">/spor</div>
+                </div>
+                <span class="category-status status-active">Aktif</span>
+            </div>
+            <div class="category-stats">
+                <div class="stat-item">
+                    <div class="stat-value">456</div>
+                    <div class="stat-label">Tahmin</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value">12.4K</div>
+                    <div class="stat-label">Katılımcı</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value">2.5M</div>
+                    <div class="stat-label">Toplam bi!</div>
+                </div>
+            </div>
+            <div class="category-footer">
+                <span class="category-date">Oluşturulma: 01.01.2024</span>
+                <div class="category-actions">
+                    <button class="action-btn" title="Düzenle"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>
+                    <button class="action-btn delete" title="Sil"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></button>
+                </div>
+            </div>
+        </div>
+        
+        <div class="category-card">
+            <div class="category-header">
+                <div class="category-icon" style="background: rgba(245, 158, 11, 0.1); color: #f59e0b;">📈</div>
+                <div class="category-info">
+                    <div class="category-name">Ekonomi</div>
+                    <div class="category-slug">/ekonomi</div>
+                </div>
+                <span class="category-status status-active">Aktif</span>
+            </div>
+            <div class="category-stats">
+                <div class="stat-item">
+                    <div class="stat-value">234</div>
+                    <div class="stat-label">Tahmin</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value">8.7K</div>
+                    <div class="stat-label">Katılımcı</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value">1.8M</div>
+                    <div class="stat-label">Toplam bi!</div>
+                </div>
+            </div>
+            <div class="category-footer">
+                <span class="category-date">Oluşturulma: 01.01.2024</span>
+                <div class="category-actions">
+                    <button class="action-btn" title="Düzenle"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>
+                    <button class="action-btn delete" title="Sil"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></button>
+                </div>
+            </div>
+        </div>
+        
+        <div class="category-card">
+            <div class="category-header">
+                <div class="category-icon" style="background: rgba(99, 102, 241, 0.1); color: #6366f1;">💻</div>
+                <div class="category-info">
+                    <div class="category-name">Teknoloji</div>
+                    <div class="category-slug">/teknoloji</div>
+                </div>
+                <span class="category-status status-active">Aktif</span>
+            </div>
+            <div class="category-stats">
+                <div class="stat-item">
+                    <div class="stat-value">189</div>
+                    <div class="stat-label">Tahmin</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value">6.2K</div>
+                    <div class="stat-label">Katılımcı</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value">980K</div>
+                    <div class="stat-label">Toplam bi!</div>
+                </div>
+            </div>
+            <div class="category-footer">
+                <span class="category-date">Oluşturulma: 15.01.2024</span>
+                <div class="category-actions">
+                    <button class="action-btn" title="Düzenle"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>
+                    <button class="action-btn delete" title="Sil"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></button>
+                </div>
+            </div>
+        </div>
+        
+        <div class="category-card">
+            <div class="category-header">
+                <div class="category-icon" style="background: rgba(236, 72, 153, 0.1); color: #ec4899;">🎬</div>
+                <div class="category-info">
+                    <div class="category-name">Eğlence</div>
+                    <div class="category-slug">/eglence</div>
+                </div>
+                <span class="category-status status-active">Aktif</span>
+            </div>
+            <div class="category-stats">
+                <div class="stat-item">
+                    <div class="stat-value">312</div>
+                    <div class="stat-label">Tahmin</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value">9.8K</div>
+                    <div class="stat-label">Katılımcı</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value">1.2M</div>
+                    <div class="stat-label">Toplam bi!</div>
+                </div>
+            </div>
+            <div class="category-footer">
+                <span class="category-date">Oluşturulma: 20.01.2024</span>
+                <div class="category-actions">
+                    <button class="action-btn" title="Düzenle"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>
+                    <button class="action-btn delete" title="Sil"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></button>
+                </div>
+            </div>
+        </div>
+        
+        <div class="category-card">
+            <div class="category-header">
+                <div class="category-icon" style="background: rgba(239, 68, 68, 0.1); color: #ef4444;">🏛️</div>
+                <div class="category-info">
+                    <div class="category-name">Siyaset</div>
+                    <div class="category-slug">/siyaset</div>
+                </div>
+                <span class="category-status status-active">Aktif</span>
+            </div>
+            <div class="category-stats">
+                <div class="stat-item">
+                    <div class="stat-value">78</div>
+                    <div class="stat-label">Tahmin</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value">4.5K</div>
+                    <div class="stat-label">Katılımcı</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value">650K</div>
+                    <div class="stat-label">Toplam bi!</div>
+                </div>
+            </div>
+            <div class="category-footer">
+                <span class="category-date">Oluşturulma: 01.02.2024</span>
+                <div class="category-actions">
+                    <button class="action-btn" title="Düzenle"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>
+                    <button class="action-btn delete" title="Sil"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></button>
+                </div>
+            </div>
+        </div>
+        
+        <div class="category-card">
+            <div class="category-header">
+                <div class="category-icon" style="background: rgba(107, 114, 128, 0.1); color: #6b7280;">🌍</div>
+                <div class="category-info">
+                    <div class="category-name">Dünya</div>
+                    <div class="category-slug">/dunya</div>
+                </div>
+                <span class="category-status status-inactive">Pasif</span>
+            </div>
+            <div class="category-stats">
+                <div class="stat-item">
+                    <div class="stat-value">45</div>
+                    <div class="stat-label">Tahmin</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value">2.1K</div>
+                    <div class="stat-label">Katılımcı</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value">320K</div>
+                    <div class="stat-label">Toplam bi!</div>
+                </div>
+            </div>
+            <div class="category-footer">
+                <span class="category-date">Oluşturulma: 15.02.2024</span>
+                <div class="category-actions">
+                    <button class="action-btn" title="Düzenle"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>
+                    <button class="action-btn delete" title="Sil"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></button>
+                </div>
+            </div>
+        </div>
+    <% } %>
+</div>
+
+<!-- Add Category Modal -->
+<div class="modal-overlay" id="addCategoryModal">
+    <div class="modal">
+        <div class="modal-header">
+            <h3 class="modal-title">Yeni Kategori Ekle</h3>
+            <button class="modal-close" onclick="closeModal('addCategoryModal')">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="18" y1="6" x2="6" y2="18"/>
+                    <line x1="6" y1="6" x2="18" y2="18"/>
+                </svg>
+            </button>
+        </div>
+        <form action="/admin/kategoriler/ekle" method="POST">
+            <div class="modal-body">
+                <div class="form-group">
+                    <label class="form-label">Kategori Adı *</label>
+                    <input type="text" class="form-input" name="name" id="categoryName" placeholder="Örn: Spor" required>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">URL Slug</label>
+                    <input type="text" class="form-input" name="slug" id="categorySlug" placeholder="Otomatik oluşturulur">
+                    <p class="form-help">Boş bırakırsanız otomatik oluşturulur</p>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Açıklama</label>
+                    <textarea class="form-textarea" name="description" placeholder="Kategori açıklaması..."></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">İkon Seçin</label>
+                    <div class="icon-picker">
+                        <div class="icon-option selected" data-icon="⚽" onclick="selectIcon(this)">⚽</div>
+                        <div class="icon-option" data-icon="📈" onclick="selectIcon(this)">📈</div>
+                        <div class="icon-option" data-icon="💻" onclick="selectIcon(this)">💻</div>
+                        <div class="icon-option" data-icon="🎬" onclick="selectIcon(this)">🎬</div>
+                        <div class="icon-option" data-icon="🏛️" onclick="selectIcon(this)">🏛️</div>
+                        <div class="icon-option" data-icon="🌍" onclick="selectIcon(this)">🌍</div>
+                        <div class="icon-option" data-icon="🎮" onclick="selectIcon(this)">🎮</div>
+                        <div class="icon-option" data-icon="🎵" onclick="selectIcon(this)">🎵</div>
+                        <div class="icon-option" data-icon="📚" onclick="selectIcon(this)">📚</div>
+                        <div class="icon-option" data-icon="🏆" onclick="selectIcon(this)">🏆</div>
+                        <div class="icon-option" data-icon="💰" onclick="selectIcon(this)">💰</div>
+                        <div class="icon-option" data-icon="🚀" onclick="selectIcon(this)">🚀</div>
+                    </div>
+                    <input type="hidden" name="icon" id="selectedIcon" value="⚽">
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Renk Seçin</label>
+                    <div class="color-picker">
+                        <div class="color-option selected" style="background: #22c55e;" data-color="#22c55e" onclick="selectColor(this)"></div>
+                        <div class="color-option" style="background: #f59e0b;" data-color="#f59e0b" onclick="selectColor(this)"></div>
+                        <div class="color-option" style="background: #6366f1;" data-color="#6366f1" onclick="selectColor(this)"></div>
+                        <div class="color-option" style="background: #ec4899;" data-color="#ec4899" onclick="selectColor(this)"></div>
+                        <div class="color-option" style="background: #ef4444;" data-color="#ef4444" onclick="selectColor(this)"></div>
+                        <div class="color-option" style="background: #8b5cf6;" data-color="#8b5cf6" onclick="selectColor(this)"></div>
+                        <div class="color-option" style="background: #14b8a6;" data-color="#14b8a6" onclick="selectColor(this)"></div>
+                        <div class="color-option" style="background: #f97316;" data-color="#f97316" onclick="selectColor(this)"></div>
+                    </div>
+                    <input type="hidden" name="color" id="selectedColor" value="#22c55e">
+                </div>
+                
+                <div class="checkbox-group">
+                    <input type="checkbox" id="isActive" name="is_active" checked>
+                    <label for="isActive">Aktif olarak yayınla</label>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="closeModal('addCategoryModal')">İptal</button>
+                <button type="submit" class="btn btn-primary">Kategori Ekle</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+function openModal(modalId) {
+    document.getElementById(modalId).classList.add('active');
+}
+
+function closeModal(modalId) {
+    document.getElementById(modalId).classList.remove('active');
+}
+
+function selectIcon(element) {
+    document.querySelectorAll('.icon-option').forEach(el => el.classList.remove('selected'));
+    element.classList.add('selected');
+    document.getElementById('selectedIcon').value = element.dataset.icon;
+}
+
+function selectColor(element) {
+    document.querySelectorAll('.color-option').forEach(el => el.classList.remove('selected'));
+    element.classList.add('selected');
+    document.getElementById('selectedColor').value = element.dataset.color;
+}
+
+// Auto-generate slug
+document.getElementById('categoryName').addEventListener('input', function() {
+    const slug = this.value
+        .toLowerCase()
+        .replace(/ğ/g, 'g')
+        .replace(/ü/g, 'u')
+        .replace(/ş/g, 's')
+        .replace(/ı/g, 'i')
+        .replace(/ö/g, 'o')
+        .replace(/ç/g, 'c')
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/-+/g, '-')
+        .replace(/^-|-$/g, '');
+    document.getElementById('categorySlug').placeholder = slug || 'Otomatik oluşturulur';
+});
+
+function editCategory(id) {
+    window.location.href = '/admin/kategoriler/' + id + '/duzenle';
+}
+
+function deleteCategory(id) {
+    if (confirm('Bu kategoriyi silmek istediğinizden emin misiniz? Bu işlem geri alınamaz.')) {
+        fetch('/admin/kategoriler/' + id, {
+            method: 'DELETE',
+            headers: { 'Content-Type': 'application/json' }
+        }).then(response => {
+            if (response.ok) {
+                window.location.reload();
+            }
+        });
+    }
+}
+
+// Close modal on outside click
+document.querySelectorAll('.modal-overlay').forEach(modal => {
+    modal.addEventListener('click', function(e) {
+        if (e.target === this) {
+            this.classList.remove('active');
+        }
+    });
+});
+</script>

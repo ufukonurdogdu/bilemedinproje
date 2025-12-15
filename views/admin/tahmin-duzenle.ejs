@@ -1,0 +1,102 @@
+<div class="admin-page">
+    <div class="page-actions">
+        <a href="/admin/tahminler" class="btn btn-secondary">← Geri</a>
+        <form action="/admin/tahminler/<%= tahmin.id %>/sil" method="POST" style="display: inline;" onsubmit="return confirm('Bu tahmini silmek istediğinize emin misiniz?')">
+            <button type="submit" class="btn btn-danger">Sil</button>
+        </form>
+    </div>
+
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title">Tahmin Düzenle</h3>
+        </div>
+        <div class="card-body">
+            <form action="/admin/tahminler/<%= tahmin.id %>/duzenle" method="POST" class="admin-form">
+                <div class="form-grid">
+                    <div class="form-group full">
+                        <label for="baslik">Başlık *</label>
+                        <input type="text" id="baslik" name="baslik" value="<%= tahmin.baslik %>" required>
+                    </div>
+
+                    <div class="form-group full">
+                        <label for="aciklama">Açıklama</label>
+                        <textarea id="aciklama" name="aciklama" rows="3"><%= tahmin.aciklama || '' %></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="kategori_id">Kategori *</label>
+                        <select id="kategori_id" name="kategori_id" required>
+                            <option value="">Seçin...</option>
+                            <% kategoriler.forEach(function(k) { %>
+                                <option value="<%= k.id %>" <%= tahmin.kategori_id == k.id ? 'selected' : '' %>><%= k.ikon %> <%= k.ad %></option>
+                            <% }); %>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="durum">Durum *</label>
+                        <select id="durum" name="durum" required>
+                            <option value="aktif" <%= tahmin.durum === 'aktif' ? 'selected' : '' %>>Aktif</option>
+                            <option value="beklemede" <%= tahmin.durum === 'beklemede' ? 'selected' : '' %>>Beklemede</option>
+                            <option value="sonuclandi" <%= tahmin.durum === 'sonuclandi' ? 'selected' : '' %>>Sonuçlandı</option>
+                            <option value="iptal" <%= tahmin.durum === 'iptal' ? 'selected' : '' %>>İptal</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="bi_odul">bi! Ödülü *</label>
+                        <input type="number" id="bi_odul" name="bi_odul" value="<%= tahmin.bi_odul %>" min="10" max="10000" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="bitis_tarihi">Bitiş Tarihi *</label>
+                        <input type="datetime-local" id="bitis_tarihi" name="bitis_tarihi" value="<%= tahmin.bitis_tarihi ? new Date(tahmin.bitis_tarihi).toISOString().slice(0, 16) : '' %>" required>
+                    </div>
+
+                    <div class="form-group full">
+                        <label for="gorsel">Görsel URL</label>
+                        <input type="url" id="gorsel" name="gorsel" value="<%= tahmin.gorsel || '' %>" placeholder="https://example.com/image.jpg">
+                    </div>
+
+                    <% if (tahmin.gorsel) { %>
+                        <div class="form-group full">
+                            <label>Mevcut Görsel</label>
+                            <img src="<%= tahmin.gorsel %>" class="preview-image" alt="">
+                        </div>
+                    <% } %>
+
+                    <div class="form-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" name="sponsorlu_mu" id="sponsorlu_mu" <%= tahmin.sponsorlu_mu ? 'checked' : '' %>>
+                            <span>Sponsorlu Tahmin</span>
+                        </label>
+                    </div>
+
+                    <div class="form-group" id="sponsorField" style="display: <%= tahmin.sponsorlu_mu ? 'block' : 'none' %>;">
+                        <label for="sponsor_adi">Sponsor Adı</label>
+                        <input type="text" id="sponsor_adi" name="sponsor_adi" value="<%= tahmin.sponsor_adi || '' %>" placeholder="Sponsor firma adı">
+                    </div>
+                </div>
+
+                <div class="stats-info">
+                    <h4>İstatistikler</h4>
+                    <div class="stats-row">
+                        <span>Katılım: <strong><%= tahmin.katilim_sayisi %></strong></span>
+                        <span>Evet: <strong>%<%= tahmin.evet_orani %></strong></span>
+                        <span>Hayır: <strong>%<%= tahmin.hayir_orani %></strong></span>
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">Değişiklikleri Kaydet</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+document.getElementById('sponsorlu_mu').addEventListener('change', function() {
+    document.getElementById('sponsorField').style.display = this.checked ? 'block' : 'none';
+});
+</script>

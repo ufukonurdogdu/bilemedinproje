@@ -1,0 +1,89 @@
+<div class="dashboard-container">
+    <div class="page-header">
+        <h1>Tahminlerim</h1>
+        <p>Tüm tahminlerini buradan takip edebilirsin</p>
+    </div>
+
+    <div class="tabs">
+        <button class="tab active" data-tab="all">Tümü</button>
+        <button class="tab" data-tab="active">Aktif</button>
+        <button class="tab" data-tab="won">Kazandıklarım</button>
+        <button class="tab" data-tab="lost">Kaybettiklerim</button>
+    </div>
+
+    <div class="predictions-list">
+        <% if (tahminler && tahminler.length > 0) { %>
+            <% tahminler.forEach(function(tahmin) { %>
+                <div class="prediction-card-horizontal" data-status="<%= tahmin.durum === 'aktif' ? 'active' : (tahmin.dogru_mu ? 'won' : 'lost') %>">
+                    <% if (tahmin.gorsel) { %>
+                        <div class="prediction-image">
+                            <img src="<%= tahmin.gorsel %>" alt="">
+                        </div>
+                    <% } %>
+                    <div class="prediction-content">
+                        <div class="prediction-header">
+                            <span class="prediction-category">
+                                <%= tahmin.kategori_ikon || '🎯' %> <%= tahmin.kategori_adi || 'Genel' %>
+                            </span>
+                            <span class="prediction-status <%= tahmin.durum %>">
+                                <% if (tahmin.durum === 'aktif') { %>
+                                    ⏳ Aktif
+                                <% } else if (tahmin.dogru_mu) { %>
+                                    ✓ Kazandın
+                                <% } else { %>
+                                    ✗ Kaybettin
+                                <% } %>
+                            </span>
+                        </div>
+                        <h3 class="prediction-title"><%= tahmin.baslik %></h3>
+                        <div class="prediction-details">
+                            <span class="prediction-choice <%= tahmin.secim %>">
+                                Seçimin: <%= tahmin.secim === 'evet' ? 'EVET' : 'HAYIR' %>
+                            </span>
+                            <span class="prediction-date">
+                                <%= new Date(tahmin.olusturma_tarihi).toLocaleDateString('tr-TR') %>
+                            </span>
+                        </div>
+                    </div>
+                    <div class="prediction-result">
+                        <% if (tahmin.durum === 'sonuclandi') { %>
+                            <div class="result-amount <%= tahmin.dogru_mu ? 'win' : 'lose' %>">
+                                <%= tahmin.dogru_mu ? '+' + tahmin.kazanilan_bi : '0' %> bi!
+                            </div>
+                        <% } else { %>
+                            <div class="result-pending">
+                                <span class="potential-win">+<%= tahmin.bi_odul %> bi!</span>
+                                <span class="potential-label">Potansiyel</span>
+                            </div>
+                        <% } %>
+                    </div>
+                </div>
+            <% }); %>
+        <% } else { %>
+            <div class="empty-state">
+                <div class="empty-icon">🎯</div>
+                <h3>Henüz tahmin yapmadın</h3>
+                <p>Ana sayfaya giderek tahmin yapmaya başla!</p>
+                <a href="/" class="btn btn-primary">Tahmin Yap</a>
+            </div>
+        <% } %>
+    </div>
+</div>
+
+<script>
+document.querySelectorAll('.tab').forEach(tab => {
+    tab.addEventListener('click', function() {
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        this.classList.add('active');
+        
+        const filter = this.dataset.tab;
+        document.querySelectorAll('.prediction-card-horizontal').forEach(card => {
+            if (filter === 'all') {
+                card.style.display = 'flex';
+            } else {
+                card.style.display = card.dataset.status === filter ? 'flex' : 'none';
+            }
+        });
+    });
+});
+</script>

@@ -1,0 +1,1102 @@
+<% layout('layouts/admin') -%>
+<% activeMenu = 'kullanicilar' %>
+
+<style>
+.page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+    gap: 16px;
+}
+
+.page-title {
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.page-subtitle {
+    font-size: 14px;
+    color: var(--text-secondary);
+    margin-top: 4px;
+}
+
+.header-actions {
+    display: flex;
+    gap: 12px;
+}
+
+.btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    border: none;
+    text-decoration: none;
+}
+
+.btn-primary {
+    background: var(--accent-primary);
+    color: white;
+}
+
+.btn-primary:hover {
+    background: var(--accent-hover);
+}
+
+.btn-secondary {
+    background: var(--bg-tertiary);
+    color: var(--text-primary);
+    border: 1px solid var(--border-color);
+}
+
+.btn-secondary:hover {
+    background: var(--bg-hover);
+}
+
+.btn-danger {
+    background: #ef4444;
+    color: white;
+}
+
+.btn-danger:hover {
+    background: #dc2626;
+}
+
+.btn-sm {
+    padding: 6px 12px;
+    font-size: 12px;
+}
+
+.stats-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    margin-bottom: 24px;
+}
+
+.stat-card {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 20px;
+}
+
+.stat-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 12px;
+}
+
+.stat-icon.blue { background: rgba(99, 102, 241, 0.1); color: #6366f1; }
+.stat-icon.green { background: rgba(34, 197, 94, 0.1); color: #22c55e; }
+.stat-icon.yellow { background: rgba(245, 158, 11, 0.1); color: #f59e0b; }
+.stat-icon.red { background: rgba(239, 68, 68, 0.1); color: #ef4444; }
+
+.stat-label {
+    font-size: 13px;
+    color: var(--text-secondary);
+    margin-bottom: 4px;
+}
+
+.stat-value {
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.stat-change {
+    font-size: 12px;
+    margin-top: 4px;
+}
+
+.stat-change.positive { color: #22c55e; }
+.stat-change.negative { color: #ef4444; }
+
+.filters-card {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 24px;
+}
+
+.filters-grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr 1fr auto;
+    gap: 16px;
+    align-items: end;
+}
+
+.filter-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.filter-label {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text-secondary);
+}
+
+.filter-input,
+.filter-select {
+    padding: 10px 12px;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    font-size: 14px;
+}
+
+.filter-input:focus,
+.filter-select:focus {
+    outline: none;
+    border-color: var(--accent-primary);
+}
+
+.table-card {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.table-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.table-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.bulk-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.table-wrapper {
+    overflow-x: auto;
+}
+
+.data-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.data-table th,
+.data-table td {
+    padding: 14px 16px;
+    text-align: left;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.data-table th {
+    background: var(--bg-tertiary);
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+}
+
+.data-table tr:hover {
+    background: var(--bg-hover);
+}
+
+.data-table tr:last-child td {
+    border-bottom: none;
+}
+
+.checkbox-cell {
+    width: 40px;
+}
+
+.checkbox-cell input {
+    width: 18px;
+    height: 18px;
+    accent-color: var(--accent-primary);
+}
+
+.user-cell {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.user-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--accent-primary), #8b5cf6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: 600;
+    font-size: 14px;
+}
+
+.user-avatar img {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.user-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.user-name {
+    font-weight: 500;
+    color: var(--text-primary);
+    font-size: 14px;
+}
+
+.user-email {
+    font-size: 12px;
+    color: var(--text-secondary);
+}
+
+.role-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.role-admin {
+    background: rgba(239, 68, 68, 0.1);
+    color: #ef4444;
+}
+
+.role-moderator {
+    background: rgba(245, 158, 11, 0.1);
+    color: #f59e0b;
+}
+
+.role-premium {
+    background: rgba(99, 102, 241, 0.1);
+    color: #6366f1;
+}
+
+.role-user {
+    background: rgba(107, 114, 128, 0.1);
+    color: #6b7280;
+}
+
+.status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.status-active {
+    background: rgba(34, 197, 94, 0.1);
+    color: #22c55e;
+}
+
+.status-inactive {
+    background: rgba(107, 114, 128, 0.1);
+    color: #6b7280;
+}
+
+.status-banned {
+    background: rgba(239, 68, 68, 0.1);
+    color: #ef4444;
+}
+
+.bi-balance {
+    font-weight: 600;
+    color: var(--bi-color);
+}
+
+.actions-cell {
+    display: flex;
+    gap: 8px;
+}
+
+.action-btn {
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 6px;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s;
+    background: var(--bg-tertiary);
+    color: var(--text-secondary);
+}
+
+.action-btn:hover {
+    background: var(--accent-primary);
+    color: white;
+}
+
+.action-btn.delete:hover {
+    background: #ef4444;
+}
+
+.pagination {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 20px;
+    border-top: 1px solid var(--border-color);
+}
+
+.pagination-info {
+    font-size: 13px;
+    color: var(--text-secondary);
+}
+
+.pagination-buttons {
+    display: flex;
+    gap: 8px;
+}
+
+.page-btn {
+    padding: 8px 14px;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.page-btn:hover:not(:disabled) {
+    background: var(--bg-tertiary);
+}
+
+.page-btn.active {
+    background: var(--accent-primary);
+    color: white;
+    border-color: var(--accent-primary);
+}
+
+.page-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* Modal Styles */
+.modal-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 1000;
+    align-items: center;
+    justify-content: center;
+}
+
+.modal-overlay.active {
+    display: flex;
+}
+
+.modal {
+    background: var(--bg-secondary);
+    border-radius: 16px;
+    width: 100%;
+    max-width: 500px;
+    max-height: 90vh;
+    overflow-y: auto;
+    margin: 20px;
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 24px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.modal-title {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.modal-close {
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    background: var(--bg-tertiary);
+    border-radius: 8px;
+    cursor: pointer;
+    color: var(--text-secondary);
+}
+
+.modal-close:hover {
+    background: var(--bg-hover);
+}
+
+.modal-body {
+    padding: 24px;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-label {
+    display: block;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text-primary);
+    margin-bottom: 8px;
+}
+
+.form-input,
+.form-select {
+    width: 100%;
+    padding: 12px 14px;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    font-size: 14px;
+}
+
+.form-input:focus,
+.form-select:focus {
+    outline: none;
+    border-color: var(--accent-primary);
+}
+
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+}
+
+.modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    padding: 16px 24px;
+    border-top: 1px solid var(--border-color);
+}
+
+.user-detail-modal .modal {
+    max-width: 600px;
+}
+
+.user-profile-header {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid var(--border-color);
+    margin-bottom: 20px;
+}
+
+.user-profile-avatar {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--accent-primary), #8b5cf6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: 700;
+    font-size: 28px;
+}
+
+.user-profile-info h3 {
+    font-size: 20px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 4px;
+}
+
+.user-profile-info p {
+    font-size: 14px;
+    color: var(--text-secondary);
+}
+
+.user-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    margin-bottom: 20px;
+}
+
+.user-stat-item {
+    background: var(--bg-tertiary);
+    border-radius: 8px;
+    padding: 16px;
+    text-align: center;
+}
+
+.user-stat-value {
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.user-stat-label {
+    font-size: 12px;
+    color: var(--text-secondary);
+    margin-top: 4px;
+}
+
+@media (max-width: 1024px) {
+    .filters-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+    
+    .stats-row {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 768px) {
+    .filters-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .form-row {
+        grid-template-columns: 1fr;
+    }
+    
+    .user-stats-grid {
+        grid-template-columns: 1fr;
+    }
+}
+</style>
+
+<!-- Stats Row -->
+<div class="stats-row">
+    <div class="stat-card">
+        <div class="stat-icon blue">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                <circle cx="9" cy="7" r="4"/>
+                <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+                <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+            </svg>
+        </div>
+        <div class="stat-label">Toplam Kullanıcı</div>
+        <div class="stat-value"><%= typeof stats !== 'undefined' ? stats.total.toLocaleString('tr-TR') : '12,456' %></div>
+        <div class="stat-change positive">↑ 8.2% bu ay</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon green">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                <polyline points="22 4 12 14.01 9 11.01"/>
+            </svg>
+        </div>
+        <div class="stat-label">Aktif Kullanıcı</div>
+        <div class="stat-value"><%= typeof stats !== 'undefined' ? stats.active.toLocaleString('tr-TR') : '8,234' %></div>
+        <div class="stat-change positive">↑ 12% bu hafta</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon yellow">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+            </svg>
+        </div>
+        <div class="stat-label">Premium Üyeler</div>
+        <div class="stat-value"><%= typeof stats !== 'undefined' ? stats.premium.toLocaleString('tr-TR') : '1,456' %></div>
+        <div class="stat-change positive">↑ 15% bu ay</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon red">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"/>
+                <line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/>
+            </svg>
+        </div>
+        <div class="stat-label">Yasaklı Hesaplar</div>
+        <div class="stat-value"><%= typeof stats !== 'undefined' ? stats.banned : '23' %></div>
+        <div class="stat-change negative">↑ 2 bu hafta</div>
+    </div>
+</div>
+
+<!-- Page Header -->
+<div class="page-header">
+    <div>
+        <h1 class="page-title">Kullanıcı Yönetimi</h1>
+        <p class="page-subtitle">Tüm kullanıcıları görüntüleyin ve yönetin</p>
+    </div>
+    <div class="header-actions">
+        <button class="btn btn-secondary" onclick="exportUsers()">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                <polyline points="7 10 12 15 17 10"/>
+                <line x1="12" y1="15" x2="12" y2="3"/>
+            </svg>
+            Dışa Aktar
+        </button>
+        <button class="btn btn-primary" onclick="openModal('addUserModal')">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                <circle cx="8.5" cy="7" r="4"/>
+                <line x1="20" y1="8" x2="20" y2="14"/>
+                <line x1="23" y1="11" x2="17" y2="11"/>
+            </svg>
+            Yeni Kullanıcı
+        </button>
+    </div>
+</div>
+
+<!-- Filters -->
+<div class="filters-card">
+    <div class="filters-grid">
+        <div class="filter-group">
+            <label class="filter-label">Ara</label>
+            <input type="text" class="filter-input" placeholder="Ad, e-posta veya kullanıcı adı..." id="searchInput">
+        </div>
+        <div class="filter-group">
+            <label class="filter-label">Rol</label>
+            <select class="filter-select" id="roleFilter">
+                <option value="">Tümü</option>
+                <option value="admin">Admin</option>
+                <option value="moderator">Moderatör</option>
+                <option value="premium">Premium</option>
+                <option value="user">Kullanıcı</option>
+            </select>
+        </div>
+        <div class="filter-group">
+            <label class="filter-label">Durum</label>
+            <select class="filter-select" id="statusFilter">
+                <option value="">Tümü</option>
+                <option value="active">Aktif</option>
+                <option value="inactive">Pasif</option>
+                <option value="banned">Yasaklı</option>
+            </select>
+        </div>
+        <div class="filter-group">
+            <label class="filter-label">Kayıt Tarihi</label>
+            <select class="filter-select" id="dateFilter">
+                <option value="">Tümü</option>
+                <option value="today">Bugün</option>
+                <option value="week">Bu Hafta</option>
+                <option value="month">Bu Ay</option>
+                <option value="year">Bu Yıl</option>
+            </select>
+        </div>
+        <button class="btn btn-primary" onclick="applyFilters()">Filtrele</button>
+    </div>
+</div>
+
+<!-- Users Table -->
+<div class="table-card">
+    <div class="table-header">
+        <span class="table-title">Kullanıcılar</span>
+        <div class="bulk-actions" id="bulkActions" style="display: none;">
+            <button class="btn btn-sm btn-secondary" onclick="bulkAction('activate')">Aktifleştir</button>
+            <button class="btn btn-sm btn-danger" onclick="bulkAction('ban')">Yasakla</button>
+        </div>
+    </div>
+    <div class="table-wrapper">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th class="checkbox-cell">
+                        <input type="checkbox" id="selectAll" onchange="toggleSelectAll()">
+                    </th>
+                    <th>Kullanıcı</th>
+                    <th>Kullanıcı Adı</th>
+                    <th>Rol</th>
+                    <th>bi! Bakiye</th>
+                    <th>Tahmin</th>
+                    <th>Durum</th>
+                    <th>Kayıt Tarihi</th>
+                    <th>İşlemler</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% if (typeof users !== 'undefined' && users.length > 0) { %>
+                    <% users.forEach(function(user) { %>
+                    <tr>
+                        <td class="checkbox-cell">
+                            <input type="checkbox" class="user-checkbox" value="<%= user.id %>">
+                        </td>
+                        <td>
+                            <div class="user-cell">
+                                <div class="user-avatar">
+                                    <% if (user.avatar) { %>
+                                        <img src="<%= user.avatar %>" alt="">
+                                    <% } else { %>
+                                        <%= user.ad.charAt(0).toUpperCase() %>
+                                    <% } %>
+                                </div>
+                                <div class="user-info">
+                                    <span class="user-name"><%= user.ad %> <%= user.soyad %></span>
+                                    <span class="user-email"><%= user.email %></span>
+                                </div>
+                            </div>
+                        </td>
+                        <td>@<%= user.kullanici_adi %></td>
+                        <td>
+                            <span class="role-badge role-<%= user.role %>">
+                                <%= user.role === 'admin' ? 'Admin' : 
+                                    user.role === 'moderator' ? 'Moderatör' : 
+                                    user.role === 'premium' ? 'Premium' : 'Kullanıcı' %>
+                            </span>
+                        </td>
+                        <td class="bi-balance"><%= user.bi_coin.toLocaleString('tr-TR') %></td>
+                        <td><%= user.tahmin_sayisi %></td>
+                        <td>
+                            <span class="status-badge status-<%= user.status %>">
+                                <%= user.status === 'active' ? 'Aktif' : 
+                                    user.status === 'inactive' ? 'Pasif' : 'Yasaklı' %>
+                            </span>
+                        </td>
+                        <td><%= new Date(user.created_at).toLocaleDateString('tr-TR') %></td>
+                        <td>
+                            <div class="actions-cell">
+                                <button class="action-btn" onclick="viewUser(<%= user.id %>)" title="Görüntüle">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                                        <circle cx="12" cy="12" r="3"/>
+                                    </svg>
+                                </button>
+                                <button class="action-btn" onclick="editUser(<%= user.id %>)" title="Düzenle">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                                        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                                    </svg>
+                                </button>
+                                <button class="action-btn delete" onclick="deleteUser(<%= user.id %>)" title="Sil">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <polyline points="3 6 5 6 21 6"/>
+                                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                                    </svg>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    <% }); %>
+                <% } else { %>
+                    <!-- Demo Data -->
+                    <tr>
+                        <td class="checkbox-cell"><input type="checkbox" class="user-checkbox" value="1"></td>
+                        <td>
+                            <div class="user-cell">
+                                <div class="user-avatar">A</div>
+                                <div class="user-info">
+                                    <span class="user-name">Ahmet Yılmaz</span>
+                                    <span class="user-email">ahmet@example.com</span>
+                                </div>
+                            </div>
+                        </td>
+                        <td>@ahmetyilmaz</td>
+                        <td><span class="role-badge role-admin">Admin</span></td>
+                        <td class="bi-balance">125,000</td>
+                        <td>234</td>
+                        <td><span class="status-badge status-active">Aktif</span></td>
+                        <td>15.01.2024</td>
+                        <td>
+                            <div class="actions-cell">
+                                <button class="action-btn" title="Görüntüle"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>
+                                <button class="action-btn" title="Düzenle"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>
+                                <button class="action-btn delete" title="Sil"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></button>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="checkbox-cell"><input type="checkbox" class="user-checkbox" value="2"></td>
+                        <td>
+                            <div class="user-cell">
+                                <div class="user-avatar" style="background: linear-gradient(135deg, #f59e0b, #ef4444);">M</div>
+                                <div class="user-info">
+                                    <span class="user-name">Mehmet Kaya</span>
+                                    <span class="user-email">mehmet@example.com</span>
+                                </div>
+                            </div>
+                        </td>
+                        <td>@mehmetkaya</td>
+                        <td><span class="role-badge role-premium">Premium</span></td>
+                        <td class="bi-balance">45,230</td>
+                        <td>156</td>
+                        <td><span class="status-badge status-active">Aktif</span></td>
+                        <td>22.02.2024</td>
+                        <td>
+                            <div class="actions-cell">
+                                <button class="action-btn" title="Görüntüle"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>
+                                <button class="action-btn" title="Düzenle"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>
+                                <button class="action-btn delete" title="Sil"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></button>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="checkbox-cell"><input type="checkbox" class="user-checkbox" value="3"></td>
+                        <td>
+                            <div class="user-cell">
+                                <div class="user-avatar" style="background: linear-gradient(135deg, #22c55e, #14b8a6);">Z</div>
+                                <div class="user-info">
+                                    <span class="user-name">Zeynep Demir</span>
+                                    <span class="user-email">zeynep@example.com</span>
+                                </div>
+                            </div>
+                        </td>
+                        <td>@zeynepdemir</td>
+                        <td><span class="role-badge role-moderator">Moderatör</span></td>
+                        <td class="bi-balance">78,450</td>
+                        <td>312</td>
+                        <td><span class="status-badge status-active">Aktif</span></td>
+                        <td>10.03.2024</td>
+                        <td>
+                            <div class="actions-cell">
+                                <button class="action-btn" title="Görüntüle"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>
+                                <button class="action-btn" title="Düzenle"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>
+                                <button class="action-btn delete" title="Sil"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></button>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="checkbox-cell"><input type="checkbox" class="user-checkbox" value="4"></td>
+                        <td>
+                            <div class="user-cell">
+                                <div class="user-avatar" style="background: linear-gradient(135deg, #ec4899, #8b5cf6);">E</div>
+                                <div class="user-info">
+                                    <span class="user-name">Emre Şahin</span>
+                                    <span class="user-email">emre@example.com</span>
+                                </div>
+                            </div>
+                        </td>
+                        <td>@emresahin</td>
+                        <td><span class="role-badge role-user">Kullanıcı</span></td>
+                        <td class="bi-balance">12,340</td>
+                        <td>45</td>
+                        <td><span class="status-badge status-inactive">Pasif</span></td>
+                        <td>05.04.2024</td>
+                        <td>
+                            <div class="actions-cell">
+                                <button class="action-btn" title="Görüntüle"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>
+                                <button class="action-btn" title="Düzenle"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>
+                                <button class="action-btn delete" title="Sil"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></button>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="checkbox-cell"><input type="checkbox" class="user-checkbox" value="5"></td>
+                        <td>
+                            <div class="user-cell">
+                                <div class="user-avatar" style="background: linear-gradient(135deg, #ef4444, #f97316);">C</div>
+                                <div class="user-info">
+                                    <span class="user-name">Can Özkan</span>
+                                    <span class="user-email">can@example.com</span>
+                                </div>
+                            </div>
+                        </td>
+                        <td>@canozkan</td>
+                        <td><span class="role-badge role-user">Kullanıcı</span></td>
+                        <td class="bi-balance">0</td>
+                        <td>0</td>
+                        <td><span class="status-badge status-banned">Yasaklı</span></td>
+                        <td>18.05.2024</td>
+                        <td>
+                            <div class="actions-cell">
+                                <button class="action-btn" title="Görüntüle"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>
+                                <button class="action-btn" title="Düzenle"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>
+                                <button class="action-btn delete" title="Sil"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></button>
+                            </div>
+                        </td>
+                    </tr>
+                <% } %>
+            </tbody>
+        </table>
+    </div>
+    <div class="pagination">
+        <span class="pagination-info">1-10 / <%= typeof totalUsers !== 'undefined' ? totalUsers : '12,456' %> kullanıcı gösteriliyor</span>
+        <div class="pagination-buttons">
+            <button class="page-btn" disabled>← Önceki</button>
+            <button class="page-btn active">1</button>
+            <button class="page-btn">2</button>
+            <button class="page-btn">3</button>
+            <button class="page-btn">...</button>
+            <button class="page-btn">1246</button>
+            <button class="page-btn">Sonraki →</button>
+        </div>
+    </div>
+</div>
+
+<!-- Add User Modal -->
+<div class="modal-overlay" id="addUserModal">
+    <div class="modal">
+        <div class="modal-header">
+            <h3 class="modal-title">Yeni Kullanıcı Ekle</h3>
+            <button class="modal-close" onclick="closeModal('addUserModal')">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="18" y1="6" x2="6" y2="18"/>
+                    <line x1="6" y1="6" x2="18" y2="18"/>
+                </svg>
+            </button>
+        </div>
+        <form action="/admin/kullanicilar/ekle" method="POST">
+            <div class="modal-body">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">Ad *</label>
+                        <input type="text" class="form-input" name="ad" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Soyad *</label>
+                        <input type="text" class="form-input" name="soyad" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Kullanıcı Adı *</label>
+                    <input type="text" class="form-input" name="kullanici_adi" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">E-posta *</label>
+                    <input type="email" class="form-input" name="email" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Şifre *</label>
+                    <input type="password" class="form-input" name="password" required>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">Rol</label>
+                        <select class="form-select" name="role">
+                            <option value="user">Kullanıcı</option>
+                            <option value="premium">Premium</option>
+                            <option value="moderator">Moderatör</option>
+                            <option value="admin">Admin</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Başlangıç bi! Coin</label>
+                        <input type="number" class="form-input" name="bi_coin" value="1000" min="0">
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="closeModal('addUserModal')">İptal</button>
+                <button type="submit" class="btn btn-primary">Kullanıcı Ekle</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+function openModal(modalId) {
+    document.getElementById(modalId).classList.add('active');
+}
+
+function closeModal(modalId) {
+    document.getElementById(modalId).classList.remove('active');
+}
+
+function toggleSelectAll() {
+    const selectAll = document.getElementById('selectAll');
+    const checkboxes = document.querySelectorAll('.user-checkbox');
+    checkboxes.forEach(cb => cb.checked = selectAll.checked);
+    updateBulkActions();
+}
+
+function updateBulkActions() {
+    const checkboxes = document.querySelectorAll('.user-checkbox:checked');
+    const bulkActions = document.getElementById('bulkActions');
+    bulkActions.style.display = checkboxes.length > 0 ? 'flex' : 'none';
+}
+
+document.querySelectorAll('.user-checkbox').forEach(cb => {
+    cb.addEventListener('change', updateBulkActions);
+});
+
+function bulkAction(action) {
+    const selected = Array.from(document.querySelectorAll('.user-checkbox:checked')).map(cb => cb.value);
+    if (selected.length === 0) return;
+    
+    const actionText = action === 'activate' ? 'aktifleştirmek' : 'yasaklamak';
+    if (confirm(`${selected.length} kullanıcıyı ${actionText} istediğinizden emin misiniz?`)) {
+        fetch('/admin/kullanicilar/bulk', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ action, ids: selected })
+        }).then(() => window.location.reload());
+    }
+}
+
+function viewUser(id) {
+    window.location.href = '/admin/kullanicilar/' + id;
+}
+
+function editUser(id) {
+    window.location.href = '/admin/kullanicilar/' + id + '/duzenle';
+}
+
+function deleteUser(id) {
+    if (confirm('Bu kullanıcıyı silmek istediğinizden emin misiniz?')) {
+        fetch('/admin/kullanicilar/' + id, {
+            method: 'DELETE',
+            headers: { 'Content-Type': 'application/json' }
+        }).then(() => window.location.reload());
+    }
+}
+
+function exportUsers() {
+    window.location.href = '/admin/kullanicilar/export';
+}
+
+function applyFilters() {
+    const params = new URLSearchParams();
+    const search = document.getElementById('searchInput').value;
+    const role = document.getElementById('roleFilter').value;
+    const status = document.getElementById('statusFilter').value;
+    const date = document.getElementById('dateFilter').value;
+    
+    if (search) params.append('search', search);
+    if (role) params.append('role', role);
+    if (status) params.append('status', status);
+    if (date) params.append('date', date);
+    
+    window.location.href = '/admin/kullanicilar?' + params.toString();
+}
+
+// Close modal on outside click
+document.querySelectorAll('.modal-overlay').forEach(modal => {
+    modal.addEventListener('click', function(e) {
+        if (e.target === this) {
+            this.classList.remove('active');
+        }
+    });
+});
+</script>

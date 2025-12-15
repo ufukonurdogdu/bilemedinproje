@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hakkımızda - Bilemezsin</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-dark: #0a0a0b;
+            --bg-card: #141416;
+            --bg-card-hover: #1a1a1d;
+            --border-color: #2a2a2d;
+            --text-primary: #ffffff;
+            --text-secondary: #a0a0a0;
+            --text-muted: #6b6b6b;
+            --accent-primary: #6366f1;
+            --accent-primary-hover: #5558e3;
+            --bi-color: #f59e0b;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text-primary);
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+
+        .main-content {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 60px 24px;
+        }
+
+        /* Hero */
+        .hero {
+            text-align: center;
+            margin-bottom: 80px;
+        }
+
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            background: rgba(99, 102, 241, 0.1);
+            border: 1px solid rgba(99, 102, 241, 0.3);
+            border-radius: 24px;
+            font-size: 14px;
+            color: var(--accent-primary);
+            margin-bottom: 24px;
+        }
+
+        .hero h1 {
+            font-size: 48px;
+            font-weight: 800;
+            margin-bottom: 20px;
+            background: linear-gradient(135deg, var(--text-primary), var(--accent-primary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero p {
+            font-size: 20px;
+            color: var(--text-secondary);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        /* Mission Section */
+        .section {
+            margin-bottom: 80px;
+        }
+
+        .section-title {
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 24px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .section-title .icon {
+            font-size: 36px;
+        }
+
+        .section-text {
+            font-size: 17px;
+            color: var(--text-secondary);
+            margin-bottom: 20px;
+        }
+
+        /* Values Grid */
+        .values-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 24px;
+            margin-top: 40px;
+        }
+
+        .value-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            padding: 32px;
+            transition: all 0.3s;
+        }
+
+        .value-card:hover {
+            transform: translateY(-4px);
+            border-color: var(--accent-primary);
+        }
+
+        .value-icon {
+            width: 64px;
+            height: 64px;
+            background: rgba(99, 102, 241, 0.1);
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+            margin-bottom: 20px;
+        }
+
+        .value-card h3 {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 12px;
+        }
+
+        .value-card p {
+            font-size: 15px;
+            color: var(--text-secondary);
+        }
+
+        /* Stats */
+        .stats-section {
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(139, 92, 246, 0.05));
+            border: 1px solid rgba(99, 102, 241, 0.2);
+            border-radius: 24px;
+            padding: 48px;
+            margin-bottom: 80px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 32px;
+            text-align: center;
+        }
+
+        .stat-item {
+            padding: 20px;
+        }
+
+        .stat-value {
+            font-size: 48px;
+            font-weight: 800;
+            color: var(--accent-primary);
+            margin-bottom: 8px;
+        }
+
+        .stat-label {
+            font-size: 16px;
+            color: var(--text-secondary);
+        }
+
+        /* Team */
+        .team-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 24px;
+            margin-top: 40px;
+        }
+
+        .team-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            padding: 32px;
+            text-align: center;
+            transition: all 0.3s;
+        }
+
+        .team-card:hover {
+            transform: translateY(-4px);
+            border-color: var(--accent-primary);
+        }
+
+        .team-avatar {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--accent-primary), #818cf8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 40px;
+            margin: 0 auto 20px;
+        }
+
+        .team-card h3 {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .team-role {
+            font-size: 14px;
+            color: var(--accent-primary);
+            margin-bottom: 12px;
+        }
+
+        .team-bio {
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+
+        /* Timeline */
+        .timeline {
+            margin-top: 40px;
+        }
+
+        .timeline-item {
+            display: flex;
+            gap: 24px;
+            margin-bottom: 32px;
+            position: relative;
+        }
+
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: 15px;
+            top: 40px;
+            bottom: -32px;
+            width: 2px;
+            background: var(--border-color);
+        }
+
+        .timeline-item:last-child::before {
+            display: none;
+        }
+
+        .timeline-dot {
+            width: 32px;
+            height: 32px;
+            background: var(--accent-primary);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            flex-shrink: 0;
+            z-index: 1;
+        }
+
+        .timeline-content {
+            flex: 1;
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 20px 24px;
+        }
+
+        .timeline-date {
+            font-size: 13px;
+            color: var(--accent-primary);
+            font-weight: 500;
+            margin-bottom: 8px;
+        }
+
+        .timeline-content h4 {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .timeline-content p {
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+
+        /* CTA */
+        .cta-section {
+            text-align: center;
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 24px;
+            padding: 60px 40px;
+        }
+
+        .cta-section h2 {
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 16px;
+        }
+
+        .cta-section p {
+            font-size: 17px;
+            color: var(--text-secondary);
+            margin-bottom: 32px;
+        }
+
+        .btn-cta {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 16px 32px;
+            background: var(--accent-primary);
+            border: none;
+            border-radius: 12px;
+            color: white;
+            font-size: 16px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.3s;
+        }
+
+        .btn-cta:hover {
+            background: var(--accent-primary-hover);
+            transform: scale(1.05);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 32px;
+            }
+
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .stat-value {
+                font-size: 32px;
+            }
+
+            .timeline-item {
+                flex-direction: column;
+                gap: 12px;
+            }
+
+            .timeline-item::before {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <%- include('./partials/header') %>
+    
+    <div class="main-content">
+        <!-- Hero -->
+        <div class="hero">
+            <div class="hero-badge">
+                <span>🎯</span>
+                Tahmin Platformu
+            </div>
+            <h1>Bilemezsin Hakkında</h1>
+            <p>Türkiye'nin en eğlenceli tahmin platformu. Bilgini test et, tahminlerini yap, bi! coin kazan!</p>
+        </div>
+
+        <!-- Mission -->
+        <div class="section">
+            <h2 class="section-title">
+                <span class="icon">🎯</span>
+                Misyonumuz
+            </h2>
+            <p class="section-text">
+                Bilemezsin, kullanıcıların güncel olaylar hakkında tahminlerde bulunarak hem eğlenebileceği hem de bilgilerini test edebileceği yenilikçi bir platformdur. Spor, ekonomi, teknoloji, eğlence ve daha birçok kategoride tahmin yapabilir, doğru tahminlerinizle bi! coin kazanabilirsiniz.
+            </p>
+            <p class="section-text">
+                Amacımız, insanların güncel olayları takip etmesini teşvik etmek ve bu süreci eğlenceli bir deneyime dönüştürmektir. Hiçbir gerçek para transferi olmadan, tamamen sanal bi! coin ekonomimizle güvenli ve eğlenceli bir ortam sunuyoruz.
+            </p>
+        </div>
+
+        <!-- Values -->
+        <div class="section">
+            <h2 class="section-title">
+                <span class="icon">💎</span>
+                Değerlerimiz
+            </h2>
+            <div class="values-grid">
+                <div class="value-card">
+                    <div class="value-icon">🎮</div>
+                    <h3>Eğlence Öncelikli</h3>
+                    <p>Her şeyden önce eğlence. Kullanıcılarımızın keyifli vakit geçirmesi en büyük önceliğimiz.</p>
+                </div>
+                <div class="value-card">
+                    <div class="value-icon">🛡️</div>
+                    <h3>Güvenlik</h3>
+                    <p>Kullanıcı verilerinin güvenliği ve gizliliği konusunda en yüksek standartları uyguluyoruz.</p>
+                </div>
+                <div class="value-card">
+                    <div class="value-icon">⚖️</div>
+                    <h3>Adalet</h3>
+                    <p>Tüm tahminlerde şeffaf ve adil bir sistem. Herkes için eşit fırsatlar.</p>
+                </div>
+                <div class="value-card">
+                    <div class="value-icon">🤝</div>
+                    <h3>Topluluk</h3>
+                    <p>Güçlü bir topluluk oluşturmak ve kullanıcılarımızla birlikte büyümek.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Stats -->
+        <div class="stats-section">
+            <div class="stats-grid">
+                <div class="stat-item">
+                    <div class="stat-value">50K+</div>
+                    <div class="stat-label">Aktif Kullanıcı</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value">1M+</div>
+                    <div class="stat-label">Yapılan Tahmin</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value">100K+</div>
+                    <div class="stat-label">Günlük Tahmin</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value">500M+</div>
+                    <div class="stat-label">Dağıtılan bi!</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Team -->
+        <div class="section">
+            <h2 class="section-title">
+                <span class="icon">👥</span>
+                Ekibimiz
+            </h2>
+            <div class="team-grid">
+                <div class="team-card">
+                    <div class="team-avatar">👨‍💻</div>
+                    <h3>Ahmet Yılmaz</h3>
+                    <div class="team-role">Kurucu & CEO</div>
+                    <p class="team-bio">10+ yıllık teknoloji deneyimi. Oyun ve tahmin platformları uzmanı.</p>
+                </div>
+                <div class="team-card">
+                    <div class="team-avatar">👩‍💼</div>
+                    <h3>Zeynep Kaya</h3>
+                    <div class="team-role">COO</div>
+                    <p class="team-bio">Operasyon ve büyüme stratejileri konusunda deneyimli.</p>
+                </div>
+                <div class="team-card">
+                    <div class="team-avatar">👨‍🔬</div>
+                    <h3>Mehmet Demir</h3>
+                    <div class="team-role">CTO</div>
+                    <p class="team-bio">Full-stack geliştirici. Ölçeklenebilir sistemler uzmanı.</p>
+                </div>
+                <div class="team-card">
+                    <div class="team-avatar">👩‍🎨</div>
+                    <h3>Elif Öztürk</h3>
+                    <div class="team-role">Tasarım Direktörü</div>
+                    <p class="team-bio">UX/UI tasarımı ve kullanıcı deneyimi konusunda tutkulu.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Timeline -->
+        <div class="section">
+            <h2 class="section-title">
+                <span class="icon">📅</span>
+                Yolculuğumuz
+            </h2>
+            <div class="timeline">
+                <div class="timeline-item">
+                    <div class="timeline-dot">🚀</div>
+                    <div class="timeline-content">
+                        <div class="timeline-date">Ocak 2024</div>
+                        <h4>Bilemezsin Doğdu</h4>
+                        <p>İlk fikir ortaya çıktı ve geliştirme süreci başladı.</p>
+                    </div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-dot">🎯</div>
+                    <div class="timeline-content">
+                        <div class="timeline-date">Mart 2024</div>
+                        <h4>Beta Lansmanı</h4>
+                        <p>İlk 1000 kullanıcıyla beta sürümü yayınlandı.</p>
+                    </div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-dot">🎉</div>
+                    <div class="timeline-content">
+                        <div class="timeline-date">Haziran 2024</div>
+                        <h4>Resmi Lansman</h4>
+                        <p>Platform herkese açıldı ve 10,000 kullanıcıya ulaşıldı.</p>
+                    </div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-dot">🏆</div>
+                    <div class="timeline-content">
+                        <div class="timeline-date">Aralık 2024</div>
+                        <h4>50,000 Kullanıcı</h4>
+                        <p>Topluluk büyümeye devam ediyor!</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- CTA -->
+        <div class="cta-section">
+            <h2>Hemen Katılın!</h2>
+            <p>Siz de Bilemezsin ailesine katılın, tahminlerinizi yapın ve bi! coin kazanmaya başlayın.</p>
+            <a href="/kayit" class="btn-cta">
+                🎯 Ücretsiz Kayıt Ol
+            </a>
+        </div>
+    </div>
+
+    <%- include('./partials/footer') %>
+</body>
+</html>

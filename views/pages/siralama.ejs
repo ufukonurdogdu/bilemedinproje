@@ -1,0 +1,108 @@
+<div class="container">
+    <div class="page-header-center">
+        <h1>🏆 Sıralama</h1>
+        <p>En çok bi! coin'e sahip olan kahinler</p>
+    </div>
+
+    <div class="leaderboard-container">
+        <% if (kullanicilar && kullanicilar.length >= 3) { %>
+            <div class="top-three">
+                <!-- 2. Sıra -->
+                <div class="top-user second">
+                    <div class="rank-badge">2</div>
+                    <div class="user-avatar-top">
+                        <% if (kullanicilar[1].avatar) { %>
+                            <img src="<%= kullanicilar[1].avatar %>" alt="">
+                        <% } else { %>
+                            <%= kullanicilar[1].ad_soyad.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase() %>
+                        <% } %>
+                    </div>
+                    <div class="user-name"><%= kullanicilar[1].ad_soyad %></div>
+                    <div class="user-username">@<%= kullanicilar[1].kullanici_adi %></div>
+                    <div class="user-coins"><%= kullanicilar[1].bi_coin.toLocaleString('tr-TR') %> bi!</div>
+                </div>
+
+                <!-- 1. Sıra -->
+                <div class="top-user first">
+                    <div class="crown">👑</div>
+                    <div class="rank-badge">1</div>
+                    <div class="user-avatar-top">
+                        <% if (kullanicilar[0].avatar) { %>
+                            <img src="<%= kullanicilar[0].avatar %>" alt="">
+                        <% } else { %>
+                            <%= kullanicilar[0].ad_soyad.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase() %>
+                        <% } %>
+                    </div>
+                    <div class="user-name"><%= kullanicilar[0].ad_soyad %></div>
+                    <div class="user-username">@<%= kullanicilar[0].kullanici_adi %></div>
+                    <div class="user-coins"><%= kullanicilar[0].bi_coin.toLocaleString('tr-TR') %> bi!</div>
+                </div>
+
+                <!-- 3. Sıra -->
+                <div class="top-user third">
+                    <div class="rank-badge">3</div>
+                    <div class="user-avatar-top">
+                        <% if (kullanicilar[2].avatar) { %>
+                            <img src="<%= kullanicilar[2].avatar %>" alt="">
+                        <% } else { %>
+                            <%= kullanicilar[2].ad_soyad.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase() %>
+                        <% } %>
+                    </div>
+                    <div class="user-name"><%= kullanicilar[2].ad_soyad %></div>
+                    <div class="user-username">@<%= kullanicilar[2].kullanici_adi %></div>
+                    <div class="user-coins"><%= kullanicilar[2].bi_coin.toLocaleString('tr-TR') %> bi!</div>
+                </div>
+            </div>
+        <% } %>
+
+        <div class="leaderboard-list">
+            <% if (kullanicilar && kullanicilar.length > 3) { %>
+                <% kullanicilar.slice(3).forEach(function(k, index) { %>
+                    <div class="leaderboard-item">
+                        <div class="item-rank">#<%= index + 4 %></div>
+                        <div class="item-user">
+                            <div class="user-avatar-small">
+                                <% if (k.avatar) { %>
+                                    <img src="<%= k.avatar %>" alt="">
+                                <% } else { %>
+                                    <%= k.ad_soyad.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase() %>
+                                <% } %>
+                            </div>
+                            <div class="user-info">
+                                <div class="user-name">
+                                    <%= k.ad_soyad %>
+                                    <% if (k.premium_mi) { %>
+                                        <span class="premium-badge">👑</span>
+                                    <% } %>
+                                </div>
+                                <div class="user-username">@<%= k.kullanici_adi %></div>
+                            </div>
+                        </div>
+                        <div class="item-stats">
+                            <div class="stat">
+                                <span class="stat-value"><%= k.seviye %></span>
+                                <span class="stat-label">Seviye</span>
+                            </div>
+                            <div class="stat">
+                                <span class="stat-value"><%= k.toplam_tahmin %></span>
+                                <span class="stat-label">Tahmin</span>
+                            </div>
+                            <div class="stat">
+                                <span class="stat-value"><%= k.dogruluk_orani || 0 %>%</span>
+                                <span class="stat-label">Doğruluk</span>
+                            </div>
+                        </div>
+                        <div class="item-coins">
+                            <span class="bi-icon">bi!</span>
+                            <%= k.bi_coin.toLocaleString('tr-TR') %>
+                        </div>
+                    </div>
+                <% }); %>
+            <% } else if (!kullanicilar || kullanicilar.length === 0) { %>
+                <div class="empty-state">
+                    <p>Henüz sıralamada kullanıcı yok</p>
+                </div>
+            <% } %>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title %></title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="/socket.io/socket.io.js"></script>
+    <style>
+        :root, [data-theme="dark"] {
+            --bg-dark: #0a0a0b;
+            --bg-card: #141416;
+            --bg-card-hover: #1a1a1d;
+            --border-color: #2a2a2d;
+            --text-primary: #ffffff;
+            --text-secondary: #a0a0a0;
+            --text-muted: #6b6b6b;
+            --accent-primary: #6366f1;
+            --bi-color: #f59e0b;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --info: #3b82f6;
+        }
+        [data-theme="light"] {
+            --bg-dark: #f5f5f5;
+            --bg-card: #ffffff;
+            --bg-card-hover: #f9f9f9;
+            --border-color: #e5e5e5;
+            --text-primary: #1a1a1a;
+            --text-secondary: #5f6368;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg-dark); color: var(--text-primary); min-height: 100vh; }
+
+        .main-content { padding: 24px; max-width: 900px; margin: 0 auto; }
+        .page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 16px; }
+        .page-title { font-size: 28px; font-weight: 700; }
+        .page-subtitle { color: var(--text-muted); font-size: 14px; margin-top: 4px; }
+
+        .header-actions { display: flex; gap: 12px; }
+        .btn-action { padding: 10px 20px; background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 10px; color: var(--text-secondary); font-size: 14px; font-weight: 500; cursor: pointer; transition: all 0.2s; }
+        .btn-action:hover { background: var(--bg-card-hover); color: var(--text-primary); border-color: var(--accent-primary); }
+        .btn-action.primary { background: var(--accent-primary); border-color: var(--accent-primary); color: white; }
+        .btn-action.primary:hover { background: #5558e3; }
+
+        .filter-tabs { display: flex; gap: 8px; margin-bottom: 24px; background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 12px; padding: 8px; }
+        .filter-tab { flex: 1; padding: 12px 16px; background: transparent; border: none; border-radius: 8px; font-size: 14px; font-weight: 600; color: var(--text-secondary); cursor: pointer; transition: all 0.2s; text-align: center; }
+        .filter-tab:hover { color: var(--text-primary); background: var(--bg-card-hover); }
+        .filter-tab.active { background: var(--accent-primary); color: white; }
+        .filter-tab .count { display: inline-flex; align-items: center; justify-content: center; min-width: 20px; height: 20px; padding: 0 6px; background: rgba(255,255,255,0.2); border-radius: 10px; font-size: 11px; margin-left: 6px; }
+
+        .notifications-list { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 16px; overflow: hidden; }
+
+        .notification-item { display: flex; align-items: flex-start; gap: 16px; padding: 20px; border-bottom: 1px solid var(--border-color); transition: all 0.2s; cursor: pointer; }
+        .notification-item:last-child { border-bottom: none; }
+        .notification-item:hover { background: var(--bg-card-hover); }
+        .notification-item.unread { background: rgba(99, 102, 241, 0.05); border-left: 4px solid var(--accent-primary); }
+
+        .notification-icon { width: 48px; height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 24px; flex-shrink: 0; }
+        .notification-icon.odul { background: linear-gradient(135deg, rgba(245, 158, 11, 0.2), rgba(245, 158, 11, 0.1)); }
+        .notification-icon.tahmin { background: linear-gradient(135deg, rgba(99, 102, 241, 0.2), rgba(99, 102, 241, 0.1)); }
+        .notification-icon.sosyal { background: linear-gradient(135deg, rgba(59, 130, 246, 0.2), rgba(59, 130, 246, 0.1)); }
+        .notification-icon.sistem { background: linear-gradient(135deg, rgba(16, 185, 129, 0.2), rgba(16, 185, 129, 0.1)); }
+        .notification-icon.uyari { background: linear-gradient(135deg, rgba(239, 68, 68, 0.2), rgba(239, 68, 68, 0.1)); }
+
+        .notification-content { flex: 1; min-width: 0; }
+        .notification-title { font-size: 16px; font-weight: 600; margin-bottom: 6px; }
+        .notification-message { font-size: 14px; color: var(--text-secondary); line-height: 1.5; margin-bottom: 8px; }
+        .notification-meta { display: flex; align-items: center; gap: 16px; font-size: 13px; color: var(--text-muted); }
+        .notification-time { display: flex; align-items: center; gap: 4px; }
+        .notification-action-link { color: var(--accent-primary); text-decoration: none; font-weight: 500; }
+        .notification-action-link:hover { text-decoration: underline; }
+
+        .notification-actions { display: flex; gap: 8px; flex-shrink: 0; }
+        .btn-icon { width: 36px; height: 36px; border-radius: 8px; background: transparent; border: 1px solid var(--border-color); color: var(--text-muted); cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s; }
+        .btn-icon:hover { background: var(--bg-card-hover); color: var(--text-primary); border-color: var(--accent-primary); }
+        .btn-icon.delete:hover { border-color: var(--danger); color: var(--danger); }
+
+        .empty-state { text-align: center; padding: 80px 24px; }
+        .empty-icon { font-size: 64px; margin-bottom: 24px; opacity: 0.5; }
+        .empty-title { font-size: 20px; font-weight: 600; margin-bottom: 8px; }
+        .empty-text { color: var(--text-secondary); font-size: 14px; }
+
+        .toast { position: fixed; bottom: 24px; right: 24px; padding: 16px 24px; background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 12px; box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3); z-index: 9999; transform: translateY(100px); opacity: 0; transition: all 0.3s; }
+        .toast.show { transform: translateY(0); opacity: 1; }
+        .toast.success { border-color: var(--success); }
+        .toast.error { border-color: var(--danger); }
+
+        @media (max-width: 768px) {
+            .page-header { flex-direction: column; align-items: flex-start; }
+            .filter-tabs { flex-wrap: wrap; }
+            .filter-tab { flex: none; }
+            .notification-item { flex-direction: column; }
+            .notification-actions { width: 100%; justify-content: flex-end; margin-top: 12px; }
+        }
+    </style>
+</head>
+<body>
+    <%- include('../partials/user-navbar') %>
+
+    <div class="main-content">
+        <div class="page-header">
+            <div>
+                <h1 class="page-title">Bildirimler</h1>
+                <p class="page-subtitle">Tum bildirimlerini buradan takip edebilirsin</p>
+            </div>
+            <div class="header-actions">
+                <button class="btn-action" onclick="markAllAsRead()">Tumunu Okundu Isaretle</button>
+            </div>
+        </div>
+
+        <div class="filter-tabs">
+            <button class="filter-tab active" onclick="filterNotifications('all', this)">
+                Tumu
+                <span class="count" id="countAll"><%= bildirimler ? bildirimler.length : 0 %></span>
+            </button>
+            <button class="filter-tab" onclick="filterNotifications('unread', this)">
+                Okunmamis
+                <span class="count" id="countUnread"><%= bildirimler ? bildirimler.filter(b => !b.okundu_mu).length : 0 %></span>
+            </button>
+            <button class="filter-tab" onclick="filterNotifications('odul', this)">Oduller</button>
+            <button class="filter-tab" onclick="filterNotifications('tahmin', this)">Tahminler</button>
+            <button class="filter-tab" onclick="filterNotifications('sistem', this)">Sistem</button>
+        </div>
+
+        <div class="notifications-list" id="notificationsList">
+            <% if (bildirimler && bildirimler.length > 0) { %>
+                <% bildirimler.forEach(function(bildirim) { %>
+                    <div class="notification-item <%= bildirim.okundu_mu ? '' : 'unread' %>" data-id="<%= bildirim.id %>" data-type="<%= bildirim.tip %>" onclick="handleNotificationClick(<%= bildirim.id %>, '<%= bildirim.link || '' %>')">
+                        <div class="notification-icon <%= bildirim.tip %>">
+                            <% if (bildirim.tip === 'odul') { %>
+                                🎉
+                            <% } else if (bildirim.tip === 'tahmin') { %>
+                                🎯
+                            <% } else if (bildirim.tip === 'sosyal') { %>
+                                👥
+                            <% } else if (bildirim.tip === 'uyari') { %>
+                                ⚠️
+                            <% } else { %>
+                                📢
+                            <% } %>
+                        </div>
+                        <div class="notification-content">
+                            <h4 class="notification-title"><%= bildirim.baslik %></h4>
+                            <% if (bildirim.mesaj) { %>
+                                <p class="notification-message"><%= bildirim.mesaj %></p>
+                            <% } %>
+                            <div class="notification-meta">
+                                <span class="notification-time">
+                                    <%= timeAgo(bildirim.olusturma_tarihi) %>
+                                </span>
+                                <% if (bildirim.link) { %>
+                                    <a href="<%= bildirim.link %>" class="notification-action-link" onclick="event.stopPropagation()">Goruntule</a>
+                                <% } %>
+                            </div>
+                        </div>
+                        <div class="notification-actions">
+                            <% if (!bildirim.okundu_mu) { %>
+                                <button class="btn-icon" onclick="event.stopPropagation(); markAsRead(<%= bildirim.id %>)" title="Okundu isaretle">✓</button>
+                            <% } %>
+                            <button class="btn-icon delete" onclick="event.stopPropagation(); deleteNotification(<%= bildirim.id %>)" title="Sil">🗑️</button>
+                        </div>
+                    </div>
+                <% }); %>
+            <% } else { %>
+                <div class="empty-state">
+                    <div class="empty-icon">🔔</div>
+                    <h3 class="empty-title">Bildirim yok</h3>
+                    <p class="empty-text">Yeni bildirimler burada gorunecek</p>
+                </div>
+            <% } %>
+        </div>
+    </div>
+
+    <%- include('../partials/footer') %>
+
+    <div id="toast" class="toast"><span id="toastMessage"></span></div>
+
+    <script>
+        const themeMode = localStorage.getItem('themeMode') || 'dark';
+        document.documentElement.setAttribute('data-theme', themeMode);
+
+        const socket = io();
+        <% if (typeof user !== 'undefined' && user) { %>
+        socket.emit('join', <%= user.id %>);
+        <% } %>
+
+        socket.on('biCoinUpdate', (data) => {
+            const el = document.getElementById('biCoinDisplay');
+            if (el) el.textContent = data.bi_coin.toLocaleString('tr-TR');
+        });
+
+        // New notification received
+        socket.on('newNotification', (notification) => {
+            location.reload();
+        });
+
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            toast.className = 'toast ' + type;
+            document.getElementById('toastMessage').textContent = message;
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 3000);
+        }
+
+        function filterNotifications(type, btn) {
+            document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+            btn.classList.add('active');
+
+            const items = document.querySelectorAll('.notification-item');
+            items.forEach(item => {
+                if (type === 'all') {
+                    item.style.display = 'flex';
+                } else if (type === 'unread') {
+                    item.style.display = item.classList.contains('unread') ? 'flex' : 'none';
+                } else {
+                    item.style.display = item.dataset.type === type ? 'flex' : 'none';
+                }
+            });
+        }
+
+        function handleNotificationClick(id, link) {
+            markAsRead(id);
+            if (link) {
+                window.location.href = link;
+            }
+        }
+
+        async function markAsRead(id) {
+            try {
+                const response = await fetch('/bildirimler/oku', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ bildirim_id: id })
+                });
+                const data = await response.json();
+                if (data.success) {
+                    const item = document.querySelector(`[data-id="${id}"]`);
+                    if (item) {
+                        item.classList.remove('unread');
+                        const readBtn = item.querySelector('.btn-icon:not(.delete)');
+                        if (readBtn) readBtn.remove();
+                    }
+                    updateCounts();
+                }
+            } catch (err) {
+                console.error('Hata:', err);
+            }
+        }
+
+        async function markAllAsRead() {
+            try {
+                const response = await fetch('/bildirimler/tumunu-oku', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+                const data = await response.json();
+                if (data.success) {
+                    showToast('Tum bildirimler okundu olarak isaretlendi');
+                    document.querySelectorAll('.notification-item.unread').forEach(item => {
+                        item.classList.remove('unread');
+                        const readBtn = item.querySelector('.btn-icon:not(.delete)');
+                        if (readBtn) readBtn.remove();
+                    });
+                    updateCounts();
+                }
+            } catch (err) {
+                showToast('Bir hata olustu', 'error');
+            }
+        }
+
+        async function deleteNotification(id) {
+            if (!confirm('Bu bildirimi silmek istediginize emin misiniz?')) return;
+
+            try {
+                const response = await fetch('/bildirimler/sil', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ bildirim_id: id })
+                });
+                const data = await response.json();
+                if (data.success) {
+                    const item = document.querySelector(`[data-id="${id}"]`);
+                    if (item) {
+                        item.style.opacity = '0';
+                        item.style.transform = 'translateX(100px)';
+                        setTimeout(() => {
+                            item.remove();
+                            updateCounts();
+                            checkEmpty();
+                        }, 300);
+                    }
+                    showToast('Bildirim silindi');
+                }
+            } catch (err) {
+                showToast('Bir hata olustu', 'error');
+            }
+        }
+
+        function updateCounts() {
+            const all = document.querySelectorAll('.notification-item').length;
+            const unread = document.querySelectorAll('.notification-item.unread').length;
+            document.getElementById('countAll').textContent = all;
+            document.getElementById('countUnread').textContent = unread;
+        }
+
+        function checkEmpty() {
+            const list = document.getElementById('notificationsList');
+            const items = list.querySelectorAll('.notification-item');
+            if (items.length === 0) {
+                list.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-icon">🔔</div>
+                        <h3 class="empty-title">Bildirim yok</h3>
+                        <p class="empty-text">Yeni bildirimler burada gorunecek</p>
+                    </div>
+                `;
+            }
+        }
+
+        // Time ago helper
+        function timeAgo(date) {
+            const now = new Date();
+            const diff = now - new Date(date);
+            const minutes = Math.floor(diff / 60000);
+            const hours = Math.floor(diff / 3600000);
+            const days = Math.floor(diff / 86400000);
+
+            if (minutes < 1) return 'Az once';
+            if (minutes < 60) return minutes + ' dakika once';
+            if (hours < 24) return hours + ' saat once';
+            if (days < 7) return days + ' gun once';
+            return new Date(date).toLocaleDateString('tr-TR');
+        }
+    </script>
+</body>
+</html>
+<%
+function timeAgo(date) {
+    const now = new Date();
+    const diff = now - new Date(date);
+    const minutes = Math.floor(diff / 60000);
+    const hours = Math.floor(diff / 3600000);
+    const days = Math.floor(diff / 86400000);
+
+    if (minutes < 1) return 'Az once';
+    if (minutes < 60) return minutes + ' dakika once';
+    if (hours < 24) return hours + ' saat once';
+    if (days < 7) return days + ' gun once';
+    return new Date(date).toLocaleDateString('tr-TR');
+}
+%>

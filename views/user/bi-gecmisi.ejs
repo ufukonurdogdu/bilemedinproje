@@ -1,0 +1,56 @@
+<div class="dashboard-container">
+    <div class="page-header">
+        <h1>bi! Geçmişi</h1>
+        <p>Tüm bi! coin işlemlerini görüntüle</p>
+    </div>
+
+    <div class="bi-summary">
+        <div class="bi-balance-card">
+            <div class="bi-icon-large">bi!</div>
+            <div class="bi-amount"><%= user.bi_coin.toLocaleString('tr-TR') %></div>
+            <div class="bi-label">Mevcut Bakiye</div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title">İşlem Geçmişi</h3>
+        </div>
+        <div class="card-body">
+            <% if (islemler && islemler.length > 0) { %>
+                <div class="transactions-list">
+                    <% islemler.forEach(function(islem) { %>
+                        <div class="transaction-item">
+                            <div class="transaction-icon <%= islem.tip %>">
+                                <% if (islem.tip === 'kazanc') { %>
+                                    💰
+                                <% } else if (islem.tip === 'harcama') { %>
+                                    🛒
+                                <% } else if (islem.tip === 'bonus') { %>
+                                    🎁
+                                <% } else { %>
+                                    ↔️
+                                <% } %>
+                            </div>
+                            <div class="transaction-content">
+                                <div class="transaction-desc"><%= islem.aciklama %></div>
+                                <div class="transaction-date">
+                                    <%= new Date(islem.olusturma_tarihi).toLocaleString('tr-TR') %>
+                                </div>
+                            </div>
+                            <div class="transaction-amount <%= islem.miktar > 0 ? 'positive' : 'negative' %>">
+                                <%= islem.miktar > 0 ? '+' : '' %><%= islem.miktar.toLocaleString('tr-TR') %> bi!
+                            </div>
+                        </div>
+                    <% }); %>
+                </div>
+            <% } else { %>
+                <div class="empty-state">
+                    <div class="empty-icon">💰</div>
+                    <h3>İşlem geçmişi boş</h3>
+                    <p>Tahmin yaparak bi! kazanmaya başla!</p>
+                </div>
+            <% } %>
+        </div>
+    </div>
+</div>

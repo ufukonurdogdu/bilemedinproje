@@ -1,0 +1,112 @@
+<div class="admin-page">
+    <div class="page-actions">
+        <button onclick="showAddModal()" class="btn btn-primary">+ Yeni Reklam</button>
+    </div>
+
+    <div class="card">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Görsel</th>
+                            <th>Başlık</th>
+                            <th>Konum</th>
+                            <th>Görüntülenme</th>
+                            <th>Tıklanma</th>
+                            <th>CTR</th>
+                            <th>Durum</th>
+                            <th>İşlem</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% if (reklamlar && reklamlar.length > 0) { %>
+                            <% reklamlar.forEach(function(r) { %>
+                                <tr>
+                                    <td>
+                                        <% if (r.gorsel) { %>
+                                            <img src="<%= r.gorsel %>" class="ad-thumb" alt="">
+                                        <% } else { %>
+                                            -
+                                        <% } %>
+                                    </td>
+                                    <td><%= r.baslik %></td>
+                                    <td>
+                                        <span class="badge"><%= r.konum %></span>
+                                    </td>
+                                    <td><%= r.goruntulenme.toLocaleString('tr-TR') %></td>
+                                    <td><%= r.tiklanma.toLocaleString('tr-TR') %></td>
+                                    <td><%= r.goruntulenme > 0 ? ((r.tiklanma / r.goruntulenme) * 100).toFixed(2) : 0 %>%</td>
+                                    <td>
+                                        <span class="status-badge <%= r.aktif_mi ? 'active' : 'inactive' %>">
+                                            <%= r.aktif_mi ? 'Aktif' : 'Pasif' %>
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <button class="btn btn-sm btn-secondary">Düzenle</button>
+                                    </td>
+                                </tr>
+                            <% }); %>
+                        <% } else { %>
+                            <tr>
+                                <td colspan="8" class="text-center">Reklam bulunamadı</td>
+                            </tr>
+                        <% } %>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Reklam Modal -->
+<div id="adModal" class="modal" style="display: none;">
+    <div class="modal-content">
+        <h3>Yeni Reklam</h3>
+        <form id="adForm">
+            <div class="form-group">
+                <label>Başlık</label>
+                <input type="text" name="baslik" required>
+            </div>
+            <div class="form-group">
+                <label>Görsel URL</label>
+                <input type="url" name="gorsel" required>
+            </div>
+            <div class="form-group">
+                <label>Link</label>
+                <input type="url" name="link" required>
+            </div>
+            <div class="form-group">
+                <label>Konum</label>
+                <select name="konum" required>
+                    <option value="banner">Banner</option>
+                    <option value="sidebar">Sidebar</option>
+                    <option value="inline">Inline</option>
+                    <option value="popup">Popup</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Başlangıç Tarihi</label>
+                <input type="datetime-local" name="baslangic_tarihi">
+            </div>
+            <div class="form-group">
+                <label>Bitiş Tarihi</label>
+                <input type="datetime-local" name="bitis_tarihi">
+            </div>
+            <div class="form-actions">
+                <button type="button" onclick="closeModal()" class="btn btn-secondary">İptal</button>
+                <button type="submit" class="btn btn-primary">Kaydet</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+function showAddModal() {
+    document.getElementById('adModal').style.display = 'flex';
+}
+
+function closeModal() {
+    document.getElementById('adModal').style.display = 'none';
+}
+</script>

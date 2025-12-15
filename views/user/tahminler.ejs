@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title %></title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="/socket.io/socket.io.js"></script>
+    <style>
+        :root, [data-theme="dark"] {
+            --bg-dark: #0a0a0b;
+            --bg-card: #141416;
+            --bg-card-hover: #1a1a1d;
+            --border-color: #2a2a2d;
+            --text-primary: #ffffff;
+            --text-secondary: #a0a0a0;
+            --text-muted: #6b6b6b;
+            --accent-primary: #6366f1;
+            --bi-color: #f59e0b;
+            --success: #10b981;
+            --danger: #ef4444;
+        }
+        [data-theme="light"] {
+            --bg-dark: #f5f5f5;
+            --bg-card: #ffffff;
+            --bg-card-hover: #f9f9f9;
+            --border-color: #e5e5e5;
+            --text-primary: #1a1a1a;
+            --text-secondary: #5f6368;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg-dark); color: var(--text-primary); min-height: 100vh; }
+        .navbar { background: rgba(20, 20, 22, 0.95); backdrop-filter: blur(20px); border-bottom: 1px solid var(--border-color); padding: 0 24px; height: 64px; position: sticky; top: 0; z-index: 1000; }
+        .navbar-content { max-width: 1400px; margin: 0 auto; height: 100%; display: flex; align-items: center; justify-content: space-between; }
+        .logo { display: flex; align-items: center; gap: 10px; text-decoration: none; color: var(--text-primary); font-weight: 700; font-size: 20px; }
+        .logo-icon { width: 36px; height: 36px; background: linear-gradient(135deg, var(--accent-primary), #8b5cf6); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-weight: 800; }
+        .nav-center { display: flex; gap: 8px; }
+        .nav-link { padding: 8px 16px; border-radius: 8px; color: var(--text-secondary); text-decoration: none; font-size: 14px; font-weight: 500; transition: all 0.2s; }
+        .nav-link:hover { background: var(--bg-card-hover); color: var(--text-primary); }
+        .nav-link.active { background: var(--accent-primary); color: white; }
+        .nav-right { display: flex; align-items: center; gap: 16px; }
+        .bi-badge { display: flex; align-items: center; gap: 8px; padding: 8px 14px; background: linear-gradient(135deg, rgba(245, 158, 11, 0.15), rgba(245, 158, 11, 0.05)); border: 1px solid rgba(245, 158, 11, 0.3); border-radius: 20px; color: var(--bi-color); font-weight: 600; text-decoration: none; }
+        .user-avatar { width: 40px; height: 40px; border-radius: 10px; background: linear-gradient(135deg, var(--accent-primary), #8b5cf6); display: flex; align-items: center; justify-content: center; font-weight: 600; color: white; text-decoration: none; overflow: hidden; }
+        .user-avatar img { width: 100%; height: 100%; object-fit: cover; }
+        .main-content { padding: 24px; max-width: 1400px; margin: 0 auto; }
+        .page-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; flex-wrap: wrap; gap: 16px; }
+        .page-title { font-size: 28px; font-weight: 700; }
+        .kategori-tabs { display: flex; gap: 8px; flex-wrap: wrap; }
+        .kategori-tab { padding: 8px 16px; border-radius: 20px; background: var(--bg-card); border: 1px solid var(--border-color); color: var(--text-secondary); text-decoration: none; font-size: 14px; font-weight: 500; transition: all 0.2s; }
+        .kategori-tab:hover { border-color: var(--accent-primary); }
+        .kategori-tab.active { background: var(--accent-primary); border-color: var(--accent-primary); color: white; }
+        .tahmin-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(380px, 1fr)); gap: 20px; }
+        .tahmin-card { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 16px; overflow: hidden; transition: all 0.3s; }
+        .tahmin-card:hover { transform: translateY(-4px); box-shadow: 0 12px 32px rgba(0, 0, 0, 0.3); }
+        .tahmin-card.voted { opacity: 0.8; }
+        .tahmin-header { padding: 20px; border-bottom: 1px solid var(--border-color); }
+        .tahmin-kategori { display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 12px; font-size: 12px; font-weight: 600; margin-bottom: 12px; }
+        .tahmin-baslik { font-size: 18px; font-weight: 600; margin-bottom: 8px; line-height: 1.4; }
+        .tahmin-aciklama { font-size: 14px; color: var(--text-secondary); margin-bottom: 12px; }
+        .tahmin-meta { display: flex; gap: 16px; font-size: 13px; color: var(--text-muted); }
+        .tahmin-body { padding: 20px; }
+        .oran-bar { display: flex; height: 40px; border-radius: 10px; overflow: hidden; margin-bottom: 16px; background: var(--bg-card-hover); }
+        .oran-evet { background: linear-gradient(135deg, #10b981, #059669); display: flex; align-items: center; justify-content: center; color: white; font-weight: 600; transition: width 0.5s; }
+        .oran-hayir { background: linear-gradient(135deg, #ef4444, #dc2626); display: flex; align-items: center; justify-content: center; color: white; font-weight: 600; transition: width 0.5s; }
+        .secim-buttons { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        .secim-btn { padding: 14px 20px; border: 2px solid var(--border-color); border-radius: 12px; background: var(--bg-card-hover); color: var(--text-primary); font-size: 15px; font-weight: 600; cursor: pointer; transition: all 0.2s; display: flex; flex-direction: column; align-items: center; gap: 4px; }
+        .secim-btn:hover:not(:disabled) { border-color: var(--accent-primary); background: rgba(99, 102, 241, 0.1); }
+        .secim-btn.evet:hover:not(:disabled) { border-color: #10b981; background: rgba(16, 185, 129, 0.1); }
+        .secim-btn.hayir:hover:not(:disabled) { border-color: #ef4444; background: rgba(239, 68, 68, 0.1); }
+        .secim-btn.selected-evet { border-color: #10b981; background: rgba(16, 185, 129, 0.2); color: #10b981; }
+        .secim-btn.selected-hayir { border-color: #ef4444; background: rgba(239, 68, 68, 0.2); color: #ef4444; }
+        .secim-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+        .secim-btn small { font-size: 12px; font-weight: 400; color: var(--text-muted); }
+        .tahmin-footer { padding: 16px 20px; background: var(--bg-card-hover); display: flex; align-items: center; justify-content: space-between; }
+        .bi-odul { display: flex; align-items: center; gap: 6px; color: var(--bi-color); font-weight: 700; }
+        .toast { position: fixed; bottom: 24px; right: 24px; padding: 16px 24px; background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 12px; box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3); z-index: 9999; transform: translateY(100px); opacity: 0; transition: all 0.3s; }
+        .toast.show { transform: translateY(0); opacity: 1; }
+        .toast.success { border-color: var(--success); }
+        .toast.error { border-color: var(--danger); }
+        .empty-state { text-align: center; padding: 60px 20px; color: var(--text-secondary); }
+        .spinner { width: 20px; height: 20px; border: 2px solid transparent; border-top-color: currentColor; border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        @media (max-width: 768px) { .tahmin-grid { grid-template-columns: 1fr; } .nav-center { display: none; } }
+    </style>
+</head>
+<body>
+    <%- include('../partials/user-navbar') %>
+
+    <div class="main-content">
+        <div class="page-header">
+            <h1 class="page-title">Tahminler</h1>
+            <div class="kategori-tabs">
+                <a href="/tahminler" class="kategori-tab <%= !kategoriSlug ? 'active' : '' %>">Tumu</a>
+                <% kategoriler.forEach(function(k) { %>
+                    <a href="/tahminler?kategori=<%= k.slug %>" class="kategori-tab <%= kategoriSlug === k.slug ? 'active' : '' %>"><%= k.ikon %> <%= k.ad %></a>
+                <% }); %>
+            </div>
+        </div>
+
+        <% if (tahminler.length === 0) { %>
+            <div class="empty-state">
+                <h3>Henuz tahmin yok</h3>
+                <p>Bu kategoride aktif tahmin bulunmuyor.</p>
+            </div>
+        <% } else { %>
+            <div class="tahmin-grid">
+                <% tahminler.forEach(function(t) { %>
+                    <% const voted = kullaniciTahminleri[t.id]; %>
+                    <div class="tahmin-card <%= voted ? 'voted' : '' %>" data-id="<%= t.id %>">
+                        <div class="tahmin-header">
+                            <div class="tahmin-kategori" style="background: <%= t.kategori_renk %>20; color: <%= t.kategori_renk %>">
+                                <%= t.kategori_ikon %> <%= t.kategori_adi %>
+                            </div>
+                            <h3 class="tahmin-baslik"><%= t.baslik %></h3>
+                            <% if (t.aciklama) { %><p class="tahmin-aciklama"><%= t.aciklama %></p><% } %>
+                            <div class="tahmin-meta">
+                                <span><%= t.katilimci_sayisi || 0 %> katilimci</span>
+                                <% if (t.bitis_tarihi) { %><span>Bitis: <%= new Date(t.bitis_tarihi).toLocaleDateString('tr-TR') %></span><% } %>
+                            </div>
+                        </div>
+                        <div class="tahmin-body">
+                            <% if (t.tip === 'evet_hayir') { %>
+                                <div class="oran-bar">
+                                    <div class="oran-evet" style="width: <%= t.evet_orani %>%"><%= t.evet_orani %>%</div>
+                                    <div class="oran-hayir" style="width: <%= t.hayir_orani %>%"><%= t.hayir_orani %>%</div>
+                                </div>
+                                <div class="secim-buttons">
+                                    <button class="secim-btn evet <%= voted === 'evet' ? 'selected-evet' : '' %>" onclick="tahminYap(<%= t.id %>, 'evet')" <%= voted ? 'disabled' : '' %>>Evet<small><%= t.evet_orani %>%</small></button>
+                                    <button class="secim-btn hayir <%= voted === 'hayir' ? 'selected-hayir' : '' %>" onclick="tahminYap(<%= t.id %>, 'hayir')" <%= voted ? 'disabled' : '' %>>Hayir<small><%= t.hayir_orani %>%</small></button>
+                                </div>
+                            <% } else { %>
+                                <p style="color: var(--text-muted); text-align: center;">Coktan secmeli tahmin</p>
+                            <% } %>
+                        </div>
+                        <div class="tahmin-footer">
+                            <div class="bi-odul"><span>+<%= t.bi_odul %></span><span>bi!</span></div>
+                            <div style="font-size: 13px; color: var(--text-muted);"><% if (voted) { %>Tahmininiz: <strong><%= voted === 'evet' ? 'Evet' : 'Hayir' %></strong><% } else { %>Tahmin yap ve kazan!<% } %></div>
+                        </div>
+                    </div>
+                <% }); %>
+            </div>
+        <% } %>
+    </div>
+
+    <%- include('../partials/footer') %>
+
+    <div id="toast" class="toast"><span id="toastMessage"></span></div>
+
+    <script>
+        const themeMode = localStorage.getItem('themeMode') || 'dark';
+        document.documentElement.setAttribute('data-theme', themeMode);
+        const socket = io();
+        <% if (typeof user !== 'undefined' && user) { %>socket.emit('join', <%= user.id %>);<% } %>
+        socket.on('biCoinUpdate', (data) => { const el = document.getElementById('biCoinDisplay'); if(el) el.textContent = data.bi_coin.toLocaleString('tr-TR'); });
+
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            toast.className = 'toast ' + type;
+            document.getElementById('toastMessage').textContent = message;
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 3000);
+        }
+
+        async function tahminYap(tahminId, secim) {
+            const card = document.querySelector(`[data-id="${tahminId}"]`);
+            const buttons = card.querySelectorAll('.secim-btn');
+            buttons.forEach(btn => { btn.disabled = true; if (btn.classList.contains(secim)) btn.innerHTML = '<div class="spinner"></div>'; });
+
+            try {
+                const response = await fetch('/tahminler/yap', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ tahmin_id: tahminId, secim: secim }) });
+                const data = await response.json();
+                if (data.success) { showToast(data.message, 'success'); setTimeout(() => location.reload(), 1000); }
+                else { showToast(data.message, 'error'); buttons.forEach(btn => btn.disabled = false); }
+            } catch (err) { showToast('Bir hata olustu', 'error'); buttons.forEach(btn => btn.disabled = false); }
+        }
+    </script>
+</body>
+</html>
